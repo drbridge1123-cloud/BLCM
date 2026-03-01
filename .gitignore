@@ -1,0 +1,8 @@
+.env
+vendor/
+storage/logs/
+storage/cache/
+.claude/
+*.log
+.DS_Store
+Thumbs.db

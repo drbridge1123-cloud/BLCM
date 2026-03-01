@@ -1,0 +1,10 @@
+<?php include __DIR__ . '/modals/_modal-provider.php'; ?>
+<?php include __DIR__ . '/modals/_modal-request.php'; ?>
+<?php include __DIR__ . '/modals/_modal-receipt.php'; ?>
+<?php include __DIR__ . '/modals/_modal-preview.php'; ?>
+<?php include __DIR__ . '/modals/_modal-deadline.php'; ?>
+<?php include __DIR__ . '/modals/_modal-edit-case.php'; ?>
+<?php include __DIR__ . '/modals/_modal-workflow.php'; ?>
+<?php include __DIR__ . '/modals/_modal-payment.php'; ?>
+<?php include __DIR__ . '/modals/_modal-quick-add-provider.php'; ?>
+<?php include __DIR__ . '/modals/_modal-ini-staff.php'; ?>

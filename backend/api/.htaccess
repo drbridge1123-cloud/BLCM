@@ -1,0 +1,6 @@
+DirectorySlash Off
+RewriteEngine On
+
+# Route all API requests through central router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php [QSA,L]
