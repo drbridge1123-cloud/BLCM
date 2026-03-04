@@ -80,7 +80,7 @@
                                 <div style="flex:1; display:grid; grid-template-columns:repeat(10,1fr); gap:8px; padding:10px 14px 10px 0; align-items:center; font-size:13px;">
                                     <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;" x-text="item.client_name"></div>
                                     <div>
-                                        <template x-if="item.case_id"><a :href="'/CMC/frontend/pages/bl-cases/detail.php?id=' + item.case_id" style="color:#C9A84C; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" x-text="item.case_number" @click.stop></a></template>
+                                        <template x-if="item.case_id"><a :href="'/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + item.case_id" style="color:#C9A84C; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" x-text="item.case_number" @click.stop></a></template>
                                         <template x-if="!item.case_id"><span style="color:#9ca3af;" x-text="item.case_number || '-'"></span></template>
                                     </div>
                                     <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" x-text="item.insurance_carrier"></div>

@@ -16,8 +16,7 @@ function trackerPage() {
         }),
 
         // Page-specific state
-        pendingAssignments: [],
-        summary: { total: 0, overdue: 0, followup_due: 0, not_started: 0, pending_assignments: 0 },
+        summary: { total: 0, overdue: 0, followup_due: 0, not_started: 0 },
         statusFilter: '',
         activeFilter: '',
         tierFilter: '',
@@ -99,14 +98,10 @@ function trackerPage() {
             this.loadStaff();
             this.loadBulkTemplates();
             this.loadHlTemplates();
-            this.loadPendingAssignments();
             await this.loadData(1);
 
-            // Auto-select all items when filtering by case_id
-            if (this.caseIdFilter && this.items.length > 0) {
-                this.selectedItems = this.items.map(item => item.id);
-                this.updateAllSelected();
-            }
+            this.selectedItems = [];
+            this.allSelected = false;
         },
 
         async loadStaff() {
@@ -132,7 +127,7 @@ function trackerPage() {
 
         async loadHlTemplates() {
             try {
-                const r = await api.get('templates?type=medical_records&active_only=1');
+                const r = await api.get('templates?active_only=1');
                 this.hlTemplates = r.data || [];
             } catch(e) { this.hlTemplates = []; }
         },
@@ -143,7 +138,7 @@ function trackerPage() {
         },
 
         goToCase(caseId, cpId) {
-            let url = '/CMC/frontend/pages/bl-cases/detail.php?id=' + caseId;
+            let url = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + caseId;
             if (cpId) url += '&cp=' + cpId;
             window.location.href = url;
         },
@@ -151,43 +146,6 @@ function trackerPage() {
         getMethodLabel(method) {
             const labels = { email: 'Email', fax: 'Fax', portal: 'Portal', phone: 'Phone', mail: 'Mail' };
             return labels[method] || method || '';
-        },
-
-        // Pending assignments
-        async loadPendingAssignments() {
-            try {
-                const res = await api.get('billing/pending-assignments');
-                this.pendingAssignments = res.data || [];
-            } catch(e) { this.pendingAssignments = []; }
-        },
-
-        async acceptAssignment(cpId) {
-            if (!confirm('Accept this assignment?')) return;
-            try {
-                await api.put('case-providers/' + cpId + '/respond', { action: 'accept' });
-                showToast('Assignment accepted', 'success');
-                this.pendingAssignments = this.pendingAssignments.filter(a => a.id !== cpId);
-                await this.loadData(this.pagination?.page || 1);
-            } catch(e) {
-                showToast(e.data?.message || 'Failed to accept', 'error');
-            }
-        },
-
-        async declineAssignment(cpId) {
-            const reason = prompt('Please enter the reason for declining:');
-            if (reason === null) return;
-            if (!reason.trim()) {
-                showToast('Decline reason is required', 'error');
-                return;
-            }
-            try {
-                await api.put('case-providers/' + cpId + '/respond', { action: 'decline', reason: reason.trim() });
-                showToast('Assignment declined', 'success');
-                this.pendingAssignments = this.pendingAssignments.filter(a => a.id !== cpId);
-                await this.loadData(this.pagination?.page || 1);
-            } catch(e) {
-                showToast(e.data?.message || 'Failed to decline', 'error');
-            }
         },
 
         // Bulk selection methods
@@ -397,6 +355,7 @@ function trackerPage() {
         // --- Request Modal ---
 
         openRequestModal(item) {
+            const defaultTpl = this.hlTemplates.find(t => t.is_default == 1);
             this.reqForm = {
                 _cpId: item.id,
                 _caseId: item.case_id,
@@ -405,7 +364,7 @@ function trackerPage() {
                 request_type: item.request_count > 0 ? 'follow_up' : 'initial',
                 sent_to: '',
                 notes: '',
-                template_id: '',
+                template_id: defaultTpl ? defaultTpl.id : (this.hlTemplates[0]?.id || ''),
                 template_data: {},
                 document_ids: [],
                 _showSettlement: false,

@@ -34,7 +34,7 @@ document.addEventListener('alpine:init', () => {
 
         async logout() {
             try { await api.post('auth/logout'); } catch (e) {}
-            window.location.href = '/CMC/frontend/pages/auth/login.php';
+            window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
         }
     });
 

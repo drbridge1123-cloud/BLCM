@@ -73,7 +73,7 @@
                 <div><label class="mrt-label">Type</label><select x-model="reqForm.request_type" class="mrt-select"><option value="initial">Initial</option><option value="follow_up">Follow Up</option><option value="re_request">Re-Request</option></select></div>
                 <div><label class="mrt-label">Send To</label><input type="text" x-model="reqForm.sent_to" class="mrt-input" placeholder="Email or fax #"></div>
             </div>
-            <div><label class="mrt-label">Template</label><select x-model="reqForm.template_id" class="mrt-select"><option value="">Default (no template)</option><template x-for="t in hlTemplates" :key="t.id"><option :value="t.id" x-text="t.name + (t.is_default ? ' (Default)' : '')"></option></template></select></div>
+            <div><label class="mrt-label">Template</label><select x-model="reqForm.template_id" class="mrt-select"><template x-for="t in hlTemplates" :key="t.id"><option :value="t.id" x-text="t.name + (t.is_default ? ' (Default)' : '')"></option></template></select></div>
             <div><label class="mrt-label">Notes</label><textarea x-model="reqForm.notes" rows="2" class="mrt-textarea"></textarea></div>
             <!-- Document Attachments -->
             <div x-show="reqForm.request_method === 'email' || reqForm.request_method === 'fax'"
@@ -103,7 +103,7 @@
                             </label>
                         </template>
                     </div>
-                    <div class="mt-2 text-[10px] text-v2-text-light">For PDF field overlay, use <a :href="'/CMC/frontend/pages/bl-cases/detail.php?id=' + reqForm._caseId" class="text-gold underline" target="_blank">Case Detail</a> &rarr; Documents</div>
+                    <div class="mt-2 text-[10px] text-v2-text-light">For PDF field overlay, use <a :href="'/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + reqForm._caseId" class="text-gold underline" target="_blank">Case Detail</a> &rarr; Documents</div>
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
                 x-data="{...documentUploader(caseId), docsOpen: false}" x-init="init()">
                 <div class="c1-section-header" :class="docsOpen && 'is-open'" @click="docsOpen = !docsOpen; if(docsOpen) $nextTick(() => $el.closest('[data-panel]').scrollIntoView({behavior:'smooth',block:'start'}))">
                     <div class="flex items-center gap-2.5">
-                        <span class="c1-num c1-num-olive">03</span>
+                        <span class="c1-num c1-num-olive">04</span>
                         <h3 class="panel-title">Documents</h3>
                         <span class="panel-count" x-text="documents.length"></span>
                     </div>

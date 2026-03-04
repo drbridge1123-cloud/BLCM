@@ -37,12 +37,15 @@ CREATE TABLE IF NOT EXISTS users (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS cases (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NULL,
+    adjuster_3rd_id INT NULL,
+    adjuster_um_id INT NULL,
     case_number VARCHAR(50) NOT NULL UNIQUE,
     client_name VARCHAR(100) NOT NULL,
     client_dob DATE NULL,
     doi DATE NULL,
     assigned_to INT NULL,
-    status ENUM('collecting','verification','completed','rfd','final_verification','disbursement','accounting','closed') NOT NULL DEFAULT 'collecting',
+    status ENUM('ini','rec','verification','rfd','neg','lit','final_verification','accounting','closed') NOT NULL DEFAULT 'ini',
     treatment_status ENUM('in_treatment','treatment_done','neg','rfd') NULL,
     treatment_end_date DATE NULL,
     settlement_amount DECIMAL(12,2) DEFAULT 0,
@@ -60,11 +63,35 @@ CREATE TABLE IF NOT EXISTS cases (
     notes TEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE SET NULL,
+    FOREIGN KEY (adjuster_3rd_id) REFERENCES adjusters(id) ON DELETE SET NULL,
+    FOREIGN KEY (adjuster_um_id) REFERENCES adjusters(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_cases_client (client_id),
+    INDEX idx_cases_adjuster_3rd (adjuster_3rd_id),
+    INDEX idx_cases_adjuster_um (adjuster_um_id),
     INDEX idx_cases_status (status),
     INDEX idx_cases_treatment_status (treatment_status),
     INDEX idx_cases_assigned (assigned_to),
     INDEX idx_cases_case_number (case_number)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 2b. CLIENTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS clients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    dob DATE NULL,
+    phone VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+    address_street VARCHAR(300) NULL,
+    address_city VARCHAR(100) NULL,
+    address_state VARCHAR(2) NULL,
+    address_zip VARCHAR(10) NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_clients_name_dob (name, dob)
 ) ENGINE=InnoDB;
 
 -- ============================================================

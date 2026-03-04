@@ -8,3 +8,5 @@
 <?php include __DIR__ . '/modals/_modal-payment.php'; ?>
 <?php include __DIR__ . '/modals/_modal-quick-add-provider.php'; ?>
 <?php include __DIR__ . '/modals/_modal-ini-staff.php'; ?>
+<?php include __DIR__ . '/modals/_modal-treatment-complete.php'; ?>
+<?php include __DIR__ . '/../../components/_modal-contacts.php'; ?>

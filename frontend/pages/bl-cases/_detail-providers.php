@@ -7,7 +7,7 @@
                         <span class="panel-count" x-text="providers.length"></span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button @click.stop="window.location.href='/CMC/frontend/pages/billing/?case_id=' + caseId" class="panel-btn">
+                        <button @click.stop="window.location.href='/CMCdemo/frontend/pages/billing/?case_id=' + caseId" class="panel-btn">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -39,7 +39,7 @@
                                         <div class="ps-track" style="width:80px;">
                                             <div class="ps-fill" :class="'ps-fill-' + p.overall_status"
                                                 :style="'width:' + ({
-                                                    treating:'0', no_records:'0', not_started:'0',
+                                                    treating:'0', treatment_complete:'10', no_records:'0', not_started:'0',
                                                     requesting:'20', follow_up:'35', action_needed:'40',
                                                     on_hold:'60', received_partial:'55',
                                                     received_complete:'100', received:'100',
@@ -60,7 +60,12 @@
                                 </div>
                                 <div class="flex gap-1 flex-shrink-0" @click.stop>
                                     <template x-if="p.overall_status === 'treating'">
-                                        <button @click="activateProvider(p)" title="Activate for Requesting" class="icon-btn icon-btn-sm" style="color:#C9A84C;">
+                                        <button @click="activateProvider(p)" title="Mark Treatment Complete" class="icon-btn icon-btn-sm" style="color:#C9A84C;">
+                                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        </button>
+                                    </template>
+                                    <template x-if="p.overall_status === 'treatment_complete'">
+                                        <button @click="rushActivateProvider(p)" title="Rush Activate for Billing" class="icon-btn icon-btn-sm" style="color:#3B82F6;">
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                         </button>
                                     </template>

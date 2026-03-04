@@ -1,11 +1,11 @@
     <style>
     /* ── Add Provider Modal ── */
-    .apm { width: 540px; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,.24); overflow: hidden; background: #fff; }
-    .apm-header { background: #0F1B2D; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .apm { width: 540px; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,.24); background: #fff; }
+    .apm-header { background: #0F1B2D; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; }
     .apm-header h3 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
     .apm-close { background: none; border: none; color: rgba(255,255,255,.35); cursor: pointer; padding: 4px; transition: color .15s; }
     .apm-close:hover { color: rgba(255,255,255,.75); }
-    .apm-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; max-height: 70vh; overflow-y: auto; }
+    .apm-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
     .apm-body::-webkit-scrollbar { width: 4px; }
     .apm-body::-webkit-scrollbar-track { background: transparent; }
     .apm-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
@@ -58,7 +58,7 @@
     .apm-type-card:hover { border-color: rgba(201,168,76,.5); background: #fff; }
     .apm-type-card.checked { border-color: var(--gold, #C9A84C); background: rgba(201,168,76,.06); }
     .apm-type-card input[type="checkbox"] { accent-color: var(--gold, #C9A84C); width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
-    .apm-footer { padding: 14px 24px; border-top: 1px solid var(--border, #d0cdc5); display: flex; justify-content: flex-end; gap: 10px; }
+    .apm-footer { padding: 14px 24px; border-top: 1px solid var(--border, #d0cdc5); display: flex; justify-content: flex-end; gap: 10px; border-radius: 0 0 12px 12px; background: #fff; }
     .apm-btn-cancel {
         background: #fff; border: 1.5px solid var(--border, #d0cdc5); border-radius: 7px;
         padding: 9px 18px; font-size: 13px; font-weight: 500; color: #5A6B82; cursor: pointer; transition: all .15s;
@@ -116,31 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Record Types Needed -->
-                <div class="apm-section"><span>Record Types Needed</span></div>
-                <div class="apm-type-grid">
-                    <label class="apm-type-card" :class="{ checked: newProvider.record_types.includes('medical_records') }">
-                        <input type="checkbox" value="medical_records" x-model="newProvider.record_types"> Medical Records
-                    </label>
-                    <label class="apm-type-card" :class="{ checked: newProvider.record_types.includes('billing') }">
-                        <input type="checkbox" value="billing" x-model="newProvider.record_types"> Billing
-                    </label>
-                    <label class="apm-type-card" :class="{ checked: newProvider.record_types.includes('chart') }">
-                        <input type="checkbox" value="chart" x-model="newProvider.record_types"> Chart Notes
-                    </label>
-                    <label class="apm-type-card" :class="{ checked: newProvider.record_types.includes('imaging') }">
-                        <input type="checkbox" value="imaging" x-model="newProvider.record_types"> Imaging
-                    </label>
-                    <label class="apm-type-card" :class="{ checked: newProvider.record_types.includes('op_report') }">
-                        <input type="checkbox" value="op_report" x-model="newProvider.record_types"> Op Report
-                    </label>
-                </div>
-
-                <!-- Deadline -->
-                <div>
-                    <label class="apm-label">Deadline</label>
-                    <input type="date" x-model="newProvider.deadline" class="apm-input apm-mono">
-                </div>
 
             </div>
 

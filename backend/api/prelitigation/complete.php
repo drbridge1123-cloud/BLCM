@@ -7,13 +7,13 @@ $input = getInput();
 $caseId = (int)($input['case_id'] ?? 0);
 if (!$caseId) errorResponse('case_id required', 400);
 
-$case = dbFetchOne("SELECT * FROM cases WHERE id = ? AND status = 'prelitigation'", [$caseId]);
-if (!$case) errorResponse('Case not found or not in prelitigation status', 404);
+$case = dbFetchOne("SELECT * FROM cases WHERE id = ? AND status = 'ini'", [$caseId]);
+if (!$case) errorResponse('Case not found or not in treatment (INI) status', 404);
 
-$newOwner = STATUS_OWNER_MAP['collecting'] ?? $case['assigned_to'];
+$newOwner = STATUS_OWNER_MAP['rec'] ?? $case['assigned_to'];
 
 dbUpdate('cases', [
-    'status' => 'collecting',
+    'status' => 'rec',
     'assigned_to' => $newOwner,
     'sent_to_billing_date' => date('Y-m-d'),
     'treatment_status' => 'treatment_done',
@@ -30,8 +30,8 @@ if ($newOwner) {
 }
 
 logActivity($userId, 'change_status', 'case', $caseId, [
-    'from' => 'prelitigation',
-    'to' => 'collecting',
+    'from' => 'ini',
+    'to' => 'rec',
     'note' => sanitizeString($input['note'] ?? 'Treatment completed, sent to billing'),
 ]);
 

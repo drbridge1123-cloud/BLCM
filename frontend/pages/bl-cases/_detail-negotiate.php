@@ -4,6 +4,11 @@
         <div class="neg-header-left">
             <span class="c1-num c1-num-gold">07</span>
             <span class="neg-header-title">Negotiate</span>
+            <template x-if="getNegotiateStatus()">
+                <span class="neg-status-badge"
+                    :class="'neg-status-' + getNegotiateStatus()"
+                    x-text="getNegotiateStatusLabel(getNegotiateStatus())"></span>
+            </template>
             <template x-if="activeCoverages.length > 0">
                 <span class="neg-header-badge" x-text="activeCoverages.length + ' Coverage'"></span>
             </template>

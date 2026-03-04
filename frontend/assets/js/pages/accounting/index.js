@@ -1,5 +1,6 @@
 function accountingTrackerPage() {
     return {
+        ...pendingAssignmentsMixin(),
         ...listPageBase('accounting/list', {
             defaultSort: 'sent_to_accounting_date',
             defaultDir: 'asc',
@@ -65,9 +66,10 @@ function accountingTrackerPage() {
             }
             if (urlParams.get('case_id')) {
                 this.fromCaseDetail = true;
-                this.fromCaseDetailUrl = '/CMC/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
+                this.fromCaseDetailUrl = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
             }
 
+            this.loadPendingCaseAssignments();
             this.loadStaff();
             await this.loadData(1);
         },
@@ -91,10 +93,10 @@ function accountingTrackerPage() {
 
         goToCase(item) {
             if (typeof item === 'object' && item.source_type === 'attorney') {
-                window.location.href = '/CMC/frontend/pages/attorney/index.php';
+                window.location.href = '/CMCdemo/frontend/pages/attorney/index.php';
             } else {
                 const id = typeof item === 'object' ? item.id : item;
-                window.location.href = '/CMC/frontend/pages/bl-cases/detail.php?id=' + id;
+                window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + id;
             }
         },
 

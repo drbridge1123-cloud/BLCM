@@ -9,6 +9,9 @@ $currentPage = 'cases';
 $pageHeadScripts = [
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
 ];
-$pageScripts = ['/CMC/frontend/assets/js/pages/bl-cases/detail.js'];
+$pageScripts = [
+    '/CMCdemo/frontend/assets/js/components/contacts.js',
+    '/CMCdemo/frontend/assets/js/pages/bl-cases/detail.js'
+];
 $pageContent = __DIR__ . '/_detail-content.php';
 require_once __DIR__ . '/../../layouts/main.php';

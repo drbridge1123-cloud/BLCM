@@ -4,7 +4,7 @@
                 <!-- Report Header Bar -->
                 <div class="mbr-header c1-section-header" :class="mbrOpen && 'is-open'" @click="mbrOpen = !mbrOpen; if(mbrOpen) $nextTick(() => $el.closest('[data-panel]').scrollIntoView({behavior:'smooth',block:'start'}))">
                     <div class="mbr-header-left">
-                        <span class="c1-num c1-num-gold">05</span>
+                        <span class="c1-num c1-num-gold">06</span>
                         <span class="mbr-title">Medical Balance Report</span>
                         <template x-if="report">
                             <span class="mbr-badge"
@@ -47,41 +47,62 @@
                             </div>
                             <div class="mbr-insurance-body">
                                 <div class="mbr-insurance-grid">
-                                    <div>
-                                        <label class="mbr-field-label">PIP #1</label>
-                                        <input type="text" x-model="settings.pip1_name" @change="saveSettings()"
-                                            placeholder="Auto insurance carrier..."
-                                            class="mbr-field-input"
-                                            :disabled="report?.status !== 'draft'">
+                                    <?php
+                                    $insFields = [
+                                        ['field' => 'pip1_name',    'label' => 'PIP #1',    'placeholder' => 'Search auto insurance...'],
+                                        ['field' => 'pip2_name',    'label' => 'PIP #2',    'placeholder' => 'Optional...'],
+                                        ['field' => 'health1_name', 'label' => 'Health #1', 'placeholder' => 'Search health insurance...'],
+                                        ['field' => 'health2_name', 'label' => 'Health #2', 'placeholder' => 'Optional...'],
+                                        ['field' => 'health3_name', 'label' => 'Health #3', 'placeholder' => 'Optional...'],
+                                    ];
+                                    foreach ($insFields as $f): ?>
+                                    <div style="position:relative">
+                                        <label class="mbr-field-label"><?= $f['label'] ?></label>
+                                        <!-- Display value (click to open autocomplete) -->
+                                        <div x-show="insAutoField !== '<?= $f['field'] ?>'" class="mbr-ins-display"
+                                            :class="report?.status !== 'draft' ? 'disabled' : ''"
+                                            @click="report?.status === 'draft' && openInsAuto('<?= $f['field'] ?>')">
+                                            <span x-text="settings.<?= $f['field'] ?> || '<?= $f['placeholder'] ?>'"
+                                                :style="!settings.<?= $f['field'] ?> ? 'color:#b0afa8' : ''"></span>
+                                            <template x-if="settings.<?= $f['field'] ?> && report?.status === 'draft'">
+                                                <button type="button" class="mbr-ins-clear" @click.stop="clearInsField('<?= $f['field'] ?>')" title="Clear">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                        <!-- Autocomplete input (shown when field is active) -->
+                                        <div x-show="insAutoField === '<?= $f['field'] ?>'" style="position:relative" x-transition>
+                                            <input type="text" id="ins-auto-input-<?= $f['field'] ?>"
+                                                x-model="insAutoQuery"
+                                                @input="searchInsurance()"
+                                                @blur="closeInsAuto()"
+                                                @keydown.escape="insAutoField = null"
+                                                placeholder="Type to search..."
+                                                class="mbr-field-input"
+                                                style="padding-right:28px">
+                                            <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none;color:#b0afa8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                            <!-- Results dropdown -->
+                                            <div x-show="insAutoField === '<?= $f['field'] ?>' && (insAutoResults.length > 0 || insAutoQuery.length >= 1)"
+                                                class="mbr-ins-dropdown">
+                                                <template x-for="c in insAutoResults" :key="c.id">
+                                                    <button type="button" @mousedown.prevent="selectInsurance(c)" class="mbr-ins-item">
+                                                        <span x-text="c.name" style="font-weight:500"></span>
+                                                        <span x-text="(c.type || '').replace(/_/g,' ')" class="mbr-ins-type-badge"></span>
+                                                    </button>
+                                                </template>
+                                                <template x-if="insAutoQuery.length >= 1 && insAutoResults.length === 0">
+                                                    <div class="mbr-ins-empty">No match found</div>
+                                                </template>
+                                                <button type="button" @mousedown.prevent="openInsQuickAdd()" class="mbr-ins-add-btn">
+                                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    Add new insurance company
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="mbr-field-label">PIP #2</label>
-                                        <input type="text" x-model="settings.pip2_name" @change="saveSettings()"
-                                            placeholder="Optional..."
-                                            class="mbr-field-input"
-                                            :disabled="report?.status !== 'draft'">
-                                    </div>
-                                    <div>
-                                        <label class="mbr-field-label">Health #1</label>
-                                        <input type="text" x-model="settings.health1_name" @change="saveSettings()"
-                                            placeholder="Health insurance carrier..."
-                                            class="mbr-field-input"
-                                            :disabled="report?.status !== 'draft'">
-                                    </div>
-                                    <div>
-                                        <label class="mbr-field-label">Health #2</label>
-                                        <input type="text" x-model="settings.health2_name" @change="saveSettings()"
-                                            placeholder="Optional..."
-                                            class="mbr-field-input"
-                                            :disabled="report?.status !== 'draft'">
-                                    </div>
-                                    <div>
-                                        <label class="mbr-field-label">Health #3</label>
-                                        <input type="text" x-model="settings.health3_name" @change="saveSettings()"
-                                            placeholder="Optional..."
-                                            class="mbr-field-input"
-                                            :disabled="report?.status !== 'draft'">
-                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                                 <div class="mbr-checkbox-row">
                                     <label class="mbr-checkbox-label" :class="settings.has_wage_loss ? 'checked' : ''">
@@ -114,11 +135,11 @@
                                         <tr class="mbr-col-head">
                                             <th class="mbr-th-provider">Provider</th>
                                             <th class="mbr-th-r mbr-th-amount">Charges</th>
-                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.pip1_name">PIP #1</th>
-                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.pip2_name">PIP #2</th>
-                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health1_name">Health #1</th>
-                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health2_name">Health #2</th>
-                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health3_name">Health #3</th>
+                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.pip1_name" x-text="settings.pip1_name"></th>
+                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.pip2_name" x-text="settings.pip2_name"></th>
+                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health1_name" x-text="settings.health1_name"></th>
+                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health2_name" x-text="settings.health2_name"></th>
+                                            <th class="mbr-th-r mbr-th-amount" x-show="settings.health3_name" x-text="settings.health3_name"></th>
                                             <th class="mbr-th-r mbr-th-amount">Discount</th>
                                             <th class="mbr-th-r mbr-th-amount">Office Paid</th>
                                             <th class="mbr-th-r mbr-th-amount">Client Paid</th>
@@ -407,6 +428,166 @@
                         <div style="text-align:center;color:var(--mbr-muted);padding:32px 0;font-size:13px">Failed to load Medical Balance report</div>
                     </template>
                 </div>
+
+                <!-- Insurance Quick Add Modal (Full) -->
+                <div x-show="showInsQuickAdd" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
+                     @keydown.escape.window="showInsQuickAdd && (showInsQuickAdd = false)">
+                    <div class="fixed inset-0" style="background:rgba(0,0,0,.45)" @click="showInsQuickAdd = false"></div>
+                    <form @submit.prevent="saveInsQuickAdd()" class="icm relative z-10" @click.stop style="display:flex; flex-direction:column; max-height:90vh;">
+                        <div class="icm-header" style="flex-shrink:0;">
+                            <div>
+                                <h3>New Insurance Company</h3>
+                                <p class="icm-subtitle">Add a new insurance company</p>
+                            </div>
+                            <button type="button" class="icm-close" @click="showInsQuickAdd = false">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="icm-body" style="flex:1; min-height:0;">
+                            <div class="icm-section"><span>Basic Info</span></div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="flex:1;">
+                                    <label class="icm-label">Company Name <span class="icm-req">*</span></label>
+                                    <input type="text" x-model="insNewCompany.name" required class="icm-input">
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="icm-label">Type <span class="icm-req">*</span></label>
+                                    <select x-model="insNewCompany.type" required class="icm-select">
+                                        <option value="auto">Auto</option>
+                                        <option value="health">Health</option>
+                                        <option value="workers_comp">Worker's Comp</option>
+                                        <option value="liability">Liability</option>
+                                        <option value="um_uim">UM/UIM</option>
+                                        <option value="government">Government</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="icm-section"><span>Contact</span></div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="flex:1;">
+                                    <label class="icm-label">Phone</label>
+                                    <input type="text" x-model="insNewCompany.phone" class="icm-input">
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="icm-label">Fax</label>
+                                    <input type="text" x-model="insNewCompany.fax" class="icm-input">
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="icm-label">Email</label>
+                                    <input type="email" x-model="insNewCompany.email" class="icm-input">
+                                </div>
+                            </div>
+
+                            <div class="icm-section"><span>Address</span></div>
+                            <div>
+                                <label class="icm-label">Street Address</label>
+                                <input type="text" x-model="insNewCompany.address" class="icm-input">
+                            </div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="flex:3;">
+                                    <label class="icm-label">City</label>
+                                    <input type="text" x-model="insNewCompany.city" class="icm-input">
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="icm-label">State</label>
+                                    <input type="text" x-model="insNewCompany.state" maxlength="2" class="icm-input" style="text-transform:uppercase;">
+                                </div>
+                                <div style="flex:1.5;">
+                                    <label class="icm-label">ZIP</label>
+                                    <input type="text" x-model="insNewCompany.zip" maxlength="10" class="icm-input">
+                                </div>
+                            </div>
+
+                            <div class="icm-section"><span>Other</span></div>
+                            <div>
+                                <label class="icm-label">Website</label>
+                                <input type="url" x-model="insNewCompany.website" class="icm-input" placeholder="https://...">
+                            </div>
+                            <div>
+                                <label class="icm-label">Notes</label>
+                                <textarea x-model="insNewCompany.notes" class="icm-textarea" placeholder="Optional notes..."></textarea>
+                            </div>
+                        </div>
+                        <div class="icm-footer" style="flex-shrink:0;">
+                            <button type="button" @click="showInsQuickAdd = false" class="icm-btn-cancel">Cancel</button>
+                            <button type="submit" :disabled="insQuickAddSaving" class="icm-btn-submit">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span x-text="insQuickAddSaving ? 'Saving...' : '+ Create'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Insurance modal + autocomplete styles -->
+                <style>
+                    /* ICM (Insurance Company Modal) — reused from Database page */
+                    .icm { width: 560px; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,.24); overflow: hidden; background: #fff; }
+                    .icm-header { background: #0F1B2D; padding: 18px 24px; display: flex; align-items: flex-start; justify-content: space-between; }
+                    .icm-header h3 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
+                    .icm-subtitle { font-size: 12px; font-weight: 500; color: var(--gold, #C9A84C); margin: 2px 0 0; }
+                    .icm-close { background: none; border: none; color: rgba(255,255,255,.35); cursor: pointer; padding: 4px; transition: color .15s; }
+                    .icm-close:hover { color: rgba(255,255,255,.75); }
+                    .icm-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; }
+                    .icm-body::-webkit-scrollbar { width: 4px; }
+                    .icm-body::-webkit-scrollbar-track { background: transparent; }
+                    .icm-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+                    .icm-section { display: flex; align-items: center; gap: 10px; margin: 0; }
+                    .icm-section::before, .icm-section::after { content: ''; flex: 1; height: 1px; background: var(--border, #d0cdc5); }
+                    .icm-section span { font-size: 9px; font-weight: 700; color: var(--muted, #8a8a82); text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
+                    .icm-label { display: block; font-size: 9.5px; font-weight: 700; color: var(--muted, #8a8a82); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
+                    .icm-req { color: var(--gold, #C9A84C); }
+                    .icm-input, .icm-select, .icm-textarea {
+                        width: 100%; background: #fafafa; border: 1.5px solid var(--border, #d0cdc5); border-radius: 7px;
+                        padding: 9px 12px; font-size: 13px; color: #1a2535; transition: all .15s; outline: none; font-family: inherit;
+                    }
+                    .icm-input:focus, .icm-select:focus, .icm-textarea:focus {
+                        border-color: var(--gold, #C9A84C); background: #fff;
+                        box-shadow: 0 0 0 3px rgba(201,168,76,.1);
+                    }
+                    .icm-select {
+                        appearance: none; cursor: pointer; padding-right: 30px;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a82' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+                        background-repeat: no-repeat; background-position: right 10px center;
+                    }
+                    .icm-textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+                    .icm-footer { padding: 14px 24px; border-top: 1px solid var(--border, #d0cdc5); display: flex; justify-content: flex-end; gap: 10px; }
+                    .icm-btn-cancel {
+                        background: #fff; border: 1.5px solid var(--border, #d0cdc5); border-radius: 7px;
+                        padding: 9px 18px; font-size: 13px; font-weight: 500; color: #5A6B82; cursor: pointer; transition: all .15s;
+                    }
+                    .icm-btn-cancel:hover { background: #f8f7f4; border-color: #ccc; }
+                    .icm-btn-submit {
+                        background: var(--gold, #C9A84C); color: #fff; border: none; border-radius: 7px;
+                        padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer;
+                        box-shadow: 0 2px 8px rgba(201,168,76,.35); display: flex; align-items: center; gap: 6px; transition: all .15s;
+                    }
+                    .icm-btn-submit:hover { filter: brightness(1.05); box-shadow: 0 4px 12px rgba(201,168,76,.45); }
+                    .icm-btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+                    /* Autocomplete styles */
+                    .mbr-ins-display { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:7px 10px;
+                        border:1.5px solid var(--border, #d0cdc5); border-radius:6px; font-size:13px; color:#1a2535;
+                        background:#fff; cursor:pointer; min-height:36px; transition:border-color .15s; }
+                    .mbr-ins-display:hover:not(.disabled) { border-color:#C9A84C; }
+                    .mbr-ins-display.disabled { cursor:default; background:#f8f7f4; opacity:.7; }
+                    .mbr-ins-clear { background:none; border:none; cursor:pointer; color:#b0afa8; padding:2px; line-height:0; transition:color .15s; flex-shrink:0; }
+                    .mbr-ins-clear:hover { color:#d44; }
+                    .mbr-ins-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--border,#d0cdc5);
+                        border-radius:0 0 7px 7px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:20; max-height:220px; overflow-y:auto; }
+                    .mbr-ins-item { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+                        padding:8px 12px; border:none; background:none; cursor:pointer; font-size:12.5px; color:#1a2535; text-align:left; transition:background .1s; }
+                    .mbr-ins-item:hover { background:#f8f7f4; }
+                    .mbr-ins-type-badge { font-size:10px; color:#8a8a82; text-transform:capitalize; flex-shrink:0; }
+                    .mbr-ins-empty { padding:10px 12px; font-size:12px; color:#8a8a82; text-align:center; }
+                    .mbr-ins-add-btn { display:flex; align-items:center; gap:6px; width:100%; padding:9px 12px;
+                        border:none; border-top:1px solid #f0efe9; background:#fafaf8; cursor:pointer;
+                        font-size:12px; font-weight:600; color:#C9A84C; transition:background .1s; }
+                    .mbr-ins-add-btn:hover { background:#f5f3ec; }
+                </style>
 
                 <!-- MBR Import Preview Modal -->
                 <style>

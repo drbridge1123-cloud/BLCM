@@ -47,49 +47,6 @@
                 <button @click="resetFilters()" style="font-size:12px; color:#2563eb; text-decoration:underline; background:none; border:none; cursor:pointer;">Show All</button>
             </div>
 
-            <!-- New Assignments Panel -->
-            <template x-if="pendingAssignments.length > 0">
-                <div style="background:#fffbeb; border-radius:8px; border:1px solid #fcd34d; margin:0 24px 12px; overflow:hidden;">
-                    <div style="padding:8px 16px; background:#fef3c7; border-bottom:1px solid #fcd34d; display:flex; align-items:center; justify-content:space-between;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:13px; font-weight:700; color:#92400e;">New Assignments</span>
-                            <span style="background:#f59e0b; color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px;" x-text="pendingAssignments.length"></span>
-                        </div>
-                    </div>
-                    <template x-for="pa in pendingAssignments" :key="pa.id">
-                        <div style="padding:8px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(253,224,71,.3);">
-                            <div style="min-width:0;">
-                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                    <span style="font-size:13px; font-weight:600; color:#1a2535;" x-text="pa.provider_name"></span>
-                                    <span style="font-size:11px; color:#9ca3af;">|</span>
-                                    <span style="font-size:12px; color:#6b7280;" x-text="'Case #' + pa.case_number"></span>
-                                    <span style="font-size:11px; color:#9ca3af;">|</span>
-                                    <span style="font-size:12px; color:#6b7280;" x-text="pa.client_name"></span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:10px; margin-top:2px;">
-                                    <span style="font-size:11px; color:#9ca3af;" x-text="'Deadline: ' + formatDate(pa.deadline)"></span>
-                                    <template x-if="pa.activated_by_name"><span style="font-size:11px; color:#9ca3af;" x-text="'From: ' + pa.activated_by_name"></span></template>
-                                    <template x-if="pa.request_mr || pa.request_bill || pa.request_chart || pa.request_img || pa.request_op">
-                                        <span style="font-size:11px; color:#9ca3af;">
-                                            Records:
-                                            <template x-if="pa.request_mr"><span style="font-weight:600;">MR </span></template>
-                                            <template x-if="pa.request_bill"><span style="font-weight:600;">Bill </span></template>
-                                            <template x-if="pa.request_chart"><span style="font-weight:600;">Chart </span></template>
-                                            <template x-if="pa.request_img"><span style="font-weight:600;">Img </span></template>
-                                            <template x-if="pa.request_op"><span style="font-weight:600;">OP </span></template>
-                                        </span>
-                                    </template>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:6px; flex-shrink:0;">
-                                <button @click="acceptAssignment(pa.id)" style="padding:4px 12px; font-size:12px; font-weight:600; color:#fff; background:#10b981; border:none; border-radius:6px; cursor:pointer;">Accept</button>
-                                <button @click="declineAssignment(pa.id)" style="padding:4px 12px; font-size:12px; font-weight:600; color:#fff; background:#ef4444; border:none; border-radius:6px; cursor:pointer;">Decline</button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </template>
-
             <!-- Summary Cards -->
             <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:12px 24px;">
                 <div @click="toggleFilter('')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:10px 14px; border:1.5px solid #e8e4dc;"

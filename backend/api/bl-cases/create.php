@@ -30,14 +30,13 @@ if ($dup) errorResponse('A case with this case number and date of birth already 
 // Determine if admin/manager is assigning to a staff member (assignment workflow)
 $isAdminOrManager = in_array($user['role'], ['admin', 'manager']);
 $assignmentStatus = 'unassigned';
-$status = 'collecting';
+$status = 'ini';
 $actualAssignedTo = STATUS_OWNER_MAP[$status] ?? $assignedTo;
 
 if ($isAdminOrManager && $assignedTo) {
     // Validate assignee
     $assignee = dbFetchOne("SELECT id, full_name, is_active FROM users WHERE id = ?", [$assignedTo]);
     if ($assignee && $assignee['is_active']) {
-        $status = 'prelitigation';
         $assignmentStatus = 'pending';
         $actualAssignedTo = $assignedTo;
     }
@@ -52,7 +51,7 @@ $data = [
     'assignment_status'        => $assignmentStatus,
     'assignment_assigned_by'   => ($assignmentStatus === 'pending') ? $userId : null,
     'status'                   => $status,
-    'prelitigation_start_date' => ($status === 'prelitigation') ? date('Y-m-d') : null,
+    'prelitigation_start_date' => date('Y-m-d'),
     'attorney_name'            => sanitizeString($input['attorney_name'] ?? ''),
     'notes'                    => sanitizeString($input['notes'] ?? ''),
 ];

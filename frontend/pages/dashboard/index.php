@@ -6,6 +6,9 @@ requirePermission('dashboard');
 
 $pageTitle = 'Dashboard';
 $currentPage = 'dashboard';
-$pageScripts = ['assets/js/pages/dashboard/index.js'];
+$pageScripts = [
+    'assets/js/components/pending-assignments.js',
+    'assets/js/pages/dashboard/index.js'
+];
 $pageContent = __DIR__ . '/_content.php';
 require_once __DIR__ . '/../../layouts/main.php';

@@ -3,7 +3,7 @@
  * CMC Data Migration Script
  * Migrates data from MRMS (mrms) + Commission (commission_db) → CMC (cmc_db)
  *
- * Run in browser: http://localhost/CMC/database/migrate.php
+ * Run in browser: http://localhost/CMCdemo/database/migrate.php
  */
 
 ini_set('display_errors', 1);
@@ -606,12 +606,12 @@ if (!$teamColExists) {
     }
 
     try {
-        // Expand cases.status ENUM to include prelitigation
+        // Update cases.status ENUM to new codes
         $cmc->exec("ALTER TABLE cases MODIFY COLUMN status ENUM(
-            'prelitigation','collecting','verification','completed','rfd',
-            'final_verification','disbursement','accounting','closed'
-        ) NOT NULL DEFAULT 'prelitigation'");
-        msg('  cases.status ENUM updated (added prelitigation)', 'ok');
+            'ini','rec','verification','rfd','neg',
+            'final_verification','accounting','closed'
+        ) NOT NULL DEFAULT 'ini'");
+        msg('  cases.status ENUM updated (new status codes)', 'ok');
     } catch (PDOException $e) {
         msg('  cases.status: ' . $e->getMessage(), 'warn');
     }
@@ -644,7 +644,7 @@ if (!$teamColExists) {
             case_id INT NOT NULL,
             followup_date DATE NOT NULL,
             followup_type ENUM('phone','email','text','in_person','other') NOT NULL DEFAULT 'phone',
-            contact_result ENUM('reached','voicemail','no_answer','callback_scheduled','treatment_update') NOT NULL DEFAULT 'reached',
+            contact_result ENUM('reached','voicemail','no_answer','callback_scheduled','treatment_update','text') NOT NULL DEFAULT 'reached',
             treatment_status_update VARCHAR(255) NULL,
             next_followup_date DATE NULL,
             notes TEXT NULL,

@@ -23,6 +23,14 @@ function mbrPanel(caseId) {
         mbrImporting: false,
         _mbrImportFile: null,
 
+        // Insurance autocomplete
+        insAutoField: null,   // which field is open: 'pip1_name', 'pip2_name', etc.
+        insAutoQuery: '',
+        insAutoResults: [],
+        _insAutoTimeout: null,
+        showInsQuickAdd: false,
+        insQuickAddSaving: false,
+        insNewCompany: { name: '', type: 'auto', phone: '', fax: '', email: '', address: '', city: '', state: '', zip: '', website: '', notes: '' },
 
         async init() {
             this._debounceSave = createDebouncedSave((line) => this.saveLine(line), 500);
@@ -382,6 +390,87 @@ function mbrPanel(caseId) {
         },
 
         // ==========================================
+        // Insurance Autocomplete
+        // ==========================================
+
+        openInsAuto(field) {
+            this.insAutoField = field;
+            this.insAutoQuery = this.settings[field] || '';
+            this.insAutoResults = [];
+            this.$nextTick(() => {
+                const el = document.getElementById('ins-auto-input-' + field);
+                if (el) { el.focus(); el.select(); }
+            });
+        },
+
+        closeInsAuto() {
+            // Small delay so click on result registers first
+            setTimeout(() => { this.insAutoField = null; }, 150);
+        },
+
+        async searchInsurance() {
+            clearTimeout(this._insAutoTimeout);
+            const q = this.insAutoQuery.trim();
+            if (q.length < 1) { this.insAutoResults = []; return; }
+            this._insAutoTimeout = setTimeout(async () => {
+                try {
+                    const res = await api.get('insurance-companies/search?q=' + encodeURIComponent(q));
+                    this.insAutoResults = res.data || [];
+                } catch (e) {
+                    this.insAutoResults = [];
+                }
+            }, 200);
+        },
+
+        selectInsurance(company) {
+            if (!this.insAutoField) return;
+            this.settings[this.insAutoField] = company.name;
+            this.insAutoField = null;
+            this.insAutoResults = [];
+            this.saveSettings();
+        },
+
+        clearInsField(field) {
+            this.settings[field] = '';
+            this.insAutoField = null;
+            this.saveSettings();
+        },
+
+        openInsQuickAdd() {
+            const f = this.insAutoField || '';
+            const defaultType = f.startsWith('pip') ? 'auto' : (f.startsWith('health') ? 'health' : 'auto');
+            this.insNewCompany = {
+                name: this.insAutoQuery || '',
+                type: defaultType,
+                phone: '', fax: '', email: '',
+                address: '', city: '', state: '', zip: '',
+                website: '', notes: ''
+            };
+            this.showInsQuickAdd = true;
+        },
+
+        async saveInsQuickAdd() {
+            const name = this.insNewCompany.name.trim();
+            if (!name) return;
+            this.insQuickAddSaving = true;
+            try {
+                const payload = {};
+                for (const [k, v] of Object.entries(this.insNewCompany)) {
+                    if (typeof v === 'string' && v.trim()) payload[k] = v.trim();
+                }
+                await api.post('insurance-companies', payload);
+                showToast('Insurance company added: ' + name);
+                this.settings[this.insAutoField] = name;
+                this.showInsQuickAdd = false;
+                this.insAutoField = null;
+                this.saveSettings();
+            } catch (e) {
+                showToast(e.data?.message || 'Failed to add', 'error');
+            }
+            this.insQuickAddSaving = false;
+        },
+
+        // ==========================================
         // CSV Import
         // ==========================================
 
@@ -400,7 +489,7 @@ function mbrPanel(caseId) {
 
             try {
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-                const res = await fetch('/CMC/backend/api/mbr/' + this.caseId + '/import', {
+                const res = await fetch('/CMCdemo/backend/api/mbr/' + this.caseId + '/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -432,7 +521,7 @@ function mbrPanel(caseId) {
 
             try {
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-                const res = await fetch('/CMC/backend/api/mbr/' + this.caseId + '/import', {
+                const res = await fetch('/CMCdemo/backend/api/mbr/' + this.caseId + '/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData

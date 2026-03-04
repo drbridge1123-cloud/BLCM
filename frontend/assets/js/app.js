@@ -24,7 +24,7 @@ const api = {
         return this._request(endpoint, { method: 'DELETE' });
     },
     async upload(endpoint, formData, onProgress) {
-        const url = endpoint.startsWith('http') ? endpoint : `/CMC/backend/api/${endpoint}`;
+        const url = endpoint.startsWith('http') ? endpoint : `/CMCdemo/backend/api/${endpoint}`;
         try {
             if (onProgress && typeof onProgress === 'function') {
                 return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ const api = {
                         try {
                             const data = JSON.parse(xhr.responseText);
                             if (xhr.status === 401) {
-                                window.location.href = '/CMC/frontend/pages/auth/login.php';
+                                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
                                 return;
                             }
                             if (xhr.status >= 200 && xhr.status < 300) {
@@ -58,7 +58,7 @@ const api = {
             const response = await fetch(url, { method: 'POST', body: formData });
             const data = await response.json();
             if (response.status === 401) {
-                window.location.href = '/CMC/frontend/pages/auth/login.php';
+                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
                 return null;
             }
             if (!response.ok) throw { response, data };
@@ -71,11 +71,11 @@ const api = {
         }
     },
     async _request(endpoint, options = {}) {
-        const url = endpoint.startsWith('http') ? endpoint : `/CMC/backend/api/${endpoint}`;
+        const url = endpoint.startsWith('http') ? endpoint : `/CMCdemo/backend/api/${endpoint}`;
         try {
             const res = await fetch(url, options);
             if (res.status === 401) {
-                window.location.href = '/CMC/frontend/pages/auth/login.php';
+                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
                 return null;
             }
             const text = await res.text();
@@ -122,6 +122,13 @@ function formatCurrency(amount) {
     return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Parse currency string to number (removes $, commas, spaces)
+function parseCurrency(str) {
+    if (typeof str === 'number') return str;
+    if (!str) return 0;
+    return parseFloat(String(str).replace(/[$,\s]/g, '')) || 0;
+}
+
 // Format date
 function formatDate(dateStr) {
     if (!dateStr) return '-';
@@ -166,6 +173,7 @@ function daysElapsed(dateStr) {
 // Status label mapping
 const STATUS_LABELS = {
     treating: 'Treating',
+    treatment_complete: 'Tx Complete',
     not_started: 'Not Started',
     requesting: 'Requesting',
     follow_up: 'Follow Up',
@@ -175,13 +183,13 @@ const STATUS_LABELS = {
     no_records: 'No Records',
     received_complete: 'Complete',
     verified: 'Verified',
-    prelitigation: 'Prelitigation',
-    collecting: 'Collection',
+    ini: 'Treatment',
+    rec: 'Collection',
     verification: 'Verification',
-    completed: 'Completed',
-    rfd: 'Attorney',
-    final_verification: 'Final Verification',
-    disbursement: 'Disbursement',
+    rfd: 'Demand',
+    neg: 'Negotiate',
+    lit: 'Litigation',
+    final_verification: 'Settlement',
     accounting: 'Accounting',
     closed: 'Closed',
 };
@@ -204,25 +212,25 @@ function getRecordTypeShort(type) {
 
 // Workflow transitions
 const FORWARD_TRANSITIONS = {
-    prelitigation:       ['collecting'],
-    collecting:          ['verification'],
-    verification:        ['completed'],
-    completed:           ['rfd'],
-    rfd:                 ['final_verification'],
-    final_verification:  ['disbursement'],
-    disbursement:        ['accounting'],
+    ini:                 ['rec'],
+    rec:                 ['verification'],
+    verification:        ['rfd'],
+    rfd:                 ['neg'],
+    neg:                 ['lit'],
+    lit:                 ['final_verification'],
+    final_verification:  ['accounting'],
     accounting:          ['closed'],
     closed:              [],
 };
 
 const BACKWARD_TRANSITIONS = {
-    prelitigation:       [],
-    collecting:          ['prelitigation'],
-    verification:        ['prelitigation', 'collecting'],
-    completed:           ['prelitigation', 'collecting', 'verification'],
-    rfd:                 ['prelitigation', 'collecting', 'verification', 'completed'],
-    final_verification:  ['prelitigation', 'collecting', 'verification', 'completed', 'rfd'],
-    disbursement:        ['prelitigation', 'collecting', 'verification', 'completed', 'rfd', 'final_verification'],
-    accounting:          ['prelitigation', 'collecting', 'verification', 'completed', 'rfd', 'final_verification', 'disbursement'],
-    closed:              ['prelitigation', 'collecting', 'verification', 'completed', 'rfd', 'final_verification', 'disbursement', 'accounting'],
+    ini:                 [],
+    rec:                 ['ini'],
+    verification:        ['ini', 'rec'],
+    rfd:                 ['ini', 'rec', 'verification'],
+    neg:                 ['ini', 'rec', 'verification', 'rfd'],
+    lit:                 ['ini', 'rec', 'verification', 'rfd', 'neg'],
+    final_verification:  ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit'],
+    accounting:          ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification'],
+    closed:              ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification', 'accounting'],
 };

@@ -8,8 +8,8 @@ $errors = validateRequired($input, ['case_id', 'followup_date', 'followup_type',
 if (!empty($errors)) errorResponse(implode(', ', $errors));
 
 $caseId = (int)$input['case_id'];
-$case = dbFetchOne("SELECT * FROM cases WHERE id = ? AND status = 'prelitigation'", [$caseId]);
-if (!$case) errorResponse('Case not found or not in prelitigation status', 404);
+$case = dbFetchOne("SELECT * FROM cases WHERE id = ? AND status = 'ini'", [$caseId]);
+if (!$case) errorResponse('Case not found or not in treatment (INI) status', 404);
 
 $followupDate = $input['followup_date'];
 $nextDate = $input['next_followup_date'] ?? date('Y-m-d', strtotime($followupDate . ' +' . PRELITIGATION_FOLLOWUP_DAYS . ' days'));

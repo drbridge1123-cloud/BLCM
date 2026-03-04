@@ -1351,6 +1351,7 @@
                 /* Label colors */
                 .ps-label-no_records { color: #9ca3af; }
                 .ps-label-treating { color: #7C3AED; }
+                .ps-label-treatment_complete { color: #0891B2; }
                 .ps-label-not_started { color: #9ca3af; }
                 .ps-label-requesting { color: #2563eb; }
                 .ps-label-follow_up { color: #d97706; }
@@ -1365,6 +1366,7 @@
                 /* Bar fill colors */
                 .ps-fill-no_records { background: transparent; }
                 .ps-fill-treating { background: transparent; }
+                .ps-fill-treatment_complete { background: #0891B2; }
                 .ps-fill-not_started { background: transparent; }
                 .ps-fill-requesting { background: #2563eb; }
                 .ps-fill-follow_up { background: #d97706; }
@@ -2708,6 +2710,34 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border: 1px solid rgba(201,168,76,0.28);
+}
+.neg-status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.neg-status-pending {
+    background: rgba(201,168,76,0.10);
+    color: #b8942e;
+    border: 1px solid rgba(201,168,76,0.28);
+}
+.neg-status-countered {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+.neg-status-accepted {
+    background: #e8f5ee;
+    color: #1e6645;
+    border: 1px solid #a8d5bc;
+}
+.neg-status-rejected {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
 }
 .neg-chevron {
     color: var(--mbr-muted);

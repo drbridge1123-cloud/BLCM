@@ -8,6 +8,7 @@
  */
 function attorneyCasesPage() {
     return {
+        ...pendingAssignmentsMixin(),
         // -------------------------------------------------------
         //  Tab state
         // -------------------------------------------------------
@@ -790,9 +791,10 @@ function attorneyCasesPage() {
             }
             if (urlParams.get('from') === 'case-detail' && urlParams.get('case_id')) {
                 this.fromCaseDetail = true;
-                this.fromCaseDetailUrl = '/CMC/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
+                this.fromCaseDetailUrl = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
             }
 
+            this.loadPendingCaseAssignments();
             await this.loadUsers();
             await this.loadStaff();
             await this.loadStats();
@@ -1532,12 +1534,12 @@ function attorneyCasesPage() {
             try {
                 const res = await api.get('bl-cases?search=' + encodeURIComponent(caseNumber) + '&per_page=1');
                 if (res.data && res.data.length > 0) {
-                    window.location.href = '/CMC/frontend/pages/bl-cases/detail.php?id=' + res.data[0].id;
+                    window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + res.data[0].id;
                     return;
                 }
             } catch (e) {}
             // Fallback: go to cases list with search
-            window.location.href = '/CMC/frontend/pages/bl-cases/index.php?search=' + encodeURIComponent(caseNumber) + '&from=attorney';
+            window.location.href = '/CMCdemo/frontend/pages/bl-cases/index.php?search=' + encodeURIComponent(caseNumber) + '&from=attorney';
         },
 
         // -------------------------------------------------------

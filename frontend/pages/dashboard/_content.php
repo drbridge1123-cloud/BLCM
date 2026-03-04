@@ -95,10 +95,13 @@
         </div>
     </div>
 
+    <!-- Pending Case Assignments -->
+    <?php include __DIR__ . '/../../components/_pending-assignments.php'; ?>
+
     <!-- ═══ CMC Link Cards (Attorney, Commission, Traffic, Referrals) ═══ -->
     <div class="db-kpi-grid">
         <template x-if="data.attorney_cases">
-            <a href="/CMC/frontend/pages/attorney/index.php" class="db-link-card">
+            <a href="/CMCdemo/frontend/pages/attorney/index.php" class="db-link-card">
                 <div>
                     <div class="db-kpi-label">Attorney Cases</div>
                     <div class="db-kpi-num" style="color:#1a2535; font-size:18px;" x-text="data.attorney_cases.active_count ?? '-'"></div>
@@ -113,7 +116,7 @@
             </a>
         </template>
         <template x-if="data.commissions">
-            <a href="/CMC/frontend/pages/commissions/index.php" class="db-link-card">
+            <a href="/CMCdemo/frontend/pages/commissions/index.php" class="db-link-card">
                 <div>
                     <div class="db-kpi-label">Commission</div>
                     <div style="font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:700; color:#C9A84C; line-height:1;" x-text="formatCurrency(data.commissions.total_commission)"></div>
@@ -127,7 +130,7 @@
             </a>
         </template>
         <template x-if="data.traffic">
-            <a href="/CMC/frontend/pages/traffic/index.php" class="db-link-card">
+            <a href="/CMCdemo/frontend/pages/traffic/index.php" class="db-link-card">
                 <div>
                     <div class="db-kpi-label">Traffic Cases</div>
                     <div class="db-kpi-num" style="color:#1a2535; font-size:18px;" x-text="data.traffic.active_count ?? '-'"></div>
@@ -141,7 +144,7 @@
             </a>
         </template>
         <template x-if="data.referrals">
-            <a href="/CMC/frontend/pages/referrals/index.php" class="db-link-card">
+            <a href="/CMCdemo/frontend/pages/referrals/index.php" class="db-link-card">
                 <div>
                     <div class="db-kpi-label">Referrals</div>
                     <div class="db-kpi-num" style="color:#1a2535; font-size:18px;" x-text="data.referrals.total_entries ?? '-'"></div>
@@ -174,7 +177,7 @@
                 </div>
             </div>
             <div style="padding:8px 16px;">
-                <a href="/CMC/frontend/pages/attorney/index.php" style="font-size:12px; color:#C9A84C; font-weight:600; text-decoration:none; font-family:'IBM Plex Sans',sans-serif;">Review pending requests →</a>
+                <a href="/CMCdemo/frontend/pages/attorney/index.php" style="font-size:12px; color:#C9A84C; font-weight:600; text-decoration:none; font-family:'IBM Plex Sans',sans-serif;">Review pending requests →</a>
             </div>
         </div>
     </template>
@@ -198,7 +201,7 @@
             </div>
             <div style="max-height:160px; overflow-y:auto;">
                 <template x-for="item in escalations" :key="item.id">
-                    <a :href="'/CMC/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
+                    <a :href="'/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span class="sp-status" :class="item.escalation_css" x-text="item.escalation_label"></span>
                             <span style="font-size:12px; font-weight:600; color:#1a2535;" x-text="item.provider_name"></span>
@@ -304,22 +307,22 @@
                 <span class="db-section-title">Quick Actions</span>
             </div>
             <div class="db-quick-grid">
-                <a href="/CMC/frontend/pages/bl-cases/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/bl-cases/index.php" class="db-quick-link">
                     <span class="db-quick-icon">+</span> New MR Case
                 </a>
-                <a href="/CMC/frontend/pages/attorney/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/attorney/index.php" class="db-quick-link">
                     <span class="db-quick-icon">+</span> New Demand
                 </a>
-                <a href="/CMC/frontend/pages/commissions/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/commissions/index.php" class="db-quick-link">
                     <span class="db-quick-icon">+</span> Add Commission
                 </a>
-                <a href="/CMC/frontend/pages/referrals/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/referrals/index.php" class="db-quick-link">
                     <span class="db-quick-icon">+</span> New Referral
                 </a>
-                <a href="/CMC/frontend/pages/reports/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/reports/index.php" class="db-quick-link">
                     <span style="color:#8a8a82; font-size:14px;">📊</span> View Reports
                 </a>
-                <a href="/CMC/frontend/pages/traffic/index.php" class="db-quick-link">
+                <a href="/CMCdemo/frontend/pages/traffic/index.php" class="db-quick-link">
                     <span class="db-quick-icon">+</span> New Traffic
                 </a>
             </div>
@@ -340,7 +343,7 @@
                     <div class="sp-empty" style="padding:24px 0;">No follow-ups due</div>
                 </template>
                 <template x-for="item in followups" :key="item.id">
-                    <a :href="'/CMC/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
+                    <a :href="'/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
                         <div>
                             <span style="font-size:12px; font-weight:600; color:#1a2535;" x-text="item.provider_name"></span>
                             <span style="font-size:10px; color:#8a8a82; margin-left:4px;" x-text="item.case_number + ' · ' + item.client_name"></span>
@@ -362,7 +365,7 @@
                     <div class="sp-empty" style="padding:24px 0;">No overdue items</div>
                 </template>
                 <template x-for="item in overdueItems" :key="item.id">
-                    <a :href="'/CMC/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
+                    <a :href="'/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + item.case_id" class="db-list-item">
                         <div>
                             <span style="font-size:12px; font-weight:600; color:#1a2535;" x-text="item.provider_name"></span>
                             <span style="font-size:10px; color:#8a8a82; margin-left:4px;" x-text="item.case_number + ' · ' + item.client_name"></span>
@@ -402,7 +405,7 @@
         <div class="sp-gold-bar"></div>
         <div class="db-section-header" style="padding:12px 16px;">
             <span class="db-section-title">Recent Cases</span>
-            <a href="/CMC/frontend/pages/bl-cases/index.php" style="font-size:11px; color:#C9A84C; font-weight:600; text-decoration:none; font-family:'IBM Plex Sans',sans-serif;">View All →</a>
+            <a href="/CMCdemo/frontend/pages/bl-cases/index.php" style="font-size:11px; color:#C9A84C; font-weight:600; text-decoration:none; font-family:'IBM Plex Sans',sans-serif;">View All →</a>
         </div>
         <div style="max-height:288px; overflow-y:auto;">
             <table class="sp-table sp-table-compact">
@@ -420,7 +423,7 @@
                         <tr style="cursor:default;"><td colspan="5" class="sp-empty">No open cases</td></tr>
                     </template>
                     <template x-for="c in cases" :key="c.id">
-                        <tr @click="window.location.href='/CMC/frontend/pages/bl-cases/detail.php?id='+c.id">
+                        <tr @click="window.location.href='/CMCdemo/frontend/pages/bl-cases/detail.php?id='+c.id">
                             <td><span class="sp-case-num" x-text="c.case_number"></span></td>
                             <td><span class="sp-client" x-text="c.client_name"></span></td>
                             <td><span style="font-size:12px; color:#8a8a82;" x-text="c.attorney_name || '—'"></span></td>

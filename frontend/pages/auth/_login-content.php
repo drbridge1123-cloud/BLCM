@@ -4,14 +4,14 @@
         this.error = '';
         this.loading = true;
         try {
-            const res = await fetch('/CMC/backend/api/auth/login', {
+            const res = await fetch('/CMCdemo/backend/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: this.username, password: this.password })
             });
             const data = await res.json();
             if (data.success) {
-                window.location.href = '/CMC/frontend/pages/dashboard/index.php';
+                window.location.href = '/CMCdemo/frontend/pages/dashboard/index.php';
             } else {
                 this.error = data.message || 'Login failed';
             }

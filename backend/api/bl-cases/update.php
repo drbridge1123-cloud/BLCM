@@ -12,7 +12,7 @@ if (!$case) errorResponse('Case not found', 404);
 
 $allowedFields = [
     'case_number', 'client_name', 'client_dob', 'doi',
-    'assigned_to', 'status', 'attorney_name', 'ini_completed', 'notes'
+    'status', 'attorney_name', 'ini_completed', 'notes'
 ];
 
 $data    = [];
@@ -38,16 +38,13 @@ foreach ($allowedFields as $field) {
                 errorResponse("Invalid {$field} date format (YYYY-MM-DD)");
             }
             break;
-        case 'assigned_to':
-            $newValue = $newValue ? (int)$newValue : null;
-            break;
         case 'ini_completed':
             $newValue = (int)$newValue;
             break;
         case 'status':
             $validStatuses = [
-                'collecting','verification','completed','rfd',
-                'final_verification','disbursement','accounting','closed'
+                'ini','rec','verification','rfd',
+                'neg','lit','final_verification','accounting','closed'
             ];
             if (!validateEnum($newValue, $validStatuses)) {
                 errorResponse('Invalid status value');
@@ -78,10 +75,30 @@ if (isset($data['case_number']) || isset($data['client_dob'])) {
     if ($dup) errorResponse('A case with this case number and date of birth already exists');
 }
 
-// If ini_completed set to 0, revert not_started providers back to treating (requesting)
+// Validate: cannot set ini_completed=1 if treating/treatment_complete providers remain
+if (isset($data['ini_completed']) && (int)$data['ini_completed'] === 1) {
+    $treatingCount = dbFetchOne(
+        "SELECT COUNT(*) AS cnt FROM case_providers WHERE case_id = ? AND overall_status IN ('treating', 'treatment_complete')",
+        [$id]
+    );
+    if ((int)$treatingCount['cnt'] > 0) {
+        errorResponse("Cannot mark Treating Completed — providers still in treatment");
+    }
+    // Check treatment_complete providers have treatment_end_date
+    $missingDate = dbFetchAll(
+        "SELECT cp.id, p.name FROM case_providers cp JOIN providers p ON p.id = cp.provider_id WHERE cp.case_id = ? AND cp.overall_status = 'treatment_complete' AND cp.treatment_end_date IS NULL",
+        [$id]
+    );
+    if (!empty($missingDate)) {
+        $names = array_map(fn($r) => $r['name'], $missingDate);
+        errorResponse("Missing treatment end date: " . implode(', ', $names));
+    }
+}
+
+// If ini_completed set to 0, revert not_started providers back to treatment_complete
 if (isset($data['ini_completed']) && (int)$data['ini_completed'] === 0) {
     dbQuery(
-        "UPDATE case_providers SET overall_status = 'requesting' WHERE case_id = ? AND overall_status = 'not_started'",
+        "UPDATE case_providers SET overall_status = 'treatment_complete' WHERE case_id = ? AND overall_status = 'not_started'",
         [$id]
     );
 }

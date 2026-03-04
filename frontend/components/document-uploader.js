@@ -825,7 +825,7 @@ function documentUploader(caseId, caseProviderId = null) {
         async downloadDocument(documentId) {
             try {
                 // Open download in new window
-                const url = `/CMC/backend/api/documents/${documentId}/download`;
+                const url = `/CMCdemo/backend/api/documents/${documentId}/download`;
                 window.open(url, '_blank');
             } catch (error) {
                 console.error('Download failed:', error);

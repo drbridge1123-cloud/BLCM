@@ -19,7 +19,7 @@
                 <p style="font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin:0 0 6px;">
                     Providers to activate
                 </p>
-                <template x-for="p in providers.filter(p => iniProviderIds.length > 0 ? iniProviderIds.includes(p.id) : p.overall_status === 'treating')" :key="p.id">
+                <template x-for="p in providers.filter(p => iniProviderIds.length > 0 ? iniProviderIds.includes(p.id) : ['treating','treatment_complete'].includes(p.overall_status))" :key="p.id">
                     <div style="font-size:12.5px; color:#1a2535; padding:3px 0; display:flex; align-items:center; gap:6px;">
                         <svg width="14" height="14" fill="none" stroke="#C9A84C" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         <span x-text="p.provider_name"></span>
@@ -43,9 +43,6 @@
                     <label class="ecm-check-card" style="flex:0 0 auto; padding:7px 12px;" :class="{ checked: iniRecordTypes.request_img }">
                         <input type="checkbox" x-model="iniRecordTypes.request_img"> <span>Img</span>
                     </label>
-                    <label class="ecm-check-card" style="flex:0 0 auto; padding:7px 12px;" :class="{ checked: iniRecordTypes.request_op }">
-                        <input type="checkbox" x-model="iniRecordTypes.request_op"> <span>OP</span>
-                    </label>
                 </div>
             </div>
 
@@ -58,6 +55,12 @@
                         <option :value="s.id" x-text="s.display_name || s.full_name"></option>
                     </template>
                 </select>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label class="ecm-label">Notes</label>
+                <textarea x-model="iniNotes" class="ecm-input" rows="2" style="resize:none;" placeholder="Optional notes..."></textarea>
             </div>
 
             <p style="font-size:11.5px; color:#8a8a82; margin:0;">

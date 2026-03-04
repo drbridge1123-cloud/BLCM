@@ -56,6 +56,43 @@ if (empty($data)) errorResponse('No fields to update');
 
 dbUpdate('mbr_reports', $data, 'id = ?', [$id]);
 
+// Auto-create / delete mbr_lines when has_* flags are toggled
+$flagLineMap = [
+    'has_wage_loss'          => ['line_type' => 'wage_loss',          'provider_name' => 'Wage Loss'],
+    'has_essential_service'  => ['line_type' => 'essential_service',  'provider_name' => 'Essential Service'],
+    'has_health_subrogation' => ['line_type' => 'health_subrogation', 'provider_name' => 'Health Subrogation #1'],
+    'has_health_subrogation2'=> ['line_type' => 'health_subrogation2','provider_name' => 'Health Subrogation #2'],
+];
+
+foreach ($flagLineMap as $flag => $lineDef) {
+    if (!array_key_exists($flag, $data)) continue;
+    $wasOn = (int)($report[$flag] ?? 0);
+    $isOn  = (int)$data[$flag];
+
+    if ($isOn && !$wasOn) {
+        // Toggled ON → create line if not exists
+        $exists = dbFetchOne(
+            "SELECT id FROM mbr_lines WHERE report_id = ? AND line_type = ?",
+            [$id, $lineDef['line_type']]
+        );
+        if (!$exists) {
+            $maxSort = dbFetchOne(
+                "SELECT COALESCE(MAX(sort_order), 0) AS mx FROM mbr_lines WHERE report_id = ?",
+                [$id]
+            );
+            dbInsert('mbr_lines', [
+                'report_id'     => $id,
+                'line_type'     => $lineDef['line_type'],
+                'provider_name' => $lineDef['provider_name'],
+                'sort_order'    => (int)($maxSort['mx'] ?? 0) + 1,
+            ]);
+        }
+    } elseif (!$isOn && $wasOn) {
+        // Toggled OFF → delete line
+        dbDelete('mbr_lines', 'report_id = ? AND line_type = ?', [$id, $lineDef['line_type']]);
+    }
+}
+
 if (!empty($changes)) {
     logActivity($userId, 'update', 'mbr_report', $id, $changes);
 }

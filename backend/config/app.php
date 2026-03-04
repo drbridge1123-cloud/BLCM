@@ -45,13 +45,13 @@ define('ACCOUNTING_DISBURSE_DAYS', 7);      // 1 week to disburse
 
 // Status-to-owner auto-assignment (MR cases)
 define('STATUS_OWNER_MAP', [
-    'prelitigation'       => 2,
-    'collecting'          => 2,
-    'verification'        => 1,
-    'completed'           => 4,
+    'ini'                 => 2,
+    'rec'                 => 1,
+    'verification'        => 4,
     'rfd'                 => 4,
-    'final_verification'  => 1,
-    'disbursement'        => 4,
+    'neg'                 => 1,
+    'lit'                 => 4,
+    'final_verification'  => 4,
     'accounting'          => 6,
     'closed'              => 3,
 ]);

@@ -12,6 +12,7 @@ $clientName = trim($input['client_name'] ?? '');
 if (!$clientName) {
     errorResponse('Client name is required');
 }
+$clientDob = trim($input['client_dob'] ?? '') ?: null;
 
 $signedDate = $input['signed_date'] ?? date('Y-m-d');
 $entryMonth = date('M. Y', strtotime($signedDate));
@@ -37,6 +38,7 @@ $id = dbInsert('referral_entries', [
     'signed_date'           => $signedDate,
     'file_number'           => trim($input['file_number'] ?? ''),
     'client_name'           => $clientName,
+    'client_dob'            => $clientDob,
     'status'                => trim($input['status'] ?? ''),
     'date_of_loss'          => $input['date_of_loss'] ?: null,
     'referred_by'           => trim($input['referred_by'] ?? ''),
@@ -62,10 +64,10 @@ if ($caseManagerId && $fileNumber) {
         $caseId = dbInsert('cases', [
             'case_number'              => $fileNumber,
             'client_name'              => $clientName,
-            'client_dob'               => '2000-01-01',
+            'client_dob'               => $clientDob ?: null,
             'doi'                      => $input['date_of_loss'] ?: date('Y-m-d'),
             'assigned_to'              => $caseManagerId,
-            'status'                   => 'prelitigation',
+            'status'                   => 'ini',
             'assignment_status'        => 'pending',
             'assignment_assigned_by'   => $userId,
             'prelitigation_start_date' => date('Y-m-d'),
@@ -84,4 +86,27 @@ if ($caseManagerId && $fileNumber) {
     }
 }
 
-successResponse(['id' => $id], 'Referral created');
+// Conflict check (non-blocking warning)
+$warnings = [];
+if ($clientDob && $clientName) {
+    $caseConflict = dbFetchOne(
+        "SELECT id, case_number FROM cases WHERE client_name = ? AND client_dob = ?",
+        [$clientName, $clientDob]
+    );
+    if ($caseConflict) {
+        $warnings[] = "A case already exists for this client (Case #" . $caseConflict['case_number'] . ")";
+    }
+    $refConflict = dbFetchOne(
+        "SELECT id FROM referral_entries WHERE client_name = ? AND client_dob = ? AND id != ? AND deleted_at IS NULL",
+        [$clientName, $clientDob, $id]
+    );
+    if ($refConflict) {
+        $warnings[] = "A referral already exists for this client name and DOB";
+    }
+}
+
+$responseData = ['id' => $id];
+if (!empty($warnings)) {
+    $responseData['warnings'] = $warnings;
+}
+successResponse($responseData, 'Referral created');

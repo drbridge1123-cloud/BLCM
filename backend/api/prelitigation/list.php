@@ -13,7 +13,7 @@ $sortDir = strtoupper($_GET['sort_dir'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
 $allowedSorts = ['case_number', 'client_name', 'doi', 'treatment_status', 'last_followup_date', 'next_followup_date', 'followup_count', 'assigned_name'];
 if (!in_array($sortBy, $allowedSorts)) $sortBy = 'next_followup_date';
 
-$where = "c.status = 'prelitigation'";
+$where = "c.status = 'ini' AND (c.assignment_status IS NULL OR c.assignment_status != 'pending')";
 $params = [];
 
 if ($search) {
@@ -31,8 +31,11 @@ if ($treatmentStatus) {
     $params[] = $treatmentStatus;
 }
 
-$sql = "SELECT c.id, c.case_number, c.client_name, c.client_phone, c.client_email,
-               c.client_dob, c.doi, c.assigned_to, c.assignment_status,
+$sql = "SELECT c.id, c.case_number, c.client_name,
+               COALESCE(cl.phone, c.client_phone) AS client_phone,
+               COALESCE(cl.email, c.client_email) AS client_email,
+               c.client_dob, c.client_id, c.adjuster_3rd_id, c.adjuster_um_id,
+               c.doi, c.assigned_to, c.assignment_status,
                c.treatment_status, c.treatment_end_date,
                c.prelitigation_start_date, c.created_at,
                COALESCE(u.display_name, u.full_name) AS assigned_name,
@@ -40,6 +43,7 @@ $sql = "SELECT c.id, c.case_number, c.client_name, c.client_phone, c.client_emai
                lf.next_followup_date, lf.followup_count
         FROM cases c
         LEFT JOIN users u ON u.id = c.assigned_to
+        LEFT JOIN clients cl ON cl.id = c.client_id
         LEFT JOIN (
             SELECT pf1.case_id,
                    pf1.followup_date AS last_followup_date,

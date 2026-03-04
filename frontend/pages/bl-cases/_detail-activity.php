@@ -2,7 +2,7 @@
             <div class="act-panel c1-section c1-group-start" data-panel x-data="{logOpen: false}">
                 <div class="c1-section-header" :class="logOpen && 'is-open'" @click="logOpen = !logOpen; if(logOpen) $nextTick(() => $el.closest('[data-panel]').scrollIntoView({behavior:'smooth',block:'start'}))">
                     <div class="flex items-center gap-2.5">
-                        <span class="c1-num c1-num-olive">02</span>
+                        <span class="c1-num c1-num-olive">03</span>
                         <h3 class="panel-title">Activity Log</h3>
                         <span class="panel-count" x-text="notes.length"></span>
                     </div>

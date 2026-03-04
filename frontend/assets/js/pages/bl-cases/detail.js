@@ -1,5 +1,6 @@
 function caseDetailPage() {
     return {
+        ...contactsMixin(),
         caseId: getQueryParam('id'),
         caseData: null,
         providers: [],
@@ -9,11 +10,9 @@ function caseDetailPage() {
 
         showEditModal: false,
         showAddProviderModal: false,
-        showSendBackModal: false,
-        sendBackForm: { target_status: '', reason: '' },
-        showMoveForwardModal: false,
-        moveForwardForm: { target_status: '', note: '' },
-        nextStatus: '',
+        showStatusDropdown: false,
+        showStatusChangeModal: false,
+        statusChangeForm: { target_status: '', note: '', direction: '', from_label: '', to_label: '', assign_to: '' },
         showRequestModal: false,
         showReceiptModal: false,
         showPreviewModal: false,
@@ -68,13 +67,14 @@ function caseDetailPage() {
 
         // Workflow stepper
         workflowSteps: [
-            { key: 'treatment', label: 'TREATMENT', statuses: ['collecting'] },
-            { key: 'collection', label: 'COLLECTION', statuses: ['verification'] },
-            { key: 'verification', label: 'VERIFICATION', statuses: ['completed'] },
+            { key: 'treatment', label: 'TREATMENT', statuses: ['ini'] },
+            { key: 'collection', label: 'COLLECTION', statuses: ['rec'] },
+            { key: 'verification', label: 'VERIFICATION', statuses: ['verification'] },
             { key: 'demand', label: 'DEMAND', statuses: ['rfd'] },
-            { key: 'negotiate', label: 'NEGOTIATE', statuses: ['final_verification'] },
-            { key: 'settlement', label: 'SETTLEMENT', statuses: ['disbursement', 'accounting'] },
-            { key: 'closed', label: 'CLOSED', statuses: ['closed'] },
+            { key: 'negotiate', label: 'NEGOTIATE', statuses: ['neg'] },
+            { key: 'litigation', label: 'LITIGATION', statuses: ['lit'] },
+            { key: 'settlement', label: 'SETTLEMENT', statuses: ['final_verification'] },
+            { key: 'accounting', label: 'ACCOUNTING', statuses: ['accounting'] },
         ],
 
         // INI activation state
@@ -83,6 +83,14 @@ function caseDetailPage() {
         iniActivating: false,
         iniProviderIds: [],  // specific provider IDs to activate (empty = all)
         iniRecordTypes: { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false },
+        iniNotes: '',
+
+        // Treatment Complete modal state
+        showTxCompleteModal: false,
+        txCompleteProvider: null,
+        txCompleteChecked: false,
+        txCompleteDate: '',
+        txCompleteSaving: false,
 
         // Cost Ledger state
         allCosts: [],
@@ -95,7 +103,7 @@ function caseDetailPage() {
 
         async init() {
             if (!this.caseId) {
-                window.location.href = '/CMC/frontend/pages/bl-cases/index.php';
+                window.location.href = '/CMCdemo/frontend/pages/bl-cases/index.php';
                 return;
             }
             // Auto-collapse sidebar on case detail page
@@ -138,6 +146,8 @@ function caseDetailPage() {
                 const res = await api.get('bl-cases/' + this.caseId);
                 this.caseData = res.data;
                 this.editData = { ...res.data };
+                // Convert to string for <select> compatibility
+                if (this.editData.assigned_to) this.editData.assigned_to = String(this.editData.assigned_to);
             } catch (e) {
                 showToast('Failed to load case', 'error');
             }
@@ -172,25 +182,36 @@ function caseDetailPage() {
         },
 
         async updateCase() {
-            // If Treating Completed was just checked, intercept and show staff modal first
+            // Block Treating Completed if treating/treatment_complete providers remain
             const wasCompleted = this.caseData.ini_completed;
             const nowCompleted = this.editData.ini_completed;
             if (!wasCompleted && nowCompleted) {
                 const treatingProviders = this.providers.filter(p => p.overall_status === 'treating');
                 if (treatingProviders.length > 0) {
-                    // Close edit modal, open INI staff modal instead
+                    showToast(`Cannot mark Treating Completed — ${treatingProviders.length} provider(s) still treating`, 'error');
+                    this.editData.ini_completed = 0;
+                    return;
+                }
+                const missingDate = this.providers.filter(p => p.overall_status === 'treatment_complete' && !p.treatment_end_date);
+                if (missingDate.length > 0) {
+                    showToast(`Missing treatment end date: ${missingDate.map(p => p.provider_name).join(', ')}`, 'error');
+                    this.editData.ini_completed = 0;
+                    return;
+                }
+                const readyProviders = this.providers.filter(p => p.overall_status === 'treatment_complete');
+                if (readyProviders.length > 0) {
+                    // Close edit modal, open INI staff modal for bulk activation
                     this.showEditModal = false;
-                    this.iniProviderIds = treatingProviders.map(p => p.id);
-                    this.iniSelectedStaff = '';
-                    this.iniRecordTypes = { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false };
-                    this.showIniStaffModal = true;
+                    this.completeIni();
                     return;
                 }
             }
 
             this.saving = true;
             try {
-                await api.put('bl-cases/' + this.caseId, this.editData);
+                const payload = { ...this.editData };
+                payload.assigned_to = payload.assigned_to ? parseInt(payload.assigned_to) : null;
+                await api.put('bl-cases/' + this.caseId, payload);
                 showToast('Case updated');
                 this.showEditModal = false;
                 await this.loadCase();
@@ -202,37 +223,77 @@ function caseDetailPage() {
         },
 
         activateProvider(p) {
+            // Lightning bolt on treating → open Treatment Complete modal
+            this.txCompleteProvider = p;
+            this.txCompleteChecked = false;
+            this.txCompleteDate = p.treatment_end_date || '';
+            this.showTxCompleteModal = true;
+        },
+
+        async saveTreatmentComplete() {
+            if (!this.txCompleteChecked || !this.txCompleteDate) return;
+            this.txCompleteSaving = true;
+            try {
+                await api.put('case-providers/' + this.txCompleteProvider.id + '/complete-treatment', {
+                    treatment_end_date: this.txCompleteDate
+                });
+                showToast('Treatment marked complete');
+                this.showTxCompleteModal = false;
+                await this.loadProviders();
+                window.dispatchEvent(new CustomEvent('providers-changed'));
+            } catch (e) {
+                showToast(e.data?.message || 'Failed to update', 'error');
+            }
+            this.txCompleteSaving = false;
+        },
+
+        rushActivateProvider(p) {
+            // Lightning bolt on treatment_complete → rush activate for billing (opens modal)
             this.iniProviderIds = [p.id];
             this.iniSelectedStaff = '';
             this.iniRecordTypes = { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false };
+            this.iniNotes = '';
             this.showIniStaffModal = true;
         },
 
         toggleIniCompleted() {
             if (this.caseData.ini_completed) {
                 // Yes → confirm to undo
-                if (!confirm('Are you sure you want to undo Treating Completed? This will not change provider statuses.')) return;
+                if (!confirm('Are you sure you want to undo Treating Completed? Activated providers will revert to Tx Complete.')) return;
                 api.put('bl-cases/' + this.caseId, { ini_completed: 0 })
                     .then(() => {
                         showToast('Treating Completed undone');
                         this.loadCase();
+                        this.loadProviders();
                     })
                     .catch(e => showToast(e.data?.message || 'Failed to update', 'error'));
             } else {
-                // No → open INI staff modal to activate treating providers
+                // No → validate all providers are treatment_complete with end dates
+                const treatingProviders = this.providers.filter(p => p.overall_status === 'treating');
+                if (treatingProviders.length > 0) {
+                    showToast(`Cannot mark Treating Completed — ${treatingProviders.length} provider(s) still treating`, 'error');
+                    return;
+                }
+                const missingDate = this.providers.filter(p => p.overall_status === 'treatment_complete' && !p.treatment_end_date);
+                if (missingDate.length > 0) {
+                    showToast(`Missing treatment end date: ${missingDate.map(p => p.provider_name).join(', ')}`, 'error');
+                    return;
+                }
+                // All treatments done with dates → open INI staff modal for bulk activation
                 this.completeIni();
             }
         },
 
         completeIni() {
-            const treatingProviders = this.providers.filter(p => p.overall_status === 'treating');
-            if (treatingProviders.length === 0) {
-                showToast('No treating providers to activate', 'info');
+            const readyProviders = this.providers.filter(p => p.overall_status === 'treatment_complete');
+            if (readyProviders.length === 0) {
+                showToast('No providers ready for activation', 'info');
                 return;
             }
-            this.iniProviderIds = treatingProviders.map(p => p.id);
+            this.iniProviderIds = readyProviders.map(p => p.id);
             this.iniSelectedStaff = '';
             this.iniRecordTypes = { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false };
+            this.iniNotes = '';
             this.showIniStaffModal = true;
         },
 
@@ -245,7 +306,8 @@ function caseDetailPage() {
             try {
                 const payload = {
                     assigned_to: parseInt(this.iniSelectedStaff),
-                    ...this.iniRecordTypes
+                    ...this.iniRecordTypes,
+                    notes: this.iniNotes || undefined
                 };
                 if (this.iniProviderIds.length > 0) {
                     payload.provider_ids = this.iniProviderIds;
@@ -265,56 +327,121 @@ function caseDetailPage() {
             }
         },
 
-        openMoveForwardModal() {
-            const nextStatuses = FORWARD_TRANSITIONS[this.caseData.status] || [];
-            if (nextStatuses.length === 0) return;
-            this.moveForwardForm = { target_status: nextStatuses[0], note: '' };
-            this.showMoveForwardModal = true;
+        // ---- Status Dropdown Methods ----
+
+        getPipelineLabel() {
+            if (!this.caseData) return 'Status';
+            const map = {
+                ini: '1. Treatment',
+                rec: '2. Collection',
+                verification: '3. Verification',
+                rfd: '4. Demand',
+                neg: '5. Negotiate',
+                lit: '6. Litigation',
+                final_verification: '7. Settlement',
+                accounting: '8. Accounting',
+                closed: 'Closed',
+            };
+            return map[this.caseData.status] || 'Status';
         },
 
-        async submitMoveForward() {
-            if (!this.moveForwardForm.target_status || this.moveForwardForm.note.trim().length < 5) {
+        getCurrentPipelineStep() {
+            if (!this.caseData) return null;
+            const map = {
+                ini: 'treatment',
+                rec: 'collection',
+                verification: 'verification',
+                rfd: 'demand',
+                neg: 'negotiate',
+                lit: 'litigation',
+                final_verification: 'settlement',
+                accounting: 'accounting',
+                closed: 'accounting',
+            };
+            return map[this.caseData.status] || null;
+        },
+
+        selectPipelineStep(stepKey) {
+            this.showStatusDropdown = false;
+
+            const stepToStatus = {
+                treatment: 'ini',
+                collection: 'rec',
+                verification: 'verification',
+                demand: 'rfd',
+                negotiate: 'neg',
+                litigation: 'lit',
+                settlement: 'final_verification',
+                accounting: 'accounting',
+            };
+
+            const targetStatus = stepToStatus[stepKey];
+            if (!targetStatus) return;
+
+            const statusOrder = {
+                ini: 1, rec: 2, verification: 3,
+                rfd: 4, neg: 5, lit: 6, final_verification: 7, accounting: 8, closed: 9
+            };
+
+            const currentOrder = statusOrder[this.caseData.status] ?? 0;
+            const targetOrder = statusOrder[targetStatus] ?? 0;
+
+            let direction;
+            if (targetOrder > currentOrder) direction = 'forward';
+            else if (targetOrder < currentOrder) direction = 'backward';
+            else direction = 'reassign';
+
+            const step = this.workflowSteps.find(s => s.key === stepKey);
+            const toLabel = (this.workflowSteps.indexOf(step) + 1) + '. ' + step.label;
+
+            // Pre-select default owner for backward/reassign
+            const defaultOwners = { ini:'2', rec:'1', verification:'4', rfd:'4', neg:'1', lit:'4', final_verification:'4', accounting:'6' };
+            const defaultAssign = direction === 'forward' ? '' : (defaultOwners[targetStatus] || '');
+
+            this.statusChangeForm = {
+                target_status: targetStatus,
+                note: '',
+                direction: direction,
+                from_label: this.getPipelineLabel(),
+                to_label: direction === 'reassign' ? this.getPipelineLabel() : toLabel,
+                assign_to: defaultAssign
+            };
+            this.showStatusChangeModal = true;
+        },
+
+        async submitStatusChange() {
+            if (this.statusChangeForm.note.trim().length < 5) {
                 showToast('Please enter a note (min 5 characters)', 'error');
                 return;
             }
-            this.saving = true;
-            try {
-                await api.post('bl-cases/' + this.caseId + '/change-status', {
-                    new_status: this.moveForwardForm.target_status,
-                    note: this.moveForwardForm.note.trim()
-                });
-                showToast('Status updated');
-                this.showMoveForwardModal = false;
-                await this.loadCase();
-            } catch (e) {
-                showToast(e.data?.message || 'Failed to update status', 'error');
-            } finally {
-                this.saving = false;
-            }
-        },
-
-        async openSendBackModal() {
-            this.sendBackForm = { target_status: '', reason: '' };
-            const backTargets = BACKWARD_TRANSITIONS[this.caseData.status] || [];
-            if (backTargets.length > 0) {
-                this.sendBackForm.target_status = backTargets[0];
-            }
-            this.showSendBackModal = true;
-        },
-
-        async submitSendBack() {
-            if (!this.sendBackForm.target_status || !this.sendBackForm.reason.trim()) {
-                showToast('Please fill in all required fields', 'error');
+            if (!this.statusChangeForm.assign_to) {
+                showToast('Please select a staff member', 'error');
                 return;
             }
             this.saving = true;
             try {
-                await api.post('bl-cases/' + this.caseId + '/send-back', this.sendBackForm);
-                showToast('Case sent back successfully');
-                this.showSendBackModal = false;
+                const dir = this.statusChangeForm.direction;
+                const endpoint = dir === 'forward'
+                    ? 'bl-cases/' + this.caseId + '/change-status'
+                    : dir === 'backward'
+                        ? 'bl-cases/' + this.caseId + '/send-back'
+                        : 'bl-cases/' + this.caseId + '/assign';
+
+                const payload = {
+                    new_status: this.statusChangeForm.target_status,
+                    note: this.statusChangeForm.note.trim(),
+                    assign_to: parseInt(this.statusChangeForm.assign_to)
+                };
+                if (dir === 'reassign') {
+                    payload.assigned_to = payload.assign_to;
+                }
+
+                await api.post(endpoint, payload);
+                showToast(dir === 'reassign' ? 'Case reassigned' : 'Status updated');
+                this.showStatusChangeModal = false;
                 await this.loadCase();
             } catch (e) {
-                showToast(e.data?.message || 'Failed to send back', 'error');
+                showToast(e.data?.message || 'Failed to update status', 'error');
             } finally {
                 this.saving = false;
             }
@@ -349,15 +476,14 @@ function caseDetailPage() {
                 await api.post('case-providers', {
                     case_id: parseInt(this.caseId),
                     provider_id: this.selectedProvider.id,
-                    record_types_needed: this.newProvider.record_types.join(',') || null,
-                    deadline: this.newProvider.deadline || null
                 });
                 showToast('Provider added');
                 this.showAddProviderModal = false;
                 this.selectedProvider = null;
                 this.providerSearch = '';
-                this.newProvider = { record_types: [], deadline: this.getDefaultDeadline() };
                 await this.loadProviders();
+                await this.loadAllCosts();
+                window.dispatchEvent(new CustomEvent('providers-changed'));
             } catch (e) {
                 showToast(e.data?.message || 'Failed to add provider', 'error');
             }
@@ -521,6 +647,8 @@ function caseDetailPage() {
                 await api.delete('case-providers/' + id);
                 showToast('Provider removed');
                 await this.loadProviders();
+                await this.loadAllCosts();
+                window.dispatchEvent(new CustomEvent('providers-changed'));
             } catch (e) {
                 showToast('Failed to remove provider', 'error');
             }
@@ -788,8 +916,9 @@ function caseDetailPage() {
         // ---- Workflow Stepper ----
 
         getStepState(stepKey) {
-            const statusOrder = ['collecting', 'verification', 'completed', 'rfd', 'final_verification', 'disbursement', 'accounting', 'closed'];
-            const currentIdx = statusOrder.indexOf(this.caseData.status);
+            const statusOrder = ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification', 'accounting', 'closed'];
+            const status = this.caseData.status;
+            const currentIdx = statusOrder.indexOf(status);
             const step = this.workflowSteps.find(s => s.key === stepKey);
             const stepStatuses = step.statuses.map(s => statusOrder.indexOf(s));
             const maxIdx = Math.max(...stepStatuses);
@@ -810,13 +939,14 @@ function caseDetailPage() {
             const caseNum = encodeURIComponent(this.caseData.case_number);
             const caseId = this.caseData.id;
             const trackerMap = {
-                treatment:    '/CMC/frontend/pages/prelitigation/index.php',
-                collection:   '/CMC/frontend/pages/billing/index.php?case_id=' + caseId,
-                verification: '/CMC/frontend/pages/billing/index.php?case_id=' + caseId,
-                demand:       '/CMC/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
-                negotiate:    '/CMC/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
-                settlement:   '/CMC/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
-                closed:       '/CMC/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
+                treatment:    '/CMCdemo/frontend/pages/prelitigation/index.php',
+                collection:   '/CMCdemo/frontend/pages/billing/index.php?case_id=' + caseId,
+                verification: '/CMCdemo/frontend/pages/billing/index.php?case_id=' + caseId,
+                demand:       '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                negotiate:    '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                litigation:   '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                settlement:   '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
+                accounting:   '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
             };
             return trackerMap[stepKey] || '#';
         },
@@ -828,8 +958,9 @@ function caseDetailPage() {
                 verification: 'Go to Billing Tracker',
                 demand:       'Go to Attorney Cases',
                 negotiate:    'Go to Attorney Cases',
+                litigation:   'Go to Attorney Cases',
                 settlement:   'Go to Accounting Tracker',
-                closed:       'Go to Accounting Tracker',
+                accounting:   'Go to Accounting Tracker',
             };
             return tooltipMap[stepKey] || '';
         },
@@ -842,15 +973,15 @@ function caseDetailPage() {
         // Dynamic button: go to the tracker that matches current status
         goToCurrentTracker() {
             const statusTrackerMap = {
-                prelitigation:      '/CMC/frontend/pages/prelitigation/index.php',
-                collecting:         '/CMC/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
-                verification:       '/CMC/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
-                completed:          '/CMC/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                rfd:                '/CMC/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                final_verification: '/CMC/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                disbursement:       '/CMC/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
-                accounting:         '/CMC/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
-                closed:             '/CMC/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                ini:                '/CMCdemo/frontend/pages/prelitigation/index.php',
+                rec:                '/CMCdemo/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
+                verification:       '/CMCdemo/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
+                rfd:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                neg:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                lit:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                final_verification: '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                accounting:         '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                closed:             '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
             };
             const url = statusTrackerMap[this.caseData.status];
             if (url) window.location.href = url;
@@ -859,13 +990,13 @@ function caseDetailPage() {
         getCurrentTrackerLabel() {
             if (!this.caseData) return 'Tracker';
             const labelMap = {
-                prelitigation:      'Prelitigation',
-                collecting:         'Billing Tracker',
+                ini:                'Prelitigation',
+                rec:                'Billing Tracker',
                 verification:       'Billing Tracker',
-                completed:          'Attorney Cases',
                 rfd:                'Attorney Cases',
-                final_verification: 'Attorney Cases',
-                disbursement:       'Accounting',
+                neg:                'Attorney Cases',
+                lit:                'Attorney Cases',
+                final_verification: 'Accounting',
                 accounting:         'Accounting',
                 closed:             'Accounting',
             };
@@ -1012,7 +1143,7 @@ function caseDetailPage() {
             formData.append('preview', '1');
 
             try {
-                const res = await fetch('/CMC/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '') },
                     body: formData
@@ -1046,7 +1177,7 @@ function caseDetailPage() {
             formData.append('case_id', this.caseId);
 
             try {
-                const res = await fetch('/CMC/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '') },
                     body: formData

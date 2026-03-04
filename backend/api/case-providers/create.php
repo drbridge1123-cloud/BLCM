@@ -14,7 +14,7 @@ $caseId     = (int)$input['case_id'];
 $providerId = (int)$input['provider_id'];
 
 // Validate case exists
-$case = dbFetchOne("SELECT id FROM cases WHERE id = ?", [$caseId]);
+$case = dbFetchOne("SELECT id, status FROM cases WHERE id = ?", [$caseId]);
 if (!$case) errorResponse('Case not found', 404);
 
 // Validate provider exists
@@ -32,7 +32,7 @@ if ($existing) errorResponse('Provider is already linked to this case');
 $data = [
     'case_id'        => $caseId,
     'provider_id'    => $providerId,
-    'overall_status' => 'not_started',
+    'overall_status' => ($case['status'] === 'ini') ? 'treating' : 'not_started',
     'activated_by'   => $userId,
 ];
 
@@ -76,6 +76,24 @@ if ($mbrReport) {
         'case_provider_id'   => $id,
         'record_types_needed'=> $data['record_types_needed'] ?? null,
         'sort_order'         => ($maxSort['max_sort'] ?? 0) + 1,
+    ]);
+}
+
+// Auto-create Cost Ledger entry
+$existingPayment = dbFetchOne(
+    "SELECT id FROM mr_fee_payments WHERE case_id = ? AND case_provider_id = ?",
+    [$caseId, $id]
+);
+if (!$existingPayment) {
+    dbInsert('mr_fee_payments', [
+        'case_id'          => $caseId,
+        'case_provider_id' => $id,
+        'provider_name'    => $provider['name'],
+        'description'      => 'Record Fee',
+        'expense_category' => 'mr_cost',
+        'billed_amount'    => 0,
+        'paid_amount'      => 0,
+        'created_by'       => $userId,
     ]);
 }
 

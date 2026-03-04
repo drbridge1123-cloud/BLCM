@@ -73,26 +73,26 @@ function dataManagementPage() {
 
         exportCases() {
             const q = this._qs({ assigned_to: this.filters.cases.staff });
-            window.location.href = '/CMC/backend/api/cases/export' + q;
+            window.location.href = '/CMCdemo/backend/api/cases/export' + q;
         },
         exportProviders() {
-            window.location.href = '/CMC/backend/api/providers/export';
+            window.location.href = '/CMCdemo/backend/api/providers/export';
         },
         exportCommissions() {
             const q = this._qs({ employee_id: this.filters.commissions.staff });
-            window.location.href = '/CMC/backend/api/commissions/export' + q;
+            window.location.href = '/CMCdemo/backend/api/commissions/export' + q;
         },
         exportExpenseReport() {
             const q = this._qs({ staff_id: this.filters.expenseReport.staff });
-            window.location.href = '/CMC/backend/api/expense-report/export' + q;
+            window.location.href = '/CMCdemo/backend/api/expense-report/export' + q;
         },
         exportAttorneyCases() {
             const q = this._qs({ attorney_user_id: this.filters.attorneyCases.staff });
-            window.location.href = '/CMC/backend/api/attorney/export' + q;
+            window.location.href = '/CMCdemo/backend/api/attorney/export' + q;
         },
         exportReferrals() {
             const q = this._qs({ lead_id: this.filters.referrals.staff });
-            window.location.href = '/CMC/backend/api/referrals/export' + q;
+            window.location.href = '/CMCdemo/backend/api/referrals/export' + q;
         },
 
         // ── Imports ──
@@ -106,7 +106,7 @@ function dataManagementPage() {
                 const formData = new FormData();
                 formData.append('file', file);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMC/backend/api/attorney/import', {
+                const res = await fetch('/CMCdemo/backend/api/attorney/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -129,7 +129,7 @@ function dataManagementPage() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                const res = await fetch('/CMC/backend/api/health-ledger/import', { method: 'POST', body: formData });
+                const res = await fetch('/CMCdemo/backend/api/health-ledger/import', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Import failed');
                 showToast(data.message || 'Import complete', 'success');
@@ -145,7 +145,7 @@ function dataManagementPage() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                const res = await fetch('/CMC/backend/api/bank-reconciliation/import', { method: 'POST', body: formData });
+                const res = await fetch('/CMCdemo/backend/api/bank-reconciliation/import', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Import failed');
                 showToast(data.message || 'Import complete', 'success');
@@ -165,7 +165,7 @@ function dataManagementPage() {
                 formData.append('file', file);
                 formData.append('case_number', caseNumber);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMC/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -189,7 +189,7 @@ function dataManagementPage() {
                 formData.append('file', file);
                 formData.append('case_number', caseNumber);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMC/backend/api/mbr/import', {
+                const res = await fetch('/CMCdemo/backend/api/mbr/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -202,13 +202,64 @@ function dataManagementPage() {
             event.target.value = '';
         },
 
+        // ── Prelitigation Import ──
+
+        prelitImportFiles: { cases: null, providers: null, followups: null },
+
+        setPrelitFile(type, event) {
+            const file = event.target.files[0];
+            if (file && !file.name.toLowerCase().endsWith('.csv')) {
+                showToast('Please select a CSV file', 'error');
+                event.target.value = '';
+                return;
+            }
+            this.prelitImportFiles[type] = file || null;
+        },
+
+        async importPrelitigation() {
+            if (!this.prelitImportFiles.cases) {
+                showToast('Cases CSV is required', 'error');
+                return;
+            }
+            if (!confirm('Import prelitigation cases? This will create new cases in the system.')) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('cases', this.prelitImportFiles.cases);
+                if (this.prelitImportFiles.providers) formData.append('providers', this.prelitImportFiles.providers);
+                if (this.prelitImportFiles.followups) formData.append('followups', this.prelitImportFiles.followups);
+
+                const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
+                const res = await fetch('/CMCdemo/backend/api/prelitigation/import', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok && !data.success) throw new Error(data.message || 'Import failed');
+                showToast(data.message || 'Import complete', 'success');
+                if (data.data?.errors?.length) {
+                    console.warn('Prelitigation import errors:', data.data.errors);
+                    showToast(`${data.data.errors.length} warnings — check console`, 'warning');
+                }
+                // Reset file inputs
+                this.prelitImportFiles = { cases: null, providers: null, followups: null };
+                document.querySelectorAll('.prelit-import-file').forEach(el => el.value = '');
+                this.loadCounts();
+            } catch (e) { showToast(e.message, 'error'); }
+        },
+
+        downloadPrelitTemplate(type) {
+            window.location.href = '/CMCdemo/backend/api/prelitigation/template?type=' + type;
+        },
+
         // ── Template downloads ──
 
         downloadCasesTemplate() {
-            window.location.href = '/CMC/backend/api/cases/export?template=1';
+            window.location.href = '/CMCdemo/backend/api/cases/export?template=1';
         },
         downloadProvidersTemplate() {
-            window.location.href = '/CMC/backend/api/providers/export?template=1';
+            window.location.href = '/CMCdemo/backend/api/providers/export?template=1';
         },
     };
 }

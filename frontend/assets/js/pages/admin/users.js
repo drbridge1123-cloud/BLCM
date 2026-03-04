@@ -43,7 +43,7 @@ function usersPage() {
         ],
 
         // Job title options (dynamically extended)
-        jobTitleOptions: ['Billing Assistant', 'Senior Paralegal', 'Paralegal', 'Attorney', 'Administrator', 'Manager', 'Accountant'],
+        jobTitleOptions: ['Administrative Personnel', 'Associate Attorney', 'Billing Assistant', 'Managing Partner', 'Operating Manager', 'Paralegal', 'Senior Associate', 'Senior Paralegal'],
         addingJobTitle: false,
 
         // Role badge colors

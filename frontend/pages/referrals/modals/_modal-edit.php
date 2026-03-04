@@ -6,10 +6,14 @@
             <button @click="showEditModal = false" style="background:none; border:none; color:rgba(255,255,255,.4); cursor:pointer; font-size:20px;">&times;</button>
         </div>
         <div style="padding:24px; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
                 <div>
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Client Name *</label>
                     <input type="text" x-model="editForm.client_name" class="sp-search" style="width:100%;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Date of Birth</label>
+                    <input type="date" x-model="editForm.client_dob" class="sp-search" style="width:100%;">
                 </div>
                 <div>
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Signed Date</label>
@@ -42,14 +46,28 @@
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Referral Type</label>
                     <select x-model="editForm.referral_type" class="sp-select" style="width:100%;">
                         <option value="">-- Select --</option>
-                        <option value="Office">Office</option><option value="Prior client">Prior client</option><option value="Other">Other</option>
+                        <option value="Marketing">Marketing</option><option value="Friend">Friend</option><option value="Client Referral">Client Referral</option><option value="Provider Referral">Provider Referral</option><option value="Friend's Referral">Friend's Referral</option><option value="Relatives">Relatives</option><option value="Other">Other</option>
                     </select>
                 </div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div>
+                <div style="position:relative;">
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Referred to Provider</label>
-                    <input type="text" x-model="editForm.referred_to_provider" class="sp-search" style="width:100%;">
+                    <input type="text" x-model="editForm.referred_to_provider" class="sp-search" style="width:100%;"
+                           @input.debounce.300ms="searchProviders(editForm.referred_to_provider)"
+                           @focus="if(editForm.referred_to_provider.length >= 2) searchProviders(editForm.referred_to_provider)"
+                           autocomplete="off">
+                    <div x-show="showProviderDropdown" @click.outside="showProviderDropdown = false"
+                         style="position:absolute; left:0; right:0; z-index:10; background:#fff; border:1px solid #e2ddd6; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:180px; overflow-y:auto; margin-top:2px;">
+                        <template x-for="p in providerSearchResults" :key="p.id">
+                            <div @click="selectProvider(p, 'editForm')"
+                                 style="padding:8px 12px; cursor:pointer; font-size:12px; border-bottom:1px solid #f4f2ee; display:flex; justify-content:space-between; align-items:center;"
+                                 onmouseover="this.style.background='#f9f8f6'" onmouseout="this.style.background='#fff'">
+                                <span x-text="p.name" style="font-weight:600; color:#1a2535;"></span>
+                                <span x-text="p.type || ''" style="color:#8a8a82; font-size:10px;"></span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
                 <div>
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Referred to Body Shop</label>

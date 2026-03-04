@@ -23,15 +23,15 @@ if (in_array('cases', $permissions) || $isAdmin) {
     $mrStats = dbFetchOne("
         SELECT
             COUNT(*) AS total_active,
-            SUM(status = 'collecting') AS collecting_count,
-            SUM(status = 'verification') AS verification_count
+            SUM(status = 'ini') AS ini_count,
+            SUM(status = 'rec') AS rec_count
         FROM cases WHERE {$mrWhere}
     ", $mrParams);
 
     $data['mr_cases'] = [
         'total_active'    => (int)($mrStats['total_active'] ?? 0),
-        'new_count'       => (int)($mrStats['collecting_count'] ?? 0),
-        'in_progress'     => (int)($mrStats['verification_count'] ?? 0),
+        'new_count'       => (int)($mrStats['ini_count'] ?? 0),
+        'in_progress'     => (int)($mrStats['rec_count'] ?? 0),
     ];
 }
 

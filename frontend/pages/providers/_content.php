@@ -291,6 +291,7 @@
                 <button class="sp-tab" :class="activeTab === 'providers' && 'on'" @click="activeTab = 'providers'">Providers</button>
                 <button class="sp-tab" :class="activeTab === 'insurance' && 'on'" @click="activeTab = 'insurance'">Insurance</button>
                 <button class="sp-tab" :class="activeTab === 'adjusters' && 'on'" @click="activeTab = 'adjusters'">Adjusters</button>
+                <button class="sp-tab" :class="activeTab === 'clients' && 'on'" @click="activeTab = 'clients'">Clients</button>
             </div>
         </div>
 
@@ -494,10 +495,13 @@
             <div style="overflow-x:auto;" x-init="initScrollContainer($el)">
                 <table class="sp-table">
                     <thead><tr>
-                        <th class="cursor-pointer select-none" @click="sort('name')">Company Name</th>
-                        <th class="cursor-pointer select-none" @click="sort('type')">Type</th>
-                        <th>Phone</th><th>Fax</th><th>Email</th><th>Adjusters</th>
-                        <th class="cursor-pointer select-none" @click="sort('city')">City/State</th>
+                        <th style="width:18%;" class="cursor-pointer select-none" @click="sort('name')">Company Name</th>
+                        <th style="width:6%;" class="cursor-pointer select-none" @click="sort('type')">Type</th>
+                        <th style="width:12%;">Phone</th>
+                        <th style="width:12%;">Fax</th>
+                        <th style="width:16%;">Email</th>
+                        <th style="width:22%;" class="cursor-pointer select-none" @click="sort('city')">Address</th>
+                        <th style="width:7%; text-align:center;">Adjusters</th>
                     </tr></thead>
                     <tbody>
                         <template x-if="loading"><tr><td colspan="7" class="sp-empty"><div class="spinner" style="margin:0 auto;"></div></td></tr></template>
@@ -508,9 +512,9 @@
                                 <td><span class="sp-stage" :style="getTypeColor(c.type)" x-text="getInsuranceTypeLabel(c.type)"></span></td>
                                 <td style="white-space:nowrap; font-size:13px;" x-text="c.phone || '-'"></td>
                                 <td style="white-space:nowrap; font-size:13px;" x-text="c.fax || '-'"></td>
-                                <td style="font-size:12px; white-space:nowrap;" x-text="c.email || '-'"></td>
+                                <td style="font-size:12px; word-break:break-all;" x-text="c.email || '-'"></td>
+                                <td style="font-size:12px;" x-text="[c.address, [c.city, c.state].filter(Boolean).join(', '), c.zip].filter(Boolean).join(', ') || '-'"></td>
                                 <td style="text-align:center;"><span style="font-size:12px; font-weight:600;" x-text="c.adjuster_count || '0'"></span></td>
-                                <td style="font-size:13px; white-space:nowrap;" x-text="[c.city, c.state].filter(Boolean).join(', ') || '-'"></td>
                             </tr>
                         </template>
                     </tbody>
@@ -593,7 +597,7 @@
                         <th class="cursor-pointer select-none" @click="sort('last_name')">Name</th>
                         <th class="cursor-pointer select-none" @click="sort('title')">Title</th>
                         <th>Type</th>
-                        <th class="cursor-pointer select-none" @click="sort('insurance_company_name')">Insurance Company</th>
+                        <th class="cursor-pointer select-none" @click="sort('company_name')">Insurance Company</th>
                         <th>Phone</th>
                         <th class="cursor-pointer select-none" @click="sort('email')">Email</th>
                         <th>Status</th>
@@ -606,7 +610,7 @@
                                 <td style="font-weight:600; color:#7d693c;" x-text="a.last_name + ', ' + a.first_name"></td>
                                 <td style="font-size:13px; color:#6b7280;" x-text="a.title || '-'"></td>
                                 <td><span x-show="a.adjuster_type" class="sp-stage" style="background:#eff6ff; color:#2563eb; font-size:11px; padding:1px 6px;" x-text="getTypeLabel(a.adjuster_type)"></span><span x-show="!a.adjuster_type" style="color:#9ca3af;">-</span></td>
-                                <td style="font-size:13px;" x-text="a.insurance_company_name || '-'"></td>
+                                <td style="font-size:13px;" x-text="a.company_name || '-'"></td>
                                 <td style="white-space:nowrap; font-size:13px;" x-text="a.phone || '-'"></td>
                                 <td style="font-size:12px; white-space:nowrap;" x-text="a.email || '-'"></td>
                                 <td><span class="sp-stage" :style="a.is_active == 1 ? 'background:#dcfce7; color:#15803d;' : 'background:#f3f4f6; color:#6b7280;'" style="font-size:11px; padding:1px 6px;" x-text="a.is_active == 1 ? 'Active' : 'Inactive'"></span></td>
@@ -628,7 +632,7 @@
                         <div class="ajm-section"><span>Details</span></div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                             <div class="ajm-card"><p class="ajm-label">Type</p><p class="ajm-value" x-text="getTypeLabel(selectedAdjuster.adjuster_type)"></p></div>
-                            <div class="ajm-card"><p class="ajm-label">Insurance Company</p><p class="ajm-value" x-text="selectedAdjuster.insurance_company_name || '—'"></p></div>
+                            <div class="ajm-card"><p class="ajm-label">Insurance Company</p><p class="ajm-value" x-text="selectedAdjuster.company_name || '—'"></p></div>
                             <div class="ajm-card"><p class="ajm-label">Phone</p><p class="ajm-value" x-text="selectedAdjuster.phone || '—'"></p></div>
                             <div class="ajm-card"><p class="ajm-label">Fax</p><p class="ajm-value" x-text="selectedAdjuster.fax || '—'"></p></div>
                             <div class="ajm-card" style="grid-column:span 2;"><p class="ajm-label">Email</p><p class="ajm-value" style="word-break:break-all;" x-text="selectedAdjuster.email || '—'"></p></div>
@@ -652,7 +656,33 @@
                         <div class="ajm-section"><span>Basic Info</span></div>
                         <div style="display:flex; gap:12px;"><div style="flex:1;"><label class="ajm-label">First Name <span class="ajm-req">*</span></label><input type="text" x-model="showEditModal ? editAdjuster.first_name : newAdjuster.first_name" required class="ajm-input"></div><div style="flex:1;"><label class="ajm-label">Last Name <span class="ajm-req">*</span></label><input type="text" x-model="showEditModal ? editAdjuster.last_name : newAdjuster.last_name" required class="ajm-input"></div></div>
                         <div style="display:flex; gap:12px;"><div style="flex:1;"><label class="ajm-label">Title</label><input type="text" x-model="showEditModal ? editAdjuster.title : newAdjuster.title" class="ajm-input" placeholder="e.g., Claims Adjuster"></div><div style="flex:1;"><label class="ajm-label">Type</label><select x-model="showEditModal ? editAdjuster.adjuster_type : newAdjuster.adjuster_type" class="ajm-select"><option value="">None</option><option value="pip">PIP</option><option value="um">UM</option><option value="uim">UIM</option><option value="3rd_party">3rd Party</option><option value="liability">Liability</option><option value="pd">PD</option><option value="bi">BI</option></select></div></div>
-                        <div><label class="ajm-label">Insurance Company</label><select x-model="showEditModal ? editAdjuster.insurance_company_id : newAdjuster.insurance_company_id" class="ajm-select"><option value="">None</option><template x-for="co in insuranceCompanies" :key="co.id"><option :value="co.id" x-text="co.name"></option></template></select></div>
+                        <div style="position:relative;">
+                            <label class="ajm-label">Insurance Company</label>
+                            <div style="position:relative;">
+                                <input type="text" class="ajm-input" placeholder="Search company..."
+                                       x-model="icSearch"
+                                       @input.debounce.300ms="searchIc($event.target.value)"
+                                       @focus="icSearch.length >= 2 && searchIc(icSearch)">
+                                <button type="button" x-show="icSearch" @click="clearIc()"
+                                        style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:#8a8a82; cursor:pointer; font-size:16px; line-height:1;">&times;</button>
+                            </div>
+                            <div x-show="showIcDropdown" @click.outside="showIcDropdown = false"
+                                 style="position:absolute; z-index:20; width:100%; margin-top:4px; background:#fff; border:1.5px solid #d0cdc5; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:200px; overflow-y:auto;">
+                                <template x-for="co in icResults" :key="co.id">
+                                    <button type="button" @click="selectIc(co)"
+                                            style="width:100%; text-align:left; background:none; border:none; padding:9px 14px; font-size:13px; color:#1a2535; cursor:pointer; font-family:inherit; transition:background .1s;"
+                                            onmouseover="this.style.background='rgba(201,168,76,.06)'" onmouseout="this.style.background='none'">
+                                        <span x-text="co.name"></span>
+                                    </button>
+                                </template>
+                                <button type="button" @click="createIc()"
+                                        style="width:100%; text-align:left; background:none; border:none; padding:9px 14px; font-size:13px; font-weight:600; color:#C9A84C; cursor:pointer; display:flex; align-items:center; gap:6px; border-top:1px solid #d0cdc5; font-family:inherit; transition:background .1s;"
+                                        onmouseover="this.style.background='rgba(201,168,76,.06)'" onmouseout="this.style.background='none'">
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                    Create "<span x-text="icSearch"></span>"
+                                </button>
+                            </div>
+                        </div>
                         <div class="ajm-section"><span>Contact</span></div>
                         <div style="display:flex; gap:12px;"><div style="flex:1;"><label class="ajm-label">Phone</label><input type="text" x-model="showEditModal ? editAdjuster.phone : newAdjuster.phone" class="ajm-input"></div><div style="flex:1;"><label class="ajm-label">Fax</label><input type="text" x-model="showEditModal ? editAdjuster.fax : newAdjuster.fax" class="ajm-input"></div></div>
                         <div><label class="ajm-label">Email</label><input type="email" x-model="showEditModal ? editAdjuster.email : newAdjuster.email" class="ajm-input"></div>
@@ -660,6 +690,94 @@
                         <div><textarea x-model="showEditModal ? editAdjuster.notes : newAdjuster.notes" class="ajm-textarea" placeholder="Optional notes..."></textarea></div>
                     </div>
                     <div class="ajm-footer"><button type="button" @click="showCreateModal ? closeCreateModal() : closeEditModal()" class="ajm-btn-cancel">Cancel</button><button type="submit" :disabled="saving" class="ajm-btn-submit"><template x-if="!showEditModal"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></template><template x-if="showEditModal"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></template><span x-text="saving ? 'Saving...' : (showEditModal ? 'Update' : 'Create')"></span></button></div>
+                </form>
+            </div></template>
+        </div>
+
+        <!-- ===================== CLIENTS TAB ===================== -->
+        <div x-show="activeTab === 'clients'" x-cloak x-data="clientsListPage()" x-init="loadData()">
+
+            <!-- Toolbar Row -->
+            <div style="padding:12px 24px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                <input type="text" x-model="search" @input.debounce.300ms="loadData()" placeholder="Search by name, phone, or email..."
+                       class="sp-search" style="flex:1; min-width:200px;">
+                <button @click="showCreateModal = true" class="sp-new-btn-navy">+ New Client</button>
+            </div>
+
+            <!-- Table -->
+            <div style="overflow-x:auto;" x-init="initScrollContainer($el)">
+                <table class="sp-table">
+                    <thead><tr>
+                        <th class="cursor-pointer select-none" @click="sort('name')">Name</th>
+                        <th class="cursor-pointer select-none" @click="sort('dob')">DOB</th>
+                        <th>Phone</th>
+                        <th class="cursor-pointer select-none" @click="sort('email')">Email</th>
+                        <th>Address</th>
+                        <th>Cases</th>
+                        <th class="cursor-pointer select-none" @click="sort('created_at')">Created</th>
+                    </tr></thead>
+                    <tbody>
+                        <template x-if="loading"><tr><td colspan="7" class="sp-empty"><div class="spinner" style="margin:0 auto;"></div></td></tr></template>
+                        <template x-if="!loading && items.length === 0"><tr><td colspan="7" class="sp-empty">No clients found</td></tr></template>
+                        <template x-for="c in items" :key="c.id">
+                            <tr @click="viewClient(c.id)" class="db-row" :class="selectedClient?.id === c.id ? 'db-row-active' : ''">
+                                <td style="font-weight:600; color:#7d693c;" x-text="c.name"></td>
+                                <td style="font-size:13px; white-space:nowrap;" x-text="formatDob(c.dob)"></td>
+                                <td style="white-space:nowrap; font-size:13px;" x-text="c.phone || '-'"></td>
+                                <td style="font-size:12px; white-space:nowrap;" x-text="c.email || '-'"></td>
+                                <td style="font-size:12px; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis;" x-text="formatAddress(c)"></td>
+                                <td style="text-align:center;"><span style="font-size:12px; font-weight:600;" x-text="c.case_count || '0'"></span></td>
+                                <td style="font-size:12px; white-space:nowrap; color:#9ca3af;" x-text="c.created_at ? new Date(c.created_at).toLocaleDateString() : '-'"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding:10px 24px; border-top:1px solid #e8e4dc; font-size:13px; color:#9ca3af;">
+                Showing <span x-text="items.length"></span> client<span x-text="items.length === 1 ? '' : 's'"></span>
+            </div>
+
+            <!-- Client Detail Modal -->
+            <div x-show="selectedClient" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;" @keydown.escape.window="selectedClient = null">
+                <div class="fixed inset-0" style="background:rgba(0,0,0,.45);" @click="selectedClient = null"></div>
+                <div @click.stop class="icm relative z-10"><template x-if="selectedClient"><div>
+                    <div class="icm-header"><div style="flex:1; padding-right:16px;"><h3 x-text="selectedClient.name"></h3><template x-if="selectedClient.dob"><div style="margin-top:6px;"><span class="icm-badge" style="background:rgba(255,255,255,.12); color:rgba(255,255,255,.7);" x-text="'DOB: ' + formatDob(selectedClient.dob)"></span></div></template></div><button type="button" class="icm-close" @click="selectedClient = null"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+                    <div class="icm-body">
+                        <div class="icm-section"><span>Contact Information</span></div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div class="icm-card"><p class="icm-label">Phone</p><p class="icm-value" x-text="selectedClient.phone || '—'"></p></div>
+                            <div class="icm-card"><p class="icm-label">Email</p><p class="icm-value" style="word-break:break-all;" x-text="selectedClient.email || '—'"></p></div>
+                        </div>
+                        <template x-if="selectedClient.address_street || selectedClient.address_city"><div>
+                            <div class="icm-section"><span>Address</span></div>
+                            <div class="icm-card">
+                                <p class="icm-value" x-text="selectedClient.address_street || ''"></p>
+                                <p class="icm-value" x-text="[selectedClient.address_city, selectedClient.address_state].filter(Boolean).join(', ') + (selectedClient.address_zip ? ' ' + selectedClient.address_zip : '')"></p>
+                            </div>
+                        </div></template>
+                    </div>
+                    <div class="icm-footer">
+                        <button @click="openEditModal()" class="icm-btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                        <button @click="deleteClient(selectedClient.id, selectedClient.name)" class="icm-btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+                    </div>
+                </div></template></div>
+            </div>
+
+            <!-- Create/Edit Client Modal -->
+            <template x-if="showCreateModal || showEditModal"><div class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="showCreateModal ? closeCreateModal() : closeEditModal()">
+                <div class="fixed inset-0" style="background:rgba(0,0,0,.45);" @click="showCreateModal ? closeCreateModal() : closeEditModal()"></div>
+                <form @submit.prevent="showCreateModal ? createClient() : updateClient()" class="icm relative z-10" @click.stop style="display:flex; flex-direction:column; max-height:90vh;">
+                    <div class="icm-header" style="flex-shrink:0;"><div><h3 x-text="showEditModal ? 'Edit Client' : 'New Client'"></h3><p class="icm-subtitle" x-text="showEditModal ? 'Update client details' : 'Add a new client'"></p></div><button type="button" class="icm-close" @click="showCreateModal ? closeCreateModal() : closeEditModal()"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+                    <div class="icm-body" style="flex:1; min-height:0;">
+                        <div class="icm-section"><span>Basic Info</span></div>
+                        <div style="display:flex; gap:12px;"><div style="flex:2;"><label class="icm-label">Client Name <span class="icm-req">*</span></label><input type="text" x-model="showEditModal ? editClient.name : newClient.name" required class="icm-input"></div><div style="flex:1;"><label class="icm-label">Date of Birth</label><input type="date" x-model="showEditModal ? editClient.dob : newClient.dob" class="icm-input"></div></div>
+                        <div class="icm-section"><span>Contact</span></div>
+                        <div style="display:flex; gap:12px;"><div style="flex:1;"><label class="icm-label">Phone</label><input type="text" x-model="showEditModal ? editClient.phone : newClient.phone" class="icm-input"></div><div style="flex:1;"><label class="icm-label">Email</label><input type="email" x-model="showEditModal ? editClient.email : newClient.email" class="icm-input"></div></div>
+                        <div class="icm-section"><span>Address</span></div>
+                        <div><label class="icm-label">Street Address</label><input type="text" x-model="showEditModal ? editClient.address_street : newClient.address_street" class="icm-input"></div>
+                        <div style="display:flex; gap:12px;"><div style="flex:3;"><label class="icm-label">City</label><input type="text" x-model="showEditModal ? editClient.address_city : newClient.address_city" class="icm-input"></div><div style="flex:1;"><label class="icm-label">State</label><input type="text" x-model="showEditModal ? editClient.address_state : newClient.address_state" maxlength="2" class="icm-input" style="text-transform:uppercase;"></div><div style="flex:1.5;"><label class="icm-label">ZIP</label><input type="text" x-model="showEditModal ? editClient.address_zip : newClient.address_zip" maxlength="10" class="icm-input"></div></div>
+                    </div>
+                    <div class="icm-footer" style="flex-shrink:0;"><button type="button" @click="showCreateModal ? closeCreateModal() : closeEditModal()" class="icm-btn-cancel">Cancel</button><button type="submit" :disabled="saving" class="icm-btn-submit"><template x-if="!showEditModal"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></template><template x-if="showEditModal"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></template><span x-text="saving ? 'Saving...' : (showEditModal ? 'Update' : 'Create')"></span></button></div>
                 </form>
             </div></template>
         </div>

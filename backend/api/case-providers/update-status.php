@@ -62,11 +62,11 @@ if ($newStatus === 'received_complete') {
     }
 }
 
-// Auto-advance case when all providers done (collecting -> verification)
+// Auto-advance case when all providers done (ini -> rec)
 $doneStatuses = ['received_complete','verified','no_records'];
 if (in_array($newStatus, $doneStatuses)) {
     $caseRow = dbFetchOne("SELECT id, status FROM cases WHERE id = ?", [$cp['case_id']]);
-    if ($caseRow && $caseRow['status'] === 'collecting') {
+    if ($caseRow && $caseRow['status'] === 'ini') {
         $totalProviders = dbCount('case_providers', 'case_id = ?', [$cp['case_id']]);
         $doneProviders  = dbCount(
             'case_providers',
@@ -74,13 +74,13 @@ if (in_array($newStatus, $doneStatuses)) {
             [$cp['case_id']]
         );
         if ($totalProviders > 0 && $doneProviders >= $totalProviders) {
-            $newOwner = STATUS_OWNER_MAP['verification'] ?? null;
-            $caseUpdate = ['status' => 'verification'];
+            $newOwner = STATUS_OWNER_MAP['rec'] ?? null;
+            $caseUpdate = ['status' => 'rec'];
             if ($newOwner) $caseUpdate['assigned_to'] = $newOwner;
             dbUpdate('cases', $caseUpdate, 'id = ?', [$cp['case_id']]);
             logActivity($userId, 'auto_advance', 'case', $cp['case_id'], [
-                'from' => 'collecting',
-                'to'   => 'verification',
+                'from' => 'ini',
+                'to'   => 'rec',
             ]);
         }
     }

@@ -4,6 +4,7 @@
  */
 function dashboardPage() {
     return {
+        ...pendingAssignmentsMixin(),
         // MRMS-style state
         summary: {},
         followups: [],
@@ -25,7 +26,9 @@ function dashboardPage() {
                 this.loadOverdue(),
                 this.loadEscalations(),
                 this.loadCases(),
-                this.loadStaffMetrics()
+                this.loadStaffMetrics(),
+                this.loadPendingCaseAssignments(),
+                this.loadPendingProviderAssignments()
             ]);
             this.loading = false;
         },
@@ -92,12 +95,13 @@ function dashboardPage() {
 
         getStatusLabel(status) {
             const labels = {
-                'collecting': 'Collecting',
+                'ini': 'Treatment',
+                'rec': 'Collection',
                 'verification': 'Verification',
-                'completed': 'Completed',
-                'rfd': 'RFD',
-                'final_verification': 'Final Verification',
-                'disbursement': 'Disbursement',
+                'rfd': 'Demand',
+                'neg': 'Negotiate',
+                'lit': 'Litigation',
+                'final_verification': 'Settlement',
                 'accounting': 'Accounting',
                 'closed': 'Closed'
             };

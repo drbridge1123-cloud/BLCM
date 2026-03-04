@@ -5,11 +5,11 @@
 ALTER TABLE users ADD COLUMN team VARCHAR(50) NULL AFTER role;
 CREATE INDEX idx_users_team ON users(team);
 
--- 2. Add prelitigation status to cases
+-- 2. Update case status codes
 ALTER TABLE cases MODIFY COLUMN status ENUM(
-  'prelitigation','collecting','verification','completed','rfd',
-  'final_verification','disbursement','accounting','closed'
-) NOT NULL DEFAULT 'prelitigation';
+  'ini','rec','verification','rfd','neg',
+  'final_verification','accounting','closed'
+) NOT NULL DEFAULT 'ini';
 
 -- 3. Add client contact fields
 ALTER TABLE cases
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS prelitigation_followups (
   case_id INT NOT NULL,
   followup_date DATE NOT NULL,
   followup_type ENUM('phone','email','text','in_person','other') NOT NULL DEFAULT 'phone',
-  contact_result ENUM('reached','voicemail','no_answer','callback_scheduled','treatment_update') NOT NULL DEFAULT 'reached',
+  contact_result ENUM('reached','voicemail','no_answer','callback_scheduled','treatment_update','text') NOT NULL DEFAULT 'reached',
   treatment_status_update VARCHAR(255) NULL,
   next_followup_date DATE NULL,
   notes TEXT NULL,

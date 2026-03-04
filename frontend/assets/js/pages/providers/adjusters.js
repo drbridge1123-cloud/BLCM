@@ -24,6 +24,11 @@ function adjustersListPage() {
         newAdjuster: { first_name: '', last_name: '', title: '', adjuster_type: '', insurance_company_id: '', phone: '', fax: '', email: '', notes: '' },
         editAdjuster: { id: null, first_name: '', last_name: '', title: '', adjuster_type: '', insurance_company_id: '', phone: '', fax: '', email: '', notes: '', is_active: 1 },
 
+        // Insurance company search (for create/edit modal)
+        icSearch: '',
+        icResults: [],
+        showIcDropdown: false,
+
         async init() {
             try {
                 const res = await api.get('insurance-companies?sort_by=name&sort_dir=asc');
@@ -64,23 +69,97 @@ function adjustersListPage() {
                 phone: a.phone || '', fax: a.fax || '', email: a.email || '',
                 notes: a.notes || '', is_active: a.is_active
             };
+            this.icSearch = a.company_name || '';
+            this.icResults = [];
+            this.showIcDropdown = false;
             this.showEditModal = true;
         },
 
         closeCreateModal() {
             this.showCreateModal = false;
             this.newAdjuster = { first_name: '', last_name: '', title: '', adjuster_type: '', insurance_company_id: '', phone: '', fax: '', email: '', notes: '' };
+            this.icSearch = '';
+            this.icResults = [];
+            this.showIcDropdown = false;
         },
 
         closeEditModal() {
             this.showEditModal = false;
             this.editAdjuster = { id: null, first_name: '', last_name: '', title: '', adjuster_type: '', insurance_company_id: '', phone: '', fax: '', email: '', notes: '', is_active: 1 };
+            this.icSearch = '';
+            this.icResults = [];
+            this.showIcDropdown = false;
+        },
+
+        async searchIc(query) {
+            this.icSearch = query;
+            if (query.length < 2) { this.icResults = []; this.showIcDropdown = false; return; }
+            try {
+                const res = await api.get('insurance-companies?search=' + encodeURIComponent(query));
+                this.icResults = res.data || [];
+                this.showIcDropdown = true;
+            } catch (e) {
+                this.icResults = [];
+                this.showIcDropdown = true;
+            }
+        },
+
+        selectIc(co) {
+            const target = this.showEditModal ? this.editAdjuster : this.newAdjuster;
+            target.insurance_company_id = co.id;
+            this.icSearch = co.name;
+            this.icResults = [];
+            this.showIcDropdown = false;
+        },
+
+        clearIc() {
+            const target = this.showEditModal ? this.editAdjuster : this.newAdjuster;
+            target.insurance_company_id = '';
+            this.icSearch = '';
+            this.icResults = [];
+            this.showIcDropdown = false;
+        },
+
+        async createIc() {
+            const name = (this.icSearch || '').trim();
+            if (!name) return;
+            try {
+                const res = await api.post('insurance-companies', { name });
+                if (res.data && res.data.id) {
+                    this.selectIc({ id: res.data.id, name });
+                    this.insuranceCompanies.push({ id: res.data.id, name });
+                    showToast('Insurance company "' + name + '" created', 'success');
+                }
+            } catch (e) {
+                showToast(e.data?.message || 'Failed to create insurance company', 'error');
+            }
+        },
+
+        async _resolveIcBeforeSave(data) {
+            if (!data.insurance_company_id && this.icSearch.trim()) {
+                const name = this.icSearch.trim();
+                try {
+                    const searchRes = await api.get('insurance-companies?search=' + encodeURIComponent(name));
+                    const companies = searchRes.data || [];
+                    const exact = companies.find(c => c.name.toLowerCase() === name.toLowerCase());
+                    if (exact) {
+                        data.insurance_company_id = exact.id;
+                    } else {
+                        const createRes = await api.post('insurance-companies', { name });
+                        if (createRes.data && createRes.data.id) {
+                            data.insurance_company_id = createRes.data.id;
+                            this.insuranceCompanies.push({ id: createRes.data.id, name });
+                        }
+                    }
+                } catch (e) { /* continue without */ }
+            }
         },
 
         async createAdjuster() {
             this.saving = true;
             try {
                 const data = { ...this.newAdjuster };
+                await this._resolveIcBeforeSave(data);
                 if (!data.insurance_company_id) delete data.insurance_company_id;
                 await api.post('adjusters', data);
                 showToast('Adjuster created');
@@ -97,6 +176,7 @@ function adjustersListPage() {
             this.saving = true;
             try {
                 const data = { ...this.editAdjuster };
+                await this._resolveIcBeforeSave(data);
                 if (!data.insurance_company_id) data.insurance_company_id = null;
                 await api.put('adjusters/' + data.id, data);
                 showToast('Adjuster updated');

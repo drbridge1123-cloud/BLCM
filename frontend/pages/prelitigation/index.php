@@ -6,7 +6,8 @@ requirePermission('prelitigation_tracker');
 $pageTitle = 'Prelitigation Tracker';
 $currentPage = 'prelitigation_tracker';
 $pageScripts = [
-    '/CMC/frontend/assets/js/pages/prelitigation/index.js'
+    '/CMCdemo/frontend/assets/js/components/contacts.js',
+    '/CMCdemo/frontend/assets/js/pages/prelitigation/index.js'
 ];
 $pageContent = __DIR__ . '/_content.php';
 require_once __DIR__ . '/../../layouts/main.php';

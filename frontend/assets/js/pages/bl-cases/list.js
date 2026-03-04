@@ -80,14 +80,14 @@ function casesListPage() {
 
         caseStatusClass(status) {
             const map = {
-                collecting: 'sp-stage-demand-write',
-                verification: 'sp-stage-demand-review',
-                completed: 'sp-stage-settled',
+                ini: 'sp-stage-demand-write',
+                rec: 'sp-stage-demand-review',
+                verification: 'sp-stage-settled',
                 rfd: 'sp-stage-demand-sent',
-                final_verification: 'sp-stage-demand-review',
-                prelitigation: 'sp-stage-litigation',
+                neg: 'sp-stage-demand-review',
+                lit: 'sp-stage-demand-sent',
+                final_verification: 'sp-stage-trial-set',
                 accounting: 'sp-stage-mediation',
-                disbursement: 'sp-stage-trial-set',
                 closed: '',
             };
             return map[status] || '';
@@ -99,19 +99,19 @@ function casesListPage() {
             if (this.assignedFilter) params.set('assigned_to', this.assignedFilter);
             if (this.search) params.set('search', this.search);
             const qs = params.toString();
-            window.location.href = '/CMC/backend/api/cases/export' + (qs ? '?' + qs : '');
+            window.location.href = '/CMCdemo/backend/api/cases/export' + (qs ? '?' + qs : '');
         },
 
         // Tracker navigation
         getTrackerLabel(status) {
             const map = {
-                prelitigation: 'Prelit',
-                collecting: 'Billing',
+                ini: 'Prelit',
+                rec: 'Billing',
                 verification: 'Billing',
-                completed: 'Attorney',
                 rfd: 'Attorney',
-                final_verification: 'Attorney',
-                disbursement: 'Acctg',
+                neg: 'Attorney',
+                lit: 'Attorney',
+                final_verification: 'Acctg',
                 accounting: 'Acctg',
                 closed: 'Closed',
             };
@@ -121,15 +121,15 @@ function casesListPage() {
         goToTracker(c) {
             const caseNum = encodeURIComponent(c.case_number);
             const map = {
-                prelitigation:      '/CMC/frontend/pages/prelitigation/index.php',
-                collecting:         '/CMC/frontend/pages/billing/index.php?case_id=' + c.id,
-                verification:       '/CMC/frontend/pages/billing/index.php?case_id=' + c.id,
-                completed:          '/CMC/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                rfd:                '/CMC/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                final_verification: '/CMC/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                disbursement:       '/CMC/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
-                accounting:         '/CMC/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
-                closed:             '/CMC/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                ini:                '/CMCdemo/frontend/pages/prelitigation/index.php',
+                rec:                '/CMCdemo/frontend/pages/billing/index.php?case_id=' + c.id,
+                verification:       '/CMCdemo/frontend/pages/billing/index.php?case_id=' + c.id,
+                rfd:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                neg:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                lit:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                final_verification: '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                accounting:         '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                closed:             '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
             };
             const url = map[c.status];
             if (url) window.location.href = url;
@@ -161,7 +161,7 @@ function casesListPage() {
             }
 
             const uid = auth.user?.id;
-            if (uid === 2 && !urlSearch) this.statusFilter = 'collecting';
+            if (uid === 2 && !urlSearch) this.statusFilter = 'ini';
 
             await this.loadData();
         }

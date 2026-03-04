@@ -1,21 +1,21 @@
 <?php
 /**
- * PUT /api/bl-cases/{id}/assign
+ * POST /api/bl-cases/{id}/assign
  * Assign (or reassign) a case to a staff member
  */
 $userId = requireAuth();
-requireAdminOrManager();
 
 $id = (int)$_GET['id'];
 $input = getInput();
 
-$errors = validateRequired($input, ['assigned_to']);
+$errors = validateRequired($input, ['assigned_to', 'note']);
 if (!empty($errors)) errorResponse(implode(', ', $errors));
 
 $case = dbFetchOne("SELECT * FROM cases WHERE id = ?", [$id]);
 if (!$case) errorResponse('Case not found', 404);
 
 $assigneeId = (int)$input['assigned_to'];
+$note = sanitizeString($input['note']);
 
 $assignee = dbFetchOne("SELECT id, COALESCE(display_name, full_name) AS full_name, is_active FROM users WHERE id = ?", [$assigneeId]);
 if (!$assignee) errorResponse('User not found', 404);
@@ -28,10 +28,9 @@ dbUpdate('cases', [
     'assignment_declined_reason' => null,
 ], 'id = ?', [$id]);
 
-// If case is still in collecting, move to prelitigation
-if ($case['status'] === 'collecting') {
+// Set prelitigation_start_date if not already set
+if (!$case['prelitigation_start_date']) {
     dbUpdate('cases', [
-        'status' => 'prelitigation',
         'prelitigation_start_date' => date('Y-m-d'),
     ], 'id = ?', [$id]);
 }
@@ -39,13 +38,14 @@ if ($case['status'] === 'collecting') {
 dbInsert('notifications', [
     'user_id' => $assigneeId,
     'type'    => 'case_assignment',
-    'message' => "You have been assigned case {$case['case_number']} ({$case['client_name']}). Please accept or decline.",
+    'message' => "Case {$case['case_number']} ({$case['client_name']}) reassigned to you: {$note}. Please accept or decline.",
     'is_read' => 0,
 ]);
 
-logActivity($userId, 'case_assign', 'case', $id, [
+logActivity($userId, 'case_reassign', 'case', $id, [
     'assigned_to'   => $assigneeId,
     'assignee_name' => $assignee['full_name'],
+    'note'          => $note,
 ]);
 
-successResponse(null, 'Case assigned');
+successResponse(null, 'Case reassigned');

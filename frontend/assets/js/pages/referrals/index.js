@@ -71,18 +71,23 @@ function referralsPage() {
         showEditModal: false,
 
         createForm: {
-            client_name: '', signed_date: '', file_number: '', status: '',
+            client_name: '', client_dob: '', signed_date: '', file_number: '', status: '',
             date_of_loss: '', referred_by: '', referred_to_provider: '',
             referred_to_body_shop: '', referral_type: '', lead_id: '',
             case_manager_id: '', remark: ''
         },
 
         editForm: {
-            id: null, client_name: '', signed_date: '', file_number: '', status: '',
+            id: null, client_name: '', client_dob: '', signed_date: '', file_number: '', status: '',
             date_of_loss: '', referred_by: '', referred_to_provider: '',
             referred_to_body_shop: '', referral_type: '', lead_id: '',
             case_manager_id: '', remark: ''
         },
+
+        // Provider autocomplete
+        providerSearchResults: [],
+        showProviderDropdown: false,
+        _providerSearchTimer: null,
 
         // -------------------------------------------------------
         //  Lifecycle
@@ -149,11 +154,39 @@ function referralsPage() {
         },
 
         // -------------------------------------------------------
+        //  Provider autocomplete
+        // -------------------------------------------------------
+        searchProviders(query) {
+            clearTimeout(this._providerSearchTimer);
+            if (query.length < 2) {
+                this.providerSearchResults = [];
+                this.showProviderDropdown = false;
+                return;
+            }
+            this._providerSearchTimer = setTimeout(async () => {
+                try {
+                    const res = await api.get('providers/search?q=' + encodeURIComponent(query));
+                    this.providerSearchResults = res.data || [];
+                    this.showProviderDropdown = this.providerSearchResults.length > 0;
+                } catch (e) {
+                    this.providerSearchResults = [];
+                    this.showProviderDropdown = false;
+                }
+            }, 250);
+        },
+
+        selectProvider(provider, formKey) {
+            this[formKey].referred_to_provider = provider.name;
+            this.providerSearchResults = [];
+            this.showProviderDropdown = false;
+        },
+
+        // -------------------------------------------------------
         //  CRUD
         // -------------------------------------------------------
         openCreateModal() {
             this.createForm = {
-                client_name: '', signed_date: new Date().toISOString().slice(0, 10),
+                client_name: '', client_dob: '', signed_date: new Date().toISOString().slice(0, 10),
                 file_number: '', status: '', date_of_loss: '',
                 referred_by: '', referred_to_provider: '', referred_to_body_shop: '',
                 referral_type: '', lead_id: '', case_manager_id: '', remark: ''
@@ -167,8 +200,11 @@ function referralsPage() {
             }
             this.saving = true;
             try {
-                await api.post('referrals', this.createForm);
+                const res = await api.post('referrals', this.createForm);
                 showToast('Referral added');
+                if (res.data?.warnings) {
+                    res.data.warnings.forEach(w => showToast(w, 'warning', 5000));
+                }
                 this.showCreateModal = false;
                 await this.loadReferrals();
             } catch (e) {
@@ -181,6 +217,7 @@ function referralsPage() {
             this.editForm = {
                 id: r.id,
                 client_name: r.client_name || '',
+                client_dob: r.client_dob || '',
                 signed_date: r.signed_date || '',
                 file_number: r.file_number || '',
                 status: r.status || '',
@@ -199,8 +236,11 @@ function referralsPage() {
         async updateReferral() {
             this.saving = true;
             try {
-                await api.put('referrals/' + this.editForm.id, this.editForm);
+                const res = await api.put('referrals/' + this.editForm.id, this.editForm);
                 showToast('Referral updated');
+                if (res.data?.warnings) {
+                    res.data.warnings.forEach(w => showToast(w, 'warning', 5000));
+                }
                 this.showEditModal = false;
                 await this.loadReferrals();
             } catch (e) {

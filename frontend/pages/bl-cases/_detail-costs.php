@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="cost-header c1-section-header" :class="showCostLedger && 'is-open'" @click="showCostLedger = !showCostLedger; if(showCostLedger) $nextTick(() => $el.closest('[data-panel]').scrollIntoView({behavior:'smooth',block:'start'}))">
         <div class="cost-header-left">
-            <span class="c1-num c1-num-gold">04</span>
+            <span class="c1-num c1-num-gold">05</span>
             <span class="cost-header-title">Cost Ledger</span>
             <template x-if="allCosts.length > 0">
-                <span class="cost-header-badge" x-text="allCosts.length"></span>
+                <span class="panel-count" x-text="allCosts.length"></span>
             </template>
             <template x-if="allCostsTotal.billed > 0">
                 <span style="color:var(--mbr-text); font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;"

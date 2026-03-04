@@ -288,6 +288,24 @@ function negotiatePanel(caseId) {
             this.saveProviderNeg(pn);
         },
 
+        getNegotiateStatus() {
+            const allRounds = [];
+            for (const type of this.activeCoverages) {
+                const rounds = this.coverageNegotiations[type] || [];
+                allRounds.push(...rounds);
+            }
+            if (allRounds.length === 0) return null;
+            if (allRounds.some(r => r.status === 'accepted')) return 'accepted';
+            if (allRounds.some(r => r.status === 'countered')) return 'countered';
+            if (allRounds.some(r => r.status === 'pending')) return 'pending';
+            return 'rejected';
+        },
+
+        getNegotiateStatusLabel(status) {
+            const labels = { pending: 'Pending', countered: 'Countered', accepted: 'Accepted', rejected: 'Rejected' };
+            return labels[status] || '';
+        },
+
         async deleteProviderNeg(pn) {
             if (!confirm('Remove this provider negotiation?')) return;
             try {

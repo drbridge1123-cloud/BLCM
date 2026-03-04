@@ -51,6 +51,9 @@
             <!-- Staff Tabs -->
             <?php include __DIR__ . '/../../components/_staff-tabs.php'; ?>
 
+            <!-- Pending Case Assignments -->
+            <?php include __DIR__ . '/../../components/_pending-assignments.php'; ?>
+
             <!-- ═══ Unified Card ═══ -->
             <div class="sp-card">
 

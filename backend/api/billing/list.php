@@ -6,12 +6,14 @@ $userId = requireAuth();
 [$page, $perPage, $offset] = getPaginationParams();
 
 // Build WHERE clauses
-$where = ["c.status NOT IN ('closed')"];
+$where = ["c.status NOT IN ('closed')", "(cp.assignment_status IS NULL OR cp.assignment_status != 'pending')"];
 $params = [];
 
-// When viewing a specific case, show ALL providers; otherwise hide treating/completed
+// Always hide treating/treatment_complete — only show after activation
+$where[] = "cp.overall_status NOT IN ('treating', 'treatment_complete')";
+
+// When not viewing a specific case, also hide received_complete/verified
 if (empty($_GET['case_id'])) {
-    $where[] = "cp.overall_status != 'treating'";
     if (empty($_GET['status']) || !in_array($_GET['status'], ['received_complete','verified'])) {
         $where[] = "cp.overall_status NOT IN ('received_complete','verified')";
     }
@@ -184,9 +186,9 @@ LEFT JOIN (
 
 $summaryResult = dbFetchOne("
     SELECT
-        COUNT(CASE WHEN cp.overall_status != 'treating' THEN 1 END) AS total,
+        COUNT(CASE WHEN cp.overall_status NOT IN ('treating','treatment_complete') THEN 1 END) AS total,
         SUM(CASE WHEN cp.deadline < CURDATE()
-            AND cp.overall_status NOT IN ('treating','received_complete','verified')
+            AND cp.overall_status NOT IN ('treating','treatment_complete','received_complete','verified')
             THEN 1 ELSE 0 END) AS overdue_count,
         SUM(CASE WHEN slr.next_followup_date <= CURDATE()
             AND cp.overall_status IN ('requesting','follow_up','action_needed')
@@ -197,6 +199,7 @@ $summaryResult = dbFetchOne("
             THEN 1 ELSE 0 END) AS pending_assignments
     {$summaryJoins}
     WHERE c.status NOT IN ('closed')
+      AND (cp.assignment_status IS NULL OR cp.assignment_status != 'pending')
 ", [$userId]);
 
 // Custom response with summary

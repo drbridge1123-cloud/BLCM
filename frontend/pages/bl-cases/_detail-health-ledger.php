@@ -6,7 +6,7 @@
     <div class="c1-section-header" :class="open && 'is-open'"
          @click="open = !open">
         <div class="flex items-center gap-2.5">
-            <span class="c1-num c1-num-gold">06</span>
+            <span class="c1-num c1-num-navy">02</span>
             <h3 class="panel-title">Health Insurance Ledger</h3>
             <span class="panel-count" x-text="items.length" x-show="!loading"></span>
             <template x-if="!loading && receivedCount > 0">

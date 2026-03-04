@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/CMC/frontend/assets/css/app.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/css/app.css') ?>">
-    <link rel="stylesheet" href="/CMC/frontend/assets/css/sp-design-system.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/css/sp-design-system.css') ?>">
+    <link rel="stylesheet" href="/CMCdemo/frontend/assets/css/app.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/css/app.css') ?>">
+    <link rel="stylesheet" href="/CMCdemo/frontend/assets/css/sp-design-system.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/css/sp-design-system.css') ?>">
     <script>
         // Suppress Tailwind CDN production warning
         const _warn = console.warn;
@@ -50,9 +50,9 @@
         }
     </script>
     <!-- Shared JS -->
-    <script src="/CMC/frontend/assets/js/app.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/js/app.js') ?>"></script>
-    <script src="/CMC/frontend/assets/js/utils.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/js/utils.js') ?>"></script>
-    <script src="/CMC/frontend/assets/js/shared.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/js/shared.js') ?>"></script>
+    <script src="/CMCdemo/frontend/assets/js/app.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/js/app.js') ?>"></script>
+    <script src="/CMCdemo/frontend/assets/js/utils.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/js/utils.js') ?>"></script>
+    <script src="/CMCdemo/frontend/assets/js/shared.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/js/shared.js') ?>"></script>
     <?php if (!empty($pageHeadScripts)): ?>
         <?php foreach ($pageHeadScripts as $hs): ?>
             <script src="<?= $hs ?>"></script>
@@ -87,14 +87,14 @@
     <?php if (!empty($pageScripts)): ?>
         <?php foreach ($pageScripts as $script): ?>
             <?php
-                $scriptSrc = strpos($script, '/') === 0 ? $script : '/CMC/frontend/' . $script;
-                $scriptFile = FRONTEND_PATH . '/' . ltrim(str_replace('/CMC/frontend/', '', $scriptSrc), '/');
+                $scriptSrc = strpos($script, '/') === 0 ? $script : '/CMCdemo/frontend/' . $script;
+                $scriptFile = FRONTEND_PATH . '/' . ltrim(str_replace('/CMCdemo/frontend/', '', $scriptSrc), '/');
                 $ver = file_exists($scriptFile) ? filemtime($scriptFile) : time();
             ?>
             <script src="<?= $scriptSrc ?>?v=<?= $ver ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
-    <script src="/CMC/frontend/assets/js/alpine-stores.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMC/frontend/assets/js/alpine-stores.js') ?>"></script>
+    <script src="/CMCdemo/frontend/assets/js/alpine-stores.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/CMCdemo/frontend/assets/js/alpine-stores.js') ?>"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>

@@ -12,7 +12,7 @@
 
     <!-- Right side: messages -->
     <div class="flex items-center gap-2">
-        <a href="/CMC/frontend/pages/messages/index.php" x-data
+        <a href="/CMCdemo/frontend/pages/messages/index.php" x-data
            class="relative inline-flex items-center p-1.5 rounded-lg hover:bg-v2-bg transition-colors" title="Messages">
             <svg class="w-5 h-5 text-v2-text-mid" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>

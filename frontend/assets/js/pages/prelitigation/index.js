@@ -1,5 +1,6 @@
 function prelitTrackerPage() {
     return {
+        ...contactsMixin(),
         ...listPageBase('prelitigation/list', {
             defaultSort: 'next_followup_date',
             defaultDir: 'asc',
@@ -23,9 +24,6 @@ function prelitTrackerPage() {
         // Expand / follow-up history
         expandedId: null,
         followupHistory: [],
-
-        // Pending case assignments
-        pendingCaseAssignments: [],
 
         // Follow-up modal
         showFollowupModal: false,
@@ -60,44 +58,7 @@ function prelitTrackerPage() {
             }
 
             this.loadStaff();
-            this.loadPendingCaseAssignments();
             await this.loadData(1);
-        },
-
-        async loadPendingCaseAssignments() {
-            try {
-                const res = await api.get('bl-cases/pending-assignments');
-                this.pendingCaseAssignments = res.data || [];
-            } catch(e) { this.pendingCaseAssignments = []; }
-        },
-
-        async acceptCaseAssignment(caseId) {
-            if (!confirm('Accept this case assignment?')) return;
-            try {
-                await api.put('bl-cases/' + caseId + '/respond-assignment', { action: 'accept' });
-                showToast('Case assignment accepted', 'success');
-                this.pendingCaseAssignments = this.pendingCaseAssignments.filter(a => a.id !== caseId);
-                await this.loadData(1);
-            } catch(e) {
-                showToast(e.data?.message || 'Failed to accept', 'error');
-            }
-        },
-
-        async declineCaseAssignment(caseId) {
-            const reason = prompt('Please enter the reason for declining:');
-            if (reason === null) return;
-            if (!reason.trim()) {
-                showToast('Decline reason is required', 'error');
-                return;
-            }
-            try {
-                await api.put('bl-cases/' + caseId + '/respond-assignment', { action: 'decline', reason: reason.trim() });
-                showToast('Case assignment declined', 'success');
-                this.pendingCaseAssignments = this.pendingCaseAssignments.filter(a => a.id !== caseId);
-                await this.loadData(1);
-            } catch(e) {
-                showToast(e.data?.message || 'Failed to decline', 'error');
-            }
         },
 
         async loadStaff() {
@@ -125,7 +86,7 @@ function prelitTrackerPage() {
         },
 
         goToCase(caseId) {
-            window.location.href = '/CMC/frontend/pages/bl-cases/detail.php?id=' + caseId;
+            window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + caseId;
         },
 
         getContactResultLabel(result) {
@@ -134,7 +95,8 @@ function prelitTrackerPage() {
                 voicemail: 'Voicemail',
                 no_answer: 'No Answer',
                 callback_scheduled: 'Callback',
-                treatment_update: 'Treatment Update'
+                treatment_update: 'Treatment Update',
+                text: 'Text'
             };
             return labels[result] || result || '';
         },

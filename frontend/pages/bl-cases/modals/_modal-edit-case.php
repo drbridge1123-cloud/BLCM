@@ -106,20 +106,9 @@
 
                 <!-- Assignment -->
                 <div class="ecm-section"><span>Assignment</span></div>
-                <div style="display:flex; gap:12px;">
-                    <div style="flex:1;">
-                        <label class="ecm-label">Attorney</label>
-                        <input type="text" x-model="editData.attorney_name" class="ecm-input" placeholder="Select attorney...">
-                    </div>
-                    <div style="flex:1;">
-                        <label class="ecm-label">Assigned To <span class="ecm-req">*</span></label>
-                        <select x-model="editData.assigned_to" required class="ecm-select">
-                            <option value="">Select...</option>
-                            <template x-for="u in staffList" :key="u.id">
-                                <option :value="u.id" x-text="u.display_name || u.full_name"></option>
-                            </template>
-                        </select>
-                    </div>
+                <div>
+                    <label class="ecm-label">Attorney</label>
+                    <input type="text" x-model="editData.attorney_name" class="ecm-input" placeholder="Select attorney...">
                 </div>
 
                 <!-- Treating Completed -->

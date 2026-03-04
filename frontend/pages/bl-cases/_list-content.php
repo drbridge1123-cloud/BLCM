@@ -10,7 +10,7 @@
         <div class="sp-header" style="flex-wrap:wrap; gap:16px; padding:20px 24px 16px;">
             <div style="display:flex; align-items:center; width:100%; margin-bottom:12px;">
                 <div style="flex:1">
-                    <a x-show="fromAttorneyCases" x-cloak href="/CMC/frontend/pages/attorney/index.php"
+                    <a x-show="fromAttorneyCases" x-cloak href="/CMCdemo/frontend/pages/attorney/index.php"
                        style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#8a8a82; text-decoration:none; margin-bottom:4px;">&larr; Attorney Cases</a>
                     <div class="sp-eyebrow">Case Management</div>
                     <h1 class="sp-title">Cases</h1>
@@ -22,34 +22,34 @@
             <!-- KPI Cards -->
             <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; width:100%;">
                 <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'collecting,verification,completed,rfd,final_verification,accounting' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'collecting,verification,completed,rfd,final_verification,accounting' ? '' : 'collecting,verification,completed,rfd,final_verification,accounting'; loadData(1)">
+                     :class="statusFilter === 'ini,rec,verification,rfd,neg,lit,final_verification,accounting' ? 'sp-kpi-active' : ''"
+                     @click="statusFilter = statusFilter === 'ini,rec,verification,rfd,neg,lit,final_verification,accounting' ? '' : 'ini,rec,verification,rfd,neg,lit,final_verification,accounting'; loadData(1)">
                     <div class="sp-kpi-label">Active</div>
                     <div class="sp-kpi-value" style="color:#C9A84C" x-text="summary.active ?? '-'"></div>
                 </div>
                 <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'collecting' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'collecting' ? '' : 'collecting'; loadData(1)">
+                     :class="statusFilter === 'ini' ? 'sp-kpi-active' : ''"
+                     @click="statusFilter = statusFilter === 'ini' ? '' : 'ini'; loadData(1)">
+                    <div class="sp-kpi-label">Treatment</div>
+                    <div class="sp-kpi-value" style="color:#2563eb" x-text="summary.ini ?? '-'"></div>
+                </div>
+                <div class="sp-kpi-card" style="cursor:pointer"
+                     :class="statusFilter === 'rec' ? 'sp-kpi-active' : ''"
+                     @click="statusFilter = statusFilter === 'rec' ? '' : 'rec'; loadData(1)">
                     <div class="sp-kpi-label">Collection</div>
-                    <div class="sp-kpi-value" style="color:#2563eb" x-text="summary.collecting ?? '-'"></div>
+                    <div class="sp-kpi-value" style="color:#D97706" x-text="summary.rec ?? '-'"></div>
                 </div>
                 <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'verification' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'verification' ? '' : 'verification'; loadData(1)">
-                    <div class="sp-kpi-label">Verification</div>
-                    <div class="sp-kpi-value" style="color:#D97706" x-text="summary.verification ?? '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'completed,rfd' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'completed,rfd' ? '' : 'completed,rfd'; loadData(1)">
+                     :class="statusFilter === 'verification,rfd' ? 'sp-kpi-active' : ''"
+                     @click="statusFilter = statusFilter === 'verification,rfd' ? '' : 'verification,rfd'; loadData(1)">
                     <div class="sp-kpi-label">Attorney</div>
-                    <div class="sp-kpi-value" style="color:#7C5CBF" x-text="summary.attorney ?? '-'"></div>
+                    <div class="sp-kpi-value" style="color:#7C5CBF" x-text="(parseInt(summary.verification || 0) + parseInt(summary.rfd || 0)) || '-'"></div>
                 </div>
                 <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'final_verification,accounting' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'final_verification,accounting' ? '' : 'final_verification,accounting'; loadData(1)">
+                     :class="statusFilter === 'neg,lit,final_verification,accounting' ? 'sp-kpi-active' : ''"
+                     @click="statusFilter = statusFilter === 'neg,lit,final_verification,accounting' ? '' : 'neg,lit,final_verification,accounting'; loadData(1)">
                     <div class="sp-kpi-label">Closing</div>
-                    <div class="sp-kpi-value" style="color:#D97706" x-text="summary.closing ?? '-'"></div>
+                    <div class="sp-kpi-value" style="color:#D97706" x-text="(parseInt(summary.neg || 0) + parseInt(summary.lit || 0) + parseInt(summary.final_verification || 0) + parseInt(summary.accounting || 0)) || '-'"></div>
                 </div>
                 <div class="sp-kpi-card" style="cursor:pointer"
                      :class="statusFilter === 'closed' ? 'sp-kpi-active' : ''"
@@ -106,7 +106,7 @@
                         <tr><td colspan="12" class="sp-empty">No cases found</td></tr>
                     </template>
                     <template x-for="c in items" :key="c.id">
-                        <tr @click="window.location.href='/CMC/frontend/pages/bl-cases/detail.php?id='+c.id"
+                        <tr @click="window.location.href='/CMCdemo/frontend/pages/bl-cases/detail.php?id='+c.id"
                             :style="$store.auth.isStaff && !c.assigned_name ? 'opacity:.5' : ''">
 
                             <td><span class="sp-case-num" x-text="c.case_number"></span></td>
@@ -114,15 +114,17 @@
                             <td><span class="sp-mono" x-text="formatDate(c.client_dob)"></span></td>
                             <td><span class="sp-mono" x-text="formatDate(c.doi)"></span></td>
                             <td><span class="sp-month" x-text="c.attorney_name || '—'"></span></td>
-                            <td><span class="sp-month" x-text="c.assigned_name || '—'"></span></td>
-                            <td>
-                                <span class="sp-stage" :class="caseStatusClass(c.status)" x-text="getStatusLabel(c.status)"></span>
+                            <td style="white-space:nowrap;">
+                                <span class="sp-month" style="vertical-align:middle;" x-text="c.assigned_name || '—'"></span>
                                 <template x-if="c.assignment_status === 'pending'">
-                                    <span style="background:rgba(245,158,11,.1); color:#D97706; border:1px solid rgba(245,158,11,.2); font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px;">Pending Accept</span>
+                                    <span style="display:inline-block; background:rgba(245,158,11,.1); color:#D97706; border:1px solid rgba(245,158,11,.2); font-size:9px; padding:0 5px; border-radius:4px; margin-left:5px; vertical-align:middle; line-height:18px;">Pending</span>
                                 </template>
                                 <template x-if="c.assignment_status === 'declined'">
-                                    <span style="background:rgba(239,68,68,.1); color:#ef4444; border:1px solid rgba(239,68,68,.2); font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px;">Declined</span>
+                                    <span style="display:inline-block; background:rgba(239,68,68,.1); color:#ef4444; border:1px solid rgba(239,68,68,.2); font-size:9px; padding:0 5px; border-radius:4px; margin-left:5px; vertical-align:middle; line-height:18px;">Declined</span>
                                 </template>
+                            </td>
+                            <td>
+                                <span class="sp-stage" :class="caseStatusClass(c.status)" x-text="getStatusLabel(c.status)"></span>
                             </td>
                             <td>
                                 <div style="display:flex; align-items:center; gap:6px;">
@@ -280,7 +282,6 @@
             </div>
         </form>
     </div>
-</div>
 
 <!-- Reassign Case Modal -->
 <div x-show="showReassignModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,.45);" @click.self="showReassignModal = false">
@@ -306,4 +307,6 @@
             <button @click="submitReassign()" :disabled="saving" class="sp-new-btn-navy" x-text="saving ? 'Assigning...' : 'Assign'"></button>
         </div>
     </div>
+</div>
+
 </div>

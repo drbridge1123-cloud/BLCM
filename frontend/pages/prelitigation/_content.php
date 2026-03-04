@@ -25,37 +25,6 @@
         <!-- Gold bar -->
         <div class="sp-gold-bar"></div>
 
-        <!-- Pending Case Assignments Panel -->
-        <template x-if="pendingCaseAssignments.length > 0">
-            <div style="background:#fffbeb; border-radius:8px; border:1px solid #fcd34d; margin:0 24px 12px; overflow:hidden;">
-                <div style="padding:8px 16px; background:#fef3c7; border-bottom:1px solid #fcd34d; display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:13px; font-weight:700; color:#92400e;">New Case Assignments</span>
-                    <span style="background:#f59e0b; color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px;" x-text="pendingCaseAssignments.length"></span>
-                </div>
-                <template x-for="pa in pendingCaseAssignments" :key="pa.id">
-                    <div style="padding:8px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(253,224,71,.3);">
-                        <div style="min-width:0;">
-                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                <span style="font-size:13px; font-weight:600; color:#1a2535;" x-text="'#' + pa.case_number"></span>
-                                <span style="font-size:11px; color:#9ca3af;">|</span>
-                                <span style="font-size:12px; color:#6b7280;" x-text="pa.client_name"></span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; margin-top:2px;">
-                                <span style="font-size:11px; color:#9ca3af;" x-text="'DOI: ' + (pa.doi || '—')"></span>
-                                <template x-if="pa.assigned_by_name">
-                                    <span style="font-size:11px; color:#9ca3af;" x-text="'From: ' + pa.assigned_by_name"></span>
-                                </template>
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:6px; flex-shrink:0;">
-                            <button @click="acceptCaseAssignment(pa.id)" style="padding:4px 12px; font-size:12px; font-weight:600; color:#fff; background:#10b981; border:none; border-radius:6px; cursor:pointer;">Accept</button>
-                            <button @click="declineCaseAssignment(pa.id)" style="padding:4px 12px; font-size:12px; font-weight:600; color:#fff; background:#ef4444; border:none; border-radius:6px; cursor:pointer;">Decline</button>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </template>
-
         <!-- Header -->
         <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
             <div class="sp-stats">
@@ -162,6 +131,10 @@
                         </td>
                         <td @click.stop>
                             <div class="sp-actions">
+                                <button @click="openContacts(item)" class="sp-act" :class="item.client_id ? 'sp-act-green' : 'sp-act-navy'" :title="item.client_id ? 'View Contacts' : 'Add Contacts'">
+                                    <span style="font-size:13px;">&#128100;</span>
+                                    <span class="sp-tip" x-text="item.client_id ? 'Contacts' : 'Add Contacts'"></span>
+                                </button>
                                 <button @click="openFollowupModal(item)" class="sp-act sp-act-gold">
                                     <span>📞</span>
                                     <span class="sp-tip">Follow-up</span>
@@ -269,6 +242,7 @@
                             <option value="">Select...</option>
                             <option value="reached">Reached</option>
                             <option value="voicemail">Voicemail</option>
+                            <option value="text">Text</option>
                             <option value="no_answer">No Answer</option>
                             <option value="callback_scheduled">Callback Scheduled</option>
                             <option value="treatment_update">Treatment Update</option>
@@ -329,5 +303,7 @@
             </div>
         </div>
     </div>
+
+    <?php include __DIR__ . '/../../components/_modal-contacts.php'; ?>
 
 </div>

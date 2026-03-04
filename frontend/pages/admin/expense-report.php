@@ -6,6 +6,6 @@ requirePermission('expense_report');
 
 $pageTitle = 'Expense Report';
 $currentPage = 'expense_report';
-$pageScripts = ['/CMC/frontend/assets/js/pages/expense-report.js'];
+$pageScripts = ['/CMCdemo/frontend/assets/js/pages/expense-report.js'];
 $pageContent = __DIR__ . '/_expense-report-content.php';
 require_once __DIR__ . '/../../layouts/main.php';

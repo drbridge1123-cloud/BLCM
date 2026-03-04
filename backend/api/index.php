@@ -35,7 +35,7 @@ ob_start();
 header('Content-Type: application/json; charset=utf-8');
 
 $requestUri = $_SERVER['REQUEST_URI'];
-$basePath = '/CMC/backend/api';
+$basePath = '/CMCdemo/backend/api';
 $path = parse_url($requestUri, PHP_URL_PATH);
 $path = str_replace($basePath, '', $path);
 $path = trim($path, '/');
@@ -143,7 +143,7 @@ switch ($resource) {
             require __DIR__ . '/bl-cases/export.php';
         } elseif ($method === 'GET' && $id === 'pending-assignments') {
             require __DIR__ . '/bl-cases/pending-assignments.php';
-        } elseif ($method === 'PUT' && $id && $action === 'assign') {
+        } elseif (in_array($method, ['PUT', 'POST']) && $id && $action === 'assign') {
             $_GET['id'] = $id;
             require __DIR__ . '/bl-cases/assign.php';
         } elseif ($method === 'PUT' && $id && $action === 'respond-assignment') {
@@ -165,6 +165,9 @@ switch ($resource) {
         } elseif ($method === 'POST' && $id && $action === 'send-back') {
             $_GET['id'] = $id;
             require __DIR__ . '/bl-cases/send-back.php';
+        } elseif ($method === 'POST' && $id && $action === 'activate-providers') {
+            $_GET['id'] = $id;
+            require __DIR__ . '/bl-cases/activate-providers.php';
         } elseif ($method === 'POST' && !$id) {
             require __DIR__ . '/bl-cases/create.php';
         } elseif ($method === 'PUT' && $id) {
@@ -175,6 +178,25 @@ switch ($resource) {
             require __DIR__ . '/bl-cases/delete.php';
         } else {
             errorResponse('Cases endpoint not found', 404);
+        }
+        break;
+
+    // ── Clients ──
+    case 'clients':
+        if ($method === 'GET' && !$id) {
+            require __DIR__ . '/clients/list.php';
+        } elseif ($method === 'GET' && $id === 'lookup') {
+            require __DIR__ . '/clients/lookup.php';
+        } elseif ($method === 'GET' && $id && !$action) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/clients/get.php';
+        } elseif ($method === 'POST' && $id === 'save') {
+            require __DIR__ . '/clients/save.php';
+        } elseif ($method === 'DELETE' && $id) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/clients/delete.php';
+        } else {
+            errorResponse('Clients endpoint not found', 404);
         }
         break;
 
@@ -394,7 +416,9 @@ switch ($resource) {
 
     // ── Insurance Companies ──
     case 'insurance-companies':
-        if ($method === 'GET' && !$id) {
+        if ($method === 'GET' && $id === 'search') {
+            require __DIR__ . '/insurance-companies/search.php';
+        } elseif ($method === 'GET' && !$id) {
             require __DIR__ . '/insurance-companies/list.php';
         } elseif ($method === 'GET' && $id && !$action) {
             $_GET['id'] = $id;
@@ -414,8 +438,15 @@ switch ($resource) {
 
     // ── Adjusters ──
     case 'adjusters':
-        if ($method === 'GET' && !$id) {
+        if ($method === 'GET' && $id === 'lookup') {
+            require __DIR__ . '/adjusters/lookup.php';
+        } elseif ($method === 'GET' && !$id) {
             require __DIR__ . '/adjusters/list.php';
+        } elseif ($method === 'GET' && $id && !$action) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/adjusters/get.php';
+        } elseif ($method === 'POST' && $id === 'save') {
+            require __DIR__ . '/adjusters/save.php';
         } elseif ($method === 'POST' && !$id) {
             require __DIR__ . '/adjusters/create.php';
         } elseif ($method === 'PUT' && $id) {
@@ -435,6 +466,10 @@ switch ($resource) {
             require __DIR__ . '/prelitigation/list.php';
         } elseif ($method === 'GET' && $id === 'followup-history') {
             require __DIR__ . '/prelitigation/followup-history.php';
+        } elseif ($method === 'GET' && $id === 'template') {
+            require __DIR__ . '/prelitigation/export-template.php';
+        } elseif ($method === 'POST' && $id === 'import') {
+            require __DIR__ . '/prelitigation/import.php';
         } elseif ($method === 'POST' && $id === 'log-followup') {
             require __DIR__ . '/prelitigation/log-followup.php';
         } elseif ($method === 'POST' && $id === 'complete') {
@@ -490,6 +525,9 @@ switch ($resource) {
         } elseif ($method === 'PUT' && $id && $action === 'respond') {
             $_GET['id'] = $id;
             require __DIR__ . '/case-providers/respond.php';
+        } elseif ($method === 'PUT' && $id && $action === 'complete-treatment') {
+            $_GET['id'] = $id;
+            require __DIR__ . '/case-providers/complete-treatment.php';
         } elseif ($method === 'PUT' && $id && !$action) {
             $_GET['id'] = $id;
             require __DIR__ . '/case-providers/update.php';
@@ -598,6 +636,19 @@ switch ($resource) {
         }
         break;
 
+    // ── MBR Lines (direct line operations) ──
+    case 'mbr-lines':
+        if ($method === 'PUT' && $id) {
+            $_GET['line_id'] = $id;
+            require __DIR__ . '/mbr/update-line.php';
+        } elseif ($method === 'DELETE' && $id) {
+            $_GET['line_id'] = $id;
+            require __DIR__ . '/mbr/delete-line.php';
+        } else {
+            errorResponse('MBR Lines endpoint not found', 404);
+        }
+        break;
+
     // ── MBR ──
     case 'mbr':
         if ($method === 'GET' && !$id) {
@@ -605,7 +656,7 @@ switch ($resource) {
         } elseif ($method === 'GET' && $id && !$action) {
             $_GET['id'] = $id;
             require __DIR__ . '/mbr/get.php';
-        } elseif ($method === 'POST' && $id && $action === 'add-line') {
+        } elseif ($method === 'POST' && $id && ($action === 'add-line' || $action === 'lines')) {
             $_GET['id'] = $id;
             require __DIR__ . '/mbr/add-line.php';
         } elseif ($method === 'POST' && $id && $action === 'activate-providers') {
@@ -616,10 +667,10 @@ switch ($resource) {
             require __DIR__ . '/mbr/create.php';
         } elseif ($method === 'POST' && !$id) {
             require __DIR__ . '/mbr/create.php';
-        } elseif ($method === 'PUT' && $id && $action === 'complete') {
+        } elseif (($method === 'PUT' || $method === 'POST') && $id && $action === 'complete') {
             $_GET['id'] = $id;
             require __DIR__ . '/mbr/complete.php';
-        } elseif ($method === 'PUT' && $id && $action === 'approve') {
+        } elseif (($method === 'PUT' || $method === 'POST') && $id && $action === 'approve') {
             $_GET['id'] = $id;
             require __DIR__ . '/mbr/approve.php';
         } elseif ($method === 'PUT' && $id && $action === 'update-line') {

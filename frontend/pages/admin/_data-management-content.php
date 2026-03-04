@@ -183,6 +183,42 @@
                         </label>
                     </div>
 
+                    <!-- Prelitigation Bulk Import -->
+                    <div style="background:#fafaf8; border:1px solid #e8e4dc; border-radius:10px; padding:16px; grid-column: span 2;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                            <div>
+                                <div style="font-size:13px; font-weight:600; color:#1a2535;">Prelitigation Cases</div>
+                                <div style="font-size:11px; color:#9ca3af; margin-top:2px;">Bulk import cases, providers, and follow-up history</div>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;">
+                            <div>
+                                <div style="font-size:10px; font-weight:600; color:#8a8a82; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Cases CSV <span style="color:#C9A84C;">*</span></div>
+                                <input type="file" accept=".csv" class="prelit-import-file" @change="setPrelitFile('cases', $event)"
+                                    style="font-size:11px; width:100%; border:1px solid #d1cdc4; border-radius:5px; padding:4px; background:#fff;">
+                            </div>
+                            <div>
+                                <div style="font-size:10px; font-weight:600; color:#8a8a82; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Providers CSV <span style="font-weight:400; color:#b0b0a8;">(optional)</span></div>
+                                <input type="file" accept=".csv" class="prelit-import-file" @change="setPrelitFile('providers', $event)"
+                                    style="font-size:11px; width:100%; border:1px solid #d1cdc4; border-radius:5px; padding:4px; background:#fff;">
+                            </div>
+                            <div>
+                                <div style="font-size:10px; font-weight:600; color:#8a8a82; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Followups CSV <span style="font-weight:400; color:#b0b0a8;">(optional)</span></div>
+                                <input type="file" accept=".csv" class="prelit-import-file" @change="setPrelitFile('followups', $event)"
+                                    style="font-size:11px; width:100%; border:1px solid #d1cdc4; border-radius:5px; padding:4px; background:#fff;">
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button @click="importPrelitigation()" :disabled="!prelitImportFiles.cases" class="sp-new-btn-navy" style="font-size:11px; padding:5px 14px;" :style="!prelitImportFiles.cases ? 'opacity:.5;cursor:not-allowed;' : ''">
+                                ↑ Import
+                            </button>
+                            <span style="font-size:10px; color:#b0b0a8;">|</span>
+                            <button @click="downloadPrelitTemplate('cases')" style="font-size:10px; padding:3px 8px; background:none; border:1px solid #d1cdc4; border-radius:5px; color:#6b7280; cursor:pointer;">Cases Template</button>
+                            <button @click="downloadPrelitTemplate('providers')" style="font-size:10px; padding:3px 8px; background:none; border:1px solid #d1cdc4; border-radius:5px; color:#6b7280; cursor:pointer;">Providers Template</button>
+                            <button @click="downloadPrelitTemplate('followups')" style="font-size:10px; padding:3px 8px; background:none; border:1px solid #d1cdc4; border-radius:5px; color:#6b7280; cursor:pointer;">Followups Template</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

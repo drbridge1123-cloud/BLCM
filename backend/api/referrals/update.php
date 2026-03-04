@@ -32,6 +32,7 @@ $data = [
     'signed_date'           => $signedDate,
     'file_number'           => trim($input['file_number'] ?? $row['file_number']),
     'client_name'           => trim($input['client_name'] ?? $row['client_name']),
+    'client_dob'            => trim($input['client_dob'] ?? $row['client_dob'] ?? '') ?: null,
     'status'                => trim($input['status'] ?? $row['status'] ?? ''),
     'date_of_loss'          => $input['date_of_loss'] ?? $row['date_of_loss'],
     'referred_by'           => trim($input['referred_by'] ?? $row['referred_by'] ?? ''),
@@ -56,10 +57,10 @@ if ($caseManagerId && $fileNumber) {
         $caseId = dbInsert('cases', [
             'case_number'              => $fileNumber,
             'client_name'              => $clientName,
-            'client_dob'               => '2000-01-01',
+            'client_dob'               => $data['client_dob'] ?: null,
             'doi'                      => $data['date_of_loss'] ?: date('Y-m-d'),
             'assigned_to'              => $caseManagerId,
-            'status'                   => 'prelitigation',
+            'status'                   => 'ini',
             'assignment_status'        => 'pending',
             'assignment_assigned_by'   => $userId,
             'prelitigation_start_date' => date('Y-m-d'),
@@ -78,4 +79,26 @@ if ($caseManagerId && $fileNumber) {
     }
 }
 
-successResponse(null, 'Referral updated');
+// Conflict check (non-blocking warning)
+$warnings = [];
+$clientName = $data['client_name'];
+$clientDob = $data['client_dob'] ?? null;
+if ($clientDob && $clientName) {
+    $caseConflict = dbFetchOne(
+        "SELECT id, case_number FROM cases WHERE client_name = ? AND client_dob = ?",
+        [$clientName, $clientDob]
+    );
+    if ($caseConflict) {
+        $warnings[] = "A case already exists for this client (Case #" . $caseConflict['case_number'] . ")";
+    }
+    $refConflict = dbFetchOne(
+        "SELECT id FROM referral_entries WHERE client_name = ? AND client_dob = ? AND id != ? AND deleted_at IS NULL",
+        [$clientName, $clientDob, $refId]
+    );
+    if ($refConflict) {
+        $warnings[] = "A referral already exists for this client name and DOB";
+    }
+}
+
+$responseData = !empty($warnings) ? ['warnings' => $warnings] : null;
+successResponse($responseData, 'Referral updated');

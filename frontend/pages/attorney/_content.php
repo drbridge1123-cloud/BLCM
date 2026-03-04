@@ -24,6 +24,9 @@
         </template>
     </div>
 
+    <!-- Pending Case Assignments -->
+    <?php include __DIR__ . '/../../components/_pending-assignments.php'; ?>
+
     <!-- ═══ Unified Card ═══ -->
     <div class="sp-card">
 
@@ -131,7 +134,7 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
                 <template x-if="currentUserHasCommission">
-                    <a href="/CMC/commissions#attorney" class="sp-btn" style="text-decoration:none; font-size:12px; color:#C9A84C; border-color:#C9A84C;">Commissions →</a>
+                    <a href="/CMCdemo/commissions#attorney" class="sp-btn" style="text-decoration:none; font-size:12px; color:#C9A84C; border-color:#C9A84C;">Commissions →</a>
                 </template>
                 <button @click="openCreateModal()" class="sp-new-btn-navy" style="box-shadow:0 2px 8px rgba(15,27,45,.2)">+ New Case</button>
             </div>
