@@ -132,7 +132,10 @@ function parseCurrency(str) {
 // Format date → MM/DD/YYYY
 function formatDate(dateStr) {
     if (!dateStr) return '-';
-    const d = new Date(dateStr + 'T00:00:00');
+    // Handle both "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS" formats
+    const dateOnly = String(dateStr).split(' ')[0].split('T')[0];
+    const d = new Date(dateOnly + 'T00:00:00');
+    if (isNaN(d.getTime())) return '-';
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${m}/${day}/${d.getFullYear()}`;

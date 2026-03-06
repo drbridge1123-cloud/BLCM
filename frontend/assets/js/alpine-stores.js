@@ -13,8 +13,9 @@ document.addEventListener('alpine:init', () => {
             try {
                 const res = await api.get('auth/me');
                 this.user = res.data;
-                // Push unread count to messages store (avoids separate auth/me call)
                 Alpine.store('messages').unreadCount = res.data?.unread_messages || 0;
+                // Start polling only after successful auth
+                Alpine.store('messages').startPolling();
             } catch (e) {
                 this.user = null;
             }
@@ -45,17 +46,19 @@ document.addEventListener('alpine:init', () => {
         unreadCount: 0,
         _interval: null,
 
-        init() {
-            // Initial unreadCount is set by auth.load() — no fetch needed here
-            // Periodic refresh reuses same endpoint and updates both stores
-            this._interval = setInterval(() => this._refresh(), 30000);
+        startPolling() {
+            if (this._interval) return;
+            this._interval = setInterval(() => this._refresh(), 60000);
+        },
+
+        stopPolling() {
+            if (this._interval) { clearInterval(this._interval); this._interval = null; }
         },
 
         async _refresh() {
             try {
                 const res = await api.get('auth/me');
                 this.unreadCount = res.data?.unread_messages || 0;
-                // Keep auth store in sync
                 if (res.data) Alpine.store('auth').user = res.data;
             } catch (e) {}
         }
