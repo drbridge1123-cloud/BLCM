@@ -2,6 +2,10 @@
 vendor/
 storage/logs/
 storage/cache/
+storage/documents/generated/
+storage/documents/other/
+storage/templates/
+storage/traffic-files/
 .claude/
 *.log
 .DS_Store
