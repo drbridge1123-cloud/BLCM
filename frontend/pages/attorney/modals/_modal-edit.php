@@ -90,11 +90,11 @@
                         <span style="color:#8a8a82;">— current</span>
                         <template x-if="transferHistory.length > 0">
                             <span style="color:#8a8a82; font-size:11px;"
-                                  x-text="'(since ' + new Date(transferHistory[0].transferred_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) + ')'"></span>
+                                  x-text="'(since ' + formatDate(transferHistory[0].transferred_at) + ')'"></span>
                         </template>
                         <template x-if="transferHistory.length === 0 && editForm.assigned_date">
                             <span style="color:#8a8a82; font-size:11px;"
-                                  x-text="'(since ' + new Date(editForm.assigned_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) + ')'"></span>
+                                  x-text="'(since ' + formatDate(editForm.assigned_date) + ')'"></span>
                         </template>
                     </div>
                 </div>
@@ -106,9 +106,8 @@
                             <span style="font-weight:600; color:#1a2535;" x-text="t.from_name"></span>
                             <span style="color:#8a8a82; font-size:11px;"
                                   x-text="t.from_start_date
-                                      ? new Date(t.from_start_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})
-                                        + ' – ' + new Date(t.transferred_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
-                                      : '– ' + new Date(t.transferred_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})"></span>
+                                      ? formatDate(t.from_start_date) + ' – ' + formatDate(t.transferred_at)
+                                      : '– ' + formatDate(t.transferred_at)"></span>
                             <span style="color:#8a8a82;">&#8594;</span>
                             <span style="font-weight:600; color:#1a2535;" x-text="t.to_name"></span>
                             <div x-show="t.note" style="color:#5A6B82; font-size:11px; font-style:italic; margin-top:2px;" x-text="t.note"></div>

@@ -1,4 +1,4 @@
-# CMC Frontend Pages Reference
+# BLCM Frontend Pages Reference
 
 > Complete documentation of all frontend pages, navigation, tabs, modals, and permissions.
 

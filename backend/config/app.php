@@ -3,7 +3,7 @@
  * Application Configuration
  */
 
-define('APP_NAME', $_ENV['APP_NAME'] ?? 'CMC');
+define('APP_NAME', $_ENV['APP_NAME'] ?? 'BLCM');
 define('APP_VERSION', $_ENV['APP_VERSION'] ?? '1.0.0');
 define('BASE_PATH', dirname(dirname(__DIR__)));
 define('BACKEND_PATH', dirname(__DIR__));
@@ -12,7 +12,7 @@ define('STORAGE_PATH', BASE_PATH . '/storage');
 
 // Session
 define('SESSION_LIFETIME', (int)($_ENV['SESSION_LIFETIME'] ?? 28800));
-define('SESSION_NAME', $_ENV['SESSION_NAME'] ?? 'CMC_SESSION');
+define('SESSION_NAME', $_ENV['SESSION_NAME'] ?? 'BLCM_SESSION');
 
 // Pagination
 define('ITEMS_PER_PAGE', 50);

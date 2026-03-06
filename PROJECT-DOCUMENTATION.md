@@ -1,4 +1,4 @@
-# CMC (Case Management Center) - Project Documentation
+# BLCM (Bridge Law Case Management) - Project Documentation
 
 > Bridge Law & Associates - Internal Case Management System
 > **Stack:** PHP + Alpine.js + Tailwind CSS (CDN) | XAMPP / MySQL
@@ -20,7 +20,7 @@
 
 ## 1. Project Overview
 
-CMC is a case management system for a law firm (Bridge Law & Associates). It manages the full lifecycle of personal injury cases from referral intake through medical records collection, attorney review, negotiation, settlement, and accounting.
+BLCM is a case management system for a law firm (Bridge Law & Associates). It manages the full lifecycle of personal injury cases from referral intake through medical records collection, attorney review, negotiation, settlement, and accounting.
 
 ### Core Workflows
 1. **Referral Intake** - New cases enter via referrals
@@ -67,7 +67,7 @@ CMC is a case management system for a law firm (Bridge Law & Associates). It man
 ## 3. Directory Structure
 
 ```
-CMCdemo/
+blcm/
 |-- index.php                          # Root redirect -> frontend/index.php
 |-- .htaccess                          # Apache rewrite rules
 |
@@ -241,7 +241,7 @@ DELETE /api/attorney/{id}  -> backend/api/attorney/delete.php
 ```
 Browser (Alpine.js)
   -> api.get/post/put/delete()   (app.js)
-  -> fetch('/CMCdemo/backend/api/...')
+  -> fetch('/blcm/backend/api/...')
   -> API Router (backend/api/index.php)
   -> Endpoint file (e.g. attorney/list.php)
   -> Helper functions (db.php, auth.php, etc.)
@@ -402,13 +402,13 @@ Defined in `alpine-stores.js`:
 
 ### Running the App
 1. Start XAMPP (Apache + MySQL)
-2. Place project in `C:\xampp\htdocs\CMCdemo\`
-3. Access `http://localhost/CMCdemo/`
-4. Login at `/CMCdemo/frontend/pages/auth/login.php`
+2. Place project in `C:\xampp\htdocs\blcm\`
+3. Access `http://localhost/blcm/`
+4. Login at `/blcm/frontend/pages/auth/login.php`
 
 ### Cache Busting
 All CSS/JS files use `?v=<?= filemtime(...) ?>` for automatic cache invalidation on file change.
 
 ### API Base Path
-All API calls go through: `/CMCdemo/backend/api/{resource}/{action}`
+All API calls go through: `/blcm/backend/api/{resource}/{action}`
 Handled by the `api` object in `app.js` which prepends the base path automatically.

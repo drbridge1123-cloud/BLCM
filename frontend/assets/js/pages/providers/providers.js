@@ -193,7 +193,7 @@ function providersListPage() {
             if (this.difficultyFilter) params.set('difficulty_level', this.difficultyFilter);
             if (this.search) params.set('search', this.search);
             const qs = params.toString();
-            window.location.href = '/CMCdemo/backend/api/providers/export' + (qs ? '?' + qs : '');
+            window.location.href = '/blcm/backend/api/providers/export' + (qs ? '?' + qs : '');
         },
 
         async updateProvider() {

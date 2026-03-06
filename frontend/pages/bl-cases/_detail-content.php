@@ -34,10 +34,10 @@
     <?php include __DIR__ . '/_detail-modals.php'; ?>
 </div>
 
-<script src="/CMCdemo/frontend/assets/js/pages/bl-cases/mbr-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/mbr-panel.js') ?>"></script>
-<script src="/CMCdemo/frontend/assets/js/pages/bl-cases/negotiate-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/negotiate-panel.js') ?>"></script>
-<script src="/CMCdemo/frontend/assets/js/pages/bl-cases/disbursement-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/disbursement-panel.js') ?>"></script>
-<script src="/CMCdemo/frontend/assets/js/pages/bl-cases/health-ledger-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/health-ledger-panel.js') ?>"></script>
-<script src="/CMCdemo/frontend/components/template-selector.js?v=<?= filemtime(__DIR__ . '/../../components/template-selector.js') ?>"></script>
-<script src="/CMCdemo/frontend/components/document-uploader.js?v=<?= filemtime(__DIR__ . '/../../components/document-uploader.js') ?>"></script>
-<script src="/CMCdemo/frontend/components/document-selector.js?v=<?= filemtime(__DIR__ . '/../../components/document-selector.js') ?>"></script>
+<script src="/blcm/frontend/assets/js/pages/bl-cases/mbr-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/mbr-panel.js') ?>"></script>
+<script src="/blcm/frontend/assets/js/pages/bl-cases/negotiate-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/negotiate-panel.js') ?>"></script>
+<script src="/blcm/frontend/assets/js/pages/bl-cases/disbursement-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/disbursement-panel.js') ?>"></script>
+<script src="/blcm/frontend/assets/js/pages/bl-cases/health-ledger-panel.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pages/bl-cases/health-ledger-panel.js') ?>"></script>
+<script src="/blcm/frontend/components/template-selector.js?v=<?= filemtime(__DIR__ . '/../../components/template-selector.js') ?>"></script>
+<script src="/blcm/frontend/components/document-uploader.js?v=<?= filemtime(__DIR__ . '/../../components/document-uploader.js') ?>"></script>
+<script src="/blcm/frontend/components/document-selector.js?v=<?= filemtime(__DIR__ . '/../../components/document-selector.js') ?>"></script>

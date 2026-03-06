@@ -825,7 +825,7 @@ function documentUploader(caseId, caseProviderId = null) {
         async downloadDocument(documentId) {
             try {
                 // Open download in new window
-                const url = `/CMCdemo/backend/api/documents/${documentId}/download`;
+                const url = `/blcm/backend/api/documents/${documentId}/download`;
                 window.open(url, '_blank');
             } catch (error) {
                 console.error('Download failed:', error);
@@ -877,14 +877,7 @@ function documentUploader(caseId, caseProviderId = null) {
          */
         formatDate(dateStr) {
             if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit'
-            });
+            return formatDateTime(dateStr);
         },
 
         /**

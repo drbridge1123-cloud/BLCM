@@ -60,7 +60,7 @@ function expenseReportPage() {
 
         goToCase(caseId) {
             if (caseId) {
-                window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + caseId;
+                window.location.href = '/blcm/frontend/pages/bl-cases/detail.php?id=' + caseId;
             }
         },
 
@@ -73,7 +73,7 @@ function expenseReportPage() {
                 staff_id: this.staffFilter,
                 search: this.search,
             });
-            window.open('/CMCdemo/backend/api/expense-report/export' + params, '_blank');
+            window.open('/blcm/backend/api/expense-report/export' + params, '_blank');
         },
     };
 }

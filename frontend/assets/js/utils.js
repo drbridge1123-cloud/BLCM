@@ -1,5 +1,5 @@
 /**
- * CMC Utility Functions & Constants
+ * BLCM Utility Functions & Constants
  */
 
 // Provider type labels
@@ -111,6 +111,25 @@ function timeAgo(dateStr) {
 function truncate(str, len = 40) {
     if (!str) return '';
     return str.length > len ? str.substring(0, len) + '...' : str;
+}
+
+// Format date+time → MM/DD/YYYY h:mm AM/PM
+function formatDateTime(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return `${m}/${day}/${d.getFullYear()} ${time}`;
+}
+
+// Auto-format phone on blur
+function autoFormatPhone(el) {
+    const digits = el.value.replace(/\D/g, '');
+    if (digits.length === 10) {
+        el.value = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 }
 
 // Format phone

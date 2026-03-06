@@ -135,8 +135,7 @@ function attorneyModalsMixin() {
 
         formatDateShort(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+            return formatDate(dateStr);
         },
 
         async toggleDate(caseId, field, currentValue) {
@@ -144,7 +143,7 @@ function attorneyModalsMixin() {
             if (currentValue) {
                 if (!confirm(`Clear "${label}" date (${this.formatDateShort(currentValue)})?`)) return;
             } else {
-                const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const today = formatDate(new Date().toISOString().split('T')[0]);
                 if (!confirm(`Set "${label}" to today (${today})?`)) return;
             }
             const date = currentValue ? null : new Date().toISOString().split('T')[0];
@@ -404,12 +403,12 @@ function attorneyModalsMixin() {
             try {
                 const res = await api.get('bl-cases?search=' + encodeURIComponent(caseNumber) + '&per_page=1');
                 if (res.data && res.data.length > 0) {
-                    window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + res.data[0].id;
+                    window.location.href = '/blcm/frontend/pages/bl-cases/detail.php?id=' + res.data[0].id;
                     return;
                 }
             } catch (e) {}
             // Fallback: go to cases list with search
-            window.location.href = '/CMCdemo/frontend/pages/bl-cases/index.php?search=' + encodeURIComponent(caseNumber) + '&from=attorney';
+            window.location.href = '/blcm/frontend/pages/bl-cases/index.php?search=' + encodeURIComponent(caseNumber) + '&from=attorney';
         },
 
         // -------------------------------------------------------

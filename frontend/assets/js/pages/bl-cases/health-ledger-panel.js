@@ -28,7 +28,7 @@ function healthLedgerPanel(caseId, caseNumber) {
         },
 
         goToHealthTracker() {
-            const url = '/CMCdemo/frontend/pages/billing/index.php?tab=health&case_id=' + caseId;
+            const url = '/blcm/frontend/pages/billing/index.php?tab=health&case_id=' + caseId;
             window.open(url, '_blank');
         }
     };

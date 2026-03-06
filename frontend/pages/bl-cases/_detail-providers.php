@@ -7,7 +7,7 @@
                         <span class="panel-count" x-text="providers.length"></span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button @click.stop="window.location.href='/CMCdemo/frontend/pages/billing/?case_id=' + caseId" class="panel-btn">
+                        <button @click.stop="window.location.href='/blcm/frontend/pages/billing/?case_id=' + caseId" class="panel-btn">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>

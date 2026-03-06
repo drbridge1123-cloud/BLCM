@@ -1,5 +1,5 @@
 /**
- * CMC - Shared API Helper & Utilities
+ * BLCM - Shared API Helper & Utilities
  */
 
 const api = {
@@ -24,7 +24,7 @@ const api = {
         return this._request(endpoint, { method: 'DELETE' });
     },
     async upload(endpoint, formData, onProgress) {
-        const url = endpoint.startsWith('http') ? endpoint : `/CMCdemo/backend/api/${endpoint}`;
+        const url = endpoint.startsWith('http') ? endpoint : `/blcm/backend/api/${endpoint}`;
         try {
             if (onProgress && typeof onProgress === 'function') {
                 return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ const api = {
                         try {
                             const data = JSON.parse(xhr.responseText);
                             if (xhr.status === 401) {
-                                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
+                                window.location.href = '/blcm/frontend/pages/auth/login.php';
                                 return;
                             }
                             if (xhr.status >= 200 && xhr.status < 300) {
@@ -58,7 +58,7 @@ const api = {
             const response = await fetch(url, { method: 'POST', body: formData });
             const data = await response.json();
             if (response.status === 401) {
-                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
+                window.location.href = '/blcm/frontend/pages/auth/login.php';
                 return null;
             }
             if (!response.ok) throw { response, data };
@@ -71,11 +71,11 @@ const api = {
         }
     },
     async _request(endpoint, options = {}) {
-        const url = endpoint.startsWith('http') ? endpoint : `/CMCdemo/backend/api/${endpoint}`;
+        const url = endpoint.startsWith('http') ? endpoint : `/blcm/backend/api/${endpoint}`;
         try {
             const res = await fetch(url, options);
             if (res.status === 401) {
-                window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
+                window.location.href = '/blcm/frontend/pages/auth/login.php';
                 return null;
             }
             const text = await res.text();
@@ -129,11 +129,13 @@ function parseCurrency(str) {
     return parseFloat(String(str).replace(/[$,\s]/g, '')) || 0;
 }
 
-// Format date
+// Format date → MM/DD/YYYY
 function formatDate(dateStr) {
     if (!dateStr) return '-';
     const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${m}/${day}/${d.getFullYear()}`;
 }
 
 // Debounce

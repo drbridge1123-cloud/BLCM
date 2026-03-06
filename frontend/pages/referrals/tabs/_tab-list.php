@@ -30,7 +30,7 @@
             <template x-for="r in referrals" :key="r.id">
                 <tr style="cursor:default;">
                     <td style="text-align:center;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a8a82;" x-text="r.row_number"></span></td>
-                    <td><span class="sp-mono" style="font-size:11px;" x-text="r.signed_date || '—'"></span></td>
+                    <td><span class="sp-mono" style="font-size:11px;" x-text="formatDate(r.signed_date)"></span></td>
                     <td><span class="sp-case-num" style="font-size:11px;" x-text="r.file_number || '—'"></span></td>
                     <td><span class="sp-client" style="font-size:12px;" x-text="r.client_name"></span></td>
                     <td style="text-align:center;">
@@ -46,7 +46,7 @@
                                   'HEALTH': 'background:rgba(20,184,166,.08); color:#0d9488; border:1px solid rgba(20,184,166,.15);'
                               })[r.status] || ''" x-text="r.status"></span>
                     </td>
-                    <td><span class="sp-mono" style="font-size:11px;" x-text="r.date_of_loss || '—'"></span></td>
+                    <td><span class="sp-mono" style="font-size:11px;" x-text="formatDate(r.date_of_loss)"></span></td>
                     <td><span style="font-size:11px; color:#1a2535;" x-text="r.referred_by || '—'"></span></td>
                     <td><span style="font-size:11px; color:#1a2535;" x-text="r.referred_to_provider || '—'"></span></td>
                     <td><span style="font-size:11px; color:#1a2535;" x-text="r.referred_to_body_shop || '—'"></span></td>

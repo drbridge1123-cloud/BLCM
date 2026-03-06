@@ -15,15 +15,17 @@ $where = '1=1';
 $params = [];
 
 if ($type) {
-    $validTypes = ['hospital','er','chiro','imaging','physician','surgery_center','pharmacy','acupuncture','massage','pain_management','pt','other'];
-    if (!validateEnum($type, $validTypes)) errorResponse('Invalid provider type');
+    $validTypes = ['hospital', 'er', 'chiro', 'imaging', 'physician', 'surgery_center', 'pharmacy', 'acupuncture', 'massage', 'pain_management', 'pt', 'other'];
+    if (!validateEnum($type, $validTypes))
+        errorResponse('Invalid provider type');
     $where .= ' AND type = ?';
     $params[] = $type;
 }
 
 if ($difficulty) {
-    $validDifficulty = ['easy','medium','hard'];
-    if (!validateEnum($difficulty, $validDifficulty)) errorResponse('Invalid difficulty level');
+    $validDifficulty = ['easy', 'medium', 'hard'];
+    if (!validateEnum($difficulty, $validDifficulty))
+        errorResponse('Invalid difficulty level');
     $where .= ' AND difficulty_level = ?';
     $params[] = $difficulty;
 }
@@ -36,13 +38,15 @@ if ($search) {
     $params[] = "%{$search}%";
 }
 
-$allowedSorts = ['name','type','difficulty_level','avg_response_days','created_at'];
-if (!in_array($sortBy, $allowedSorts)) $sortBy = 'name';
+$allowedSorts = ['name', 'type', 'difficulty_level', 'avg_response_days', 'created_at'];
+if (!in_array($sortBy, $allowedSorts))
+    $sortBy = 'name';
 
 $providers = dbFetchAll(
     "SELECT id, name, type, address, phone, fax, email, portal_url,
             preferred_method, uses_third_party, third_party_name, third_party_contact,
-            avg_response_days, difficulty_level, notes, created_at, updated_at
+            avg_response_days, difficulty_level, notes, created_at, updated_at,
+            (SELECT COUNT(*) FROM case_providers cp WHERE cp.provider_id = providers.id) AS case_count
      FROM providers
      WHERE {$where}
      ORDER BY {$sortBy} {$sortDir}",
@@ -50,8 +54,9 @@ $providers = dbFetchAll(
 );
 
 foreach ($providers as &$p) {
-    $p['uses_third_party'] = (int)$p['uses_third_party'];
-    $p['avg_response_days'] = $p['avg_response_days'] !== null ? (int)$p['avg_response_days'] : null;
+    $p['uses_third_party'] = (int) $p['uses_third_party'];
+    $p['avg_response_days'] = $p['avg_response_days'] !== null ? (int) $p['avg_response_days'] : null;
+    $p['case_count'] = (int) $p['case_count'];
 }
 unset($p);
 

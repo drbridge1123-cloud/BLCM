@@ -1,6 +1,6 @@
-# CMC UI Components
+# BLCM UI Components
 
-> Complete reference for all reusable UI patterns in the CMC application.
+> Complete reference for all reusable UI patterns in the BLCM application.
 
 ---
 

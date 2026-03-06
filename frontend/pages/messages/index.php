@@ -5,6 +5,6 @@ requireAuth();
 requirePermission('messages');
 $pageTitle = 'Messages';
 $currentPage = 'messages';
-$pageScripts = ['/CMCdemo/frontend/assets/js/pages/messages/index.js'];
+$pageScripts = ['/blcm/frontend/assets/js/pages/messages/index.js'];
 $pageContent = __DIR__ . '/_content.php';
 require_once __DIR__ . '/../../layouts/main.php';

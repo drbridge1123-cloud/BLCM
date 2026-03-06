@@ -50,13 +50,25 @@
                             <span class="sp-stage" :style="template.is_active ? 'background:#dcfce7; color:#15803d;' : 'background:#fee2e2; color:#dc2626;'" x-text="template.is_active ? 'Active' : 'Inactive'"></span>
                         </td>
                         <td style="color:#6b7280; font-size:13px;" x-text="template.created_by_name || 'System'"></td>
-                        <td class="sp-mono" style="font-size:12px;" x-text="new Date(template.updated_at).toLocaleDateString()"></td>
+                        <td class="sp-mono" style="font-size:12px;" x-text="formatDate(template.updated_at)"></td>
                         <td style="text-align:center;">
                             <div class="sp-actions" style="justify-content:center;">
-                                <button @click="viewVersions(template)" class="sp-act sp-act-gold" title="Version History">Hist</button>
-                                <button @click="previewTemplate(template)" class="sp-act sp-act-blue" title="Preview">View</button>
-                                <button @click="editTemplate(template)" class="sp-act sp-act-gold" title="Edit">Edit</button>
-                                <button @click="deleteTemplate(template)" class="sp-act sp-act-red" title="Delete">Del</button>
+                                <button @click="viewVersions(template)" class="sp-act sp-act-gold">
+                                    <span class="sp-tip">History</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </button>
+                                <button @click="previewTemplate(template)" class="sp-act sp-act-blue">
+                                    <span class="sp-tip">Preview</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                <button @click="editTemplate(template)" class="sp-act sp-act-gold">
+                                    <span class="sp-tip">Edit</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button @click="deleteTemplate(template)" class="sp-act sp-act-red">
+                                    <span class="sp-tip">Delete</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -66,30 +78,30 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,.45); padding:16px;" @keydown.escape.window="showModal && closeModal()">
-        <div class="tpm-modal" style="width:1000px; max-height:90vh; display:flex; flex-direction:column;" @click.stop>
-            <div class="tpm-header">
+    <div x-show="showModal" x-cloak class="sp-modal-overlay" @keydown.escape.window="showModal && closeModal()">
+        <div class="sp-modal-box" style="max-width:1000px" @click.stop>
+            <div class="sp-modal-header">
                 <div>
-                    <div class="tpm-title" x-text="editingTemplate ? 'Edit Template' : 'Create Template'"></div>
+                    <div class="sp-modal-title" x-text="editingTemplate ? 'Edit Template' : 'Create Template'"></div>
                     <div class="tpm-subtitle">HTML template with placeholder support</div>
                 </div>
-                <button type="button" class="tpm-close" @click="closeModal()">&times;</button>
+                <button type="button" class="sp-modal-close" @click="closeModal()">&times;</button>
             </div>
-            <div class="tpm-body" style="flex:1; overflow-y:auto;">
+            <div class="sp-modal-body" style="flex:1; overflow-y:auto;">
                 <div style="display:grid; grid-template-columns:2fr 1fr; gap:24px;">
                     <div style="display:flex; flex-direction:column; gap:16px;">
                         <div>
-                            <label class="tpm-label">Template Name <span class="tpm-req">*</span></label>
-                            <input type="text" x-model="form.name" class="tpm-input" placeholder="e.g., Medical Records Request - Standard">
+                            <label class="sp-form-label">Template Name <span class="tpm-req">*</span></label>
+                            <input type="text" x-model="form.name" class="sp-search" placeholder="e.g., Medical Records Request - Standard">
                         </div>
                         <div>
-                            <label class="tpm-label">Description</label>
-                            <textarea x-model="form.description" rows="2" class="tpm-textarea" placeholder="Brief description of this template"></textarea>
+                            <label class="sp-form-label">Description</label>
+                            <textarea x-model="form.description" rows="2" class="sp-search" style="resize:vertical;min-height:70px;line-height:1.5" placeholder="Brief description of this template"></textarea>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:end;">
                             <div>
-                                <label class="tpm-label">Template Type <span class="tpm-req">*</span></label>
-                                <select x-model="form.template_type" class="tpm-select">
+                                <label class="sp-form-label">Template Type <span class="tpm-req">*</span></label>
+                                <select x-model="form.template_type" class="sp-select">
                                     <option value="medical_records">Medical Records</option>
                                     <option value="health_ledger">Health Ledger</option>
                                     <option value="bulk_request">Bulk Request</option>
@@ -106,17 +118,17 @@
                             </div>
                         </div>
                         <div>
-                            <label class="tpm-label">Subject Template</label>
-                            <input type="text" x-model="form.subject_template" class="tpm-input" placeholder="e.g., Medical Records Request - {{client_name}}">
+                            <label class="sp-form-label">Subject Template</label>
+                            <input type="text" x-model="form.subject_template" class="sp-search" placeholder="e.g., Medical Records Request - {{client_name}}">
                         </div>
                         <div>
-                            <label class="tpm-label">Body Template <span class="tpm-req">*</span> (HTML with placeholders)</label>
-                            <textarea x-model="form.body_template" rows="20" class="tpm-textarea" style="font-family:'IBM Plex Mono',monospace; font-size:12px;" placeholder="Enter HTML template with {{placeholders}}"></textarea>
+                            <label class="sp-form-label">Body Template <span class="tpm-req">*</span> (HTML with placeholders)</label>
+                            <textarea x-model="form.body_template" rows="20" class="sp-search" style="resize:vertical;min-height:70px;line-height:1.5;font-family:'IBM Plex Mono',monospace;font-size:12px;" placeholder="Enter HTML template with {{placeholders}}"></textarea>
                         </div>
                         <template x-if="editingTemplate">
                             <div>
-                                <label class="tpm-label">Change Notes</label>
-                                <input type="text" x-model="form.change_notes" class="tpm-input" placeholder="Describe what changed in this version">
+                                <label class="sp-form-label">Change Notes</label>
+                                <input type="text" x-model="form.change_notes" class="sp-search" placeholder="Describe what changed in this version">
                             </div>
                         </template>
                     </div>
@@ -145,11 +157,11 @@ Text if false
                     </div>
                 </div>
             </div>
-            <div class="tpm-footer" style="justify-content:space-between;">
-                <button type="button" @click="closeModal()" class="tpm-btn-cancel">Cancel</button>
+            <div class="sp-modal-footer" style="justify-content:space-between;">
+                <button type="button" @click="closeModal()" class="sp-btn">Cancel</button>
                 <div style="display:flex; gap:10px;">
-                    <button type="button" @click="previewCurrent()" class="tpm-btn-cancel" style="border-color:#C9A84C; color:#C9A84C;">Preview</button>
-                    <button type="button" @click="saveTemplate()" class="tpm-btn-submit">
+                    <button type="button" @click="previewCurrent()" class="sp-btn" style="border-color:#C9A84C; color:#C9A84C;">Preview</button>
+                    <button type="button" @click="saveTemplate()" class="sp-new-btn">
                         <span x-text="editingTemplate ? 'Update Template' : 'Create Template'"></span>
                     </button>
                 </div>
@@ -158,35 +170,35 @@ Text if false
     </div>
 
     <!-- Preview Modal -->
-    <div x-show="showPreviewModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,.45); padding:16px;" @keydown.escape.window="showPreviewModal && closePreviewModal()">
-        <div class="tpm-modal" style="width:800px; max-height:90vh; display:flex; flex-direction:column;" @click.stop>
-            <div class="tpm-header">
+    <div x-show="showPreviewModal" x-cloak class="sp-modal-overlay" @keydown.escape.window="showPreviewModal && closePreviewModal()">
+        <div class="sp-modal-box sp-modal-box-lg" @click.stop>
+            <div class="sp-modal-header">
                 <div>
-                    <div class="tpm-title">Template Preview</div>
+                    <div class="sp-modal-title">Template Preview</div>
                     <div class="tpm-subtitle">Rendered output preview</div>
                 </div>
-                <button type="button" class="tpm-close" @click="closePreviewModal()">&times;</button>
+                <button type="button" class="sp-modal-close" @click="closePreviewModal()">&times;</button>
             </div>
-            <div class="tpm-body" style="flex:1; overflow-y:auto;">
+            <div class="sp-modal-body" style="flex:1; overflow-y:auto;">
                 <div x-html="previewHtml"></div>
             </div>
-            <div class="tpm-footer">
-                <button type="button" @click="closePreviewModal()" class="tpm-btn-cancel">Close</button>
+            <div class="sp-modal-footer">
+                <button type="button" @click="closePreviewModal()" class="sp-btn">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Version History Modal -->
-    <div x-show="showVersionsModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,.45); padding:16px;" @keydown.escape.window="showVersionsModal && closeVersionsModal()">
-        <div class="tpm-modal" style="width:680px; max-height:90vh; display:flex; flex-direction:column;" @click.stop>
-            <div class="tpm-header">
+    <div x-show="showVersionsModal" x-cloak class="sp-modal-overlay" @keydown.escape.window="showVersionsModal && closeVersionsModal()">
+        <div class="sp-modal-box" style="max-width:680px" @click.stop>
+            <div class="sp-modal-header">
                 <div>
-                    <div class="tpm-title">Version History</div>
+                    <div class="sp-modal-title">Version History</div>
                     <div class="tpm-subtitle">Template revision log</div>
                 </div>
-                <button type="button" class="tpm-close" @click="closeVersionsModal()">&times;</button>
+                <button type="button" class="sp-modal-close" @click="closeVersionsModal()">&times;</button>
             </div>
-            <div class="tpm-body" style="flex:1; overflow-y:auto;">
+            <div class="sp-modal-body" style="flex:1; overflow-y:auto;">
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <template x-for="(version, idx) in versions" :key="version.id">
                         <div style="border:1px solid #e8e4dc; border-radius:10px; padding:14px 16px;">
@@ -195,7 +207,7 @@ Text if false
                                     <span style="font-weight:600; color:#1a2535;">Version <span x-text="version.version_number"></span></span>
                                     <span x-show="idx === 0" class="sp-stage" style="background:#dcfce7; color:#15803d;">Current</span>
                                 </div>
-                                <span class="sp-mono" style="font-size:11px; color:#9ca3af;" x-text="new Date(version.created_at).toLocaleString()"></span>
+                                <span class="sp-mono" style="font-size:11px; color:#9ca3af;" x-text="formatDateTime(version.created_at)"></span>
                             </div>
                             <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">
                                 Changed by: <span x-text="version.changed_by_name || 'System'"></span>
@@ -208,32 +220,14 @@ Text if false
                     </template>
                 </div>
             </div>
-            <div class="tpm-footer">
-                <button type="button" @click="closeVersionsModal()" class="tpm-btn-cancel">Close</button>
+            <div class="sp-modal-footer">
+                <button type="button" @click="closeVersionsModal()" class="sp-btn">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-.tpm-modal{border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.24);overflow:hidden;background:#fff}
-.tpm-header{background:#0F1B2D;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.tpm-title{font-size:15px;font-weight:700;color:#fff}
 .tpm-subtitle{font-size:12px;font-weight:500;color:#C9A84C;margin-top:2px}
-.tpm-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:20px;transition:color .15s}
-.tpm-close:hover{color:rgba(255,255,255,.75)}
-.tpm-body{padding:24px;display:flex;flex-direction:column;gap:16px}
-.tpm-label{display:block;font-size:9.5px;font-weight:700;color:#8a8a82;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
 .tpm-req{color:#C9A84C}
-.tpm-input{width:100%;background:#fafafa;border:1.5px solid #e8e4dc;border-radius:7px;padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s,background .15s,box-shadow .15s}
-.tpm-input:focus{border-color:#C9A84C;background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
-.tpm-textarea{width:100%;background:#fafafa;border:1.5px solid #e8e4dc;border-radius:7px;padding:9px 12px;font-size:13px;outline:none;resize:vertical;min-height:70px;line-height:1.5;transition:border-color .15s,background .15s,box-shadow .15s}
-.tpm-textarea:focus{border-color:#C9A84C;background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
-.tpm-select{width:100%;background:#fafafa;border:1.5px solid #e8e4dc;border-radius:7px;padding:9px 12px;font-size:13px;outline:none;appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .15s,background .15s,box-shadow .15s}
-.tpm-select:focus{border-color:#C9A84C;background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
-.tpm-footer{padding:14px 24px;border-top:1px solid #e8e4dc;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-shrink:0}
-.tpm-btn-cancel{background:#fff;border:1.5px solid #e8e4dc;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:500;color:#5A6B82;cursor:pointer;transition:border-color .15s,color .15s}
-.tpm-btn-cancel:hover{border-color:#94a3b8;color:#374151}
-.tpm-btn-submit{background:#C9A84C;color:#fff;border:none;border-radius:7px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(201,168,76,.35);display:flex;align-items:center;gap:6px;transition:opacity .15s}
-.tpm-btn-submit:hover{opacity:.92}
 </style>

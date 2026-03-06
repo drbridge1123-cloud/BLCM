@@ -103,7 +103,7 @@ function caseDetailPage() {
 
         async init() {
             if (!this.caseId) {
-                window.location.href = '/CMCdemo/frontend/pages/bl-cases/index.php';
+                window.location.href = '/blcm/frontend/pages/bl-cases/index.php';
                 return;
             }
             // Auto-collapse sidebar on case detail page
@@ -900,9 +900,7 @@ function caseDetailPage() {
         },
 
         formatDateTime(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+            return window.formatDateTime(dateStr);
         },
 
         // ---- Panel scroll helper ----
@@ -939,14 +937,14 @@ function caseDetailPage() {
             const caseNum = encodeURIComponent(this.caseData.case_number);
             const caseId = this.caseData.id;
             const trackerMap = {
-                treatment:    '/CMCdemo/frontend/pages/prelitigation/index.php',
-                collection:   '/CMCdemo/frontend/pages/billing/index.php?case_id=' + caseId,
-                verification: '/CMCdemo/frontend/pages/billing/index.php?case_id=' + caseId,
-                demand:       '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
-                negotiate:    '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
-                litigation:   '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
-                settlement:   '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
-                accounting:   '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
+                treatment:    '/blcm/frontend/pages/prelitigation/index.php',
+                collection:   '/blcm/frontend/pages/billing/index.php?case_id=' + caseId,
+                verification: '/blcm/frontend/pages/billing/index.php?case_id=' + caseId,
+                demand:       '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                negotiate:    '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                litigation:   '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + caseId,
+                settlement:   '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
+                accounting:   '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + caseId,
             };
             return trackerMap[stepKey] || '#';
         },
@@ -973,15 +971,15 @@ function caseDetailPage() {
         // Dynamic button: go to the tracker that matches current status
         goToCurrentTracker() {
             const statusTrackerMap = {
-                ini:                '/CMCdemo/frontend/pages/prelitigation/index.php',
-                rec:                '/CMCdemo/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
-                verification:       '/CMCdemo/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
-                rfd:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                neg:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                lit:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                final_verification: '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
-                accounting:         '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
-                closed:             '/CMCdemo/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                ini:                '/blcm/frontend/pages/prelitigation/index.php',
+                rec:                '/blcm/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
+                verification:       '/blcm/frontend/pages/billing/index.php?case_id=' + this.caseData.id,
+                rfd:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                neg:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                lit:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
+                final_verification: '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                accounting:         '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                closed:             '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
             };
             const url = statusTrackerMap[this.caseData.status];
             if (url) window.location.href = url;
@@ -1143,7 +1141,7 @@ function caseDetailPage() {
             formData.append('preview', '1');
 
             try {
-                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/blcm/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '') },
                     body: formData
@@ -1177,7 +1175,7 @@ function caseDetailPage() {
             formData.append('case_id', this.caseId);
 
             try {
-                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/blcm/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '') },
                     body: formData

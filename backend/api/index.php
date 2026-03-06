@@ -1,6 +1,6 @@
 <?php
 /**
- * CMC Central API Router
+ * BLCM Central API Router
  * Routes all API requests to the appropriate handler file
  */
 
@@ -35,7 +35,7 @@ ob_start();
 header('Content-Type: application/json; charset=utf-8');
 
 $requestUri = $_SERVER['REQUEST_URI'];
-$basePath = '/CMCdemo/backend/api';
+$basePath = '/blcm/backend/api';
 $path = parse_url($requestUri, PHP_URL_PATH);
 $path = str_replace($basePath, '', $path);
 $path = trim($path, '/');

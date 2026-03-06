@@ -1,14 +1,24 @@
 function casesListPage() {
     return {
+        clientId: '',
+        providerId: '',
+        adjusterId: '',
+        insuranceCompanyId: '',
+
         ...listPageBase('bl-cases', {
             defaultSort: 'case_number',
             defaultDir: 'desc',
             perPage: 50,
             filtersToParams() {
-                return {
+                const params = {
                     status: this.search ? '' : this.statusFilter,
                     assigned_to: this.assignedFilter,
                 };
+                if (this.clientId) params.client_id = this.clientId;
+                if (this.providerId) params.provider_id = this.providerId;
+                if (this.adjusterId) params.adjuster_id = this.adjusterId;
+                if (this.insuranceCompanyId) params.insurance_company_id = this.insuranceCompanyId;
+                return params;
             }
         }),
 
@@ -99,7 +109,7 @@ function casesListPage() {
             if (this.assignedFilter) params.set('assigned_to', this.assignedFilter);
             if (this.search) params.set('search', this.search);
             const qs = params.toString();
-            window.location.href = '/CMCdemo/backend/api/cases/export' + (qs ? '?' + qs : '');
+            window.location.href = '/blcm/backend/api/cases/export' + (qs ? '?' + qs : '');
         },
 
         // Tracker navigation
@@ -121,15 +131,15 @@ function casesListPage() {
         goToTracker(c) {
             const caseNum = encodeURIComponent(c.case_number);
             const map = {
-                ini:                '/CMCdemo/frontend/pages/prelitigation/index.php',
-                rec:                '/CMCdemo/frontend/pages/billing/index.php?case_id=' + c.id,
-                verification:       '/CMCdemo/frontend/pages/billing/index.php?case_id=' + c.id,
-                rfd:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                neg:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                lit:                '/CMCdemo/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                final_verification: '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
-                accounting:         '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
-                closed:             '/CMCdemo/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                ini:                '/blcm/frontend/pages/prelitigation/index.php',
+                rec:                '/blcm/frontend/pages/billing/index.php?case_id=' + c.id,
+                verification:       '/blcm/frontend/pages/billing/index.php?case_id=' + c.id,
+                rfd:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                neg:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                lit:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
+                final_verification: '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                accounting:         '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                closed:             '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
             };
             const url = map[c.status];
             if (url) window.location.href = url;
@@ -148,6 +158,11 @@ function casesListPage() {
             if (urlSearch) {
                 this.search = urlSearch;
             }
+            if (urlParams.get('client_id')) this.clientId = urlParams.get('client_id');
+            if (urlParams.get('provider_id')) this.providerId = urlParams.get('provider_id');
+            if (urlParams.get('adjuster_id')) this.adjusterId = urlParams.get('adjuster_id');
+            if (urlParams.get('insurance_company_id')) this.insuranceCompanyId = urlParams.get('insurance_company_id');
+            
             if (urlParams.get('from') === 'attorney-cases' || urlParams.get('from') === 'attorney') {
                 this.fromAttorneyCases = true;
             }
@@ -160,7 +175,8 @@ function casesListPage() {
             }
 
             const uid = auth.user?.id;
-            if (uid === 2 && !urlSearch) this.statusFilter = 'ini';
+            const hasExternalFilters = urlSearch || this.clientId || this.providerId || this.adjusterId || this.insuranceCompanyId;
+            if (uid === 2 && !hasExternalFilters) this.statusFilter = 'ini';
 
             await this.loadData();
         }

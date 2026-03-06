@@ -17,19 +17,20 @@ $params = [];
 
 if ($insuranceCompanyId) {
     $where .= ' AND a.insurance_company_id = ?';
-    $params[] = (int)$insuranceCompanyId;
+    $params[] = (int) $insuranceCompanyId;
 }
 
 if ($adjusterType) {
-    $validTypes = ['pip','um','uim','3rd_party','liability','pd','bi'];
-    if (!validateEnum($adjusterType, $validTypes)) errorResponse('Invalid adjuster type');
+    $validTypes = ['pip', 'um', 'uim', '3rd_party', 'liability', 'pd', 'bi'];
+    if (!validateEnum($adjusterType, $validTypes))
+        errorResponse('Invalid adjuster type');
     $where .= ' AND a.adjuster_type = ?';
     $params[] = $adjusterType;
 }
 
 if ($isActive !== null && $isActive !== '') {
     $where .= ' AND a.is_active = ?';
-    $params[] = (int)$isActive;
+    $params[] = (int) $isActive;
 }
 
 if ($search) {
@@ -41,15 +42,17 @@ if ($search) {
     $params[] = "%{$search}%";
 }
 
-$allowedSorts = ['last_name','first_name','adjuster_type','is_active','created_at','company_name'];
-if (!in_array($sortBy, $allowedSorts)) $sortBy = 'last_name';
+$allowedSorts = ['last_name', 'first_name', 'adjuster_type', 'is_active', 'created_at', 'company_name'];
+if (!in_array($sortBy, $allowedSorts))
+    $sortBy = 'last_name';
 $orderCol = $sortBy === 'company_name' ? 'ic.name' : "a.{$sortBy}";
 
 $adjusters = dbFetchAll(
     "SELECT a.id, a.insurance_company_id, a.first_name, a.last_name, a.title,
             a.adjuster_type, a.phone, a.fax, a.email, a.notes,
             a.is_active, a.created_at, a.updated_at,
-            ic.name AS company_name
+            ic.name AS company_name,
+            (SELECT COUNT(*) FROM cases c WHERE c.adjuster_3rd_id = a.id OR c.adjuster_um_id = a.id) AS case_count
      FROM adjusters a
      LEFT JOIN insurance_companies ic ON ic.id = a.insurance_company_id
      WHERE {$where}
@@ -58,7 +61,8 @@ $adjusters = dbFetchAll(
 );
 
 foreach ($adjusters as &$a) {
-    $a['is_active'] = (int)$a['is_active'];
+    $a['is_active'] = (int) $a['is_active'];
+    $a['case_count'] = (int) $a['case_count'];
 }
 unset($a);
 

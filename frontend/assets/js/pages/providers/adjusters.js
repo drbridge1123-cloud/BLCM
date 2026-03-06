@@ -34,6 +34,12 @@ function adjustersListPage() {
                 const res = await api.get('insurance-companies?sort_by=name&sort_dir=asc');
                 this.insuranceCompanies = res.data || [];
             } catch (e) { /* ignore */ }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('insurance_company_id')) {
+                this.companyFilter = urlParams.get('insurance_company_id');
+            }
+
             this.loadData();
         },
 

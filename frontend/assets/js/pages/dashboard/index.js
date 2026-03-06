@@ -1,6 +1,6 @@
 /**
  * Dashboard Page — Alpine.js Controller
- * Combines MRMS dashboard pattern with CMC-specific data
+ * Combines MRMS dashboard pattern with BLCM-specific data
  */
 function dashboardPage() {
     return {
@@ -14,14 +14,14 @@ function dashboardPage() {
         staffMetrics: {},
         systemHealth: {},
         providerAnalytics: {},
-        // CMC-specific state
+        // BLCM-specific state
         data: {},
         loading: true,
 
         async init() {
             await Promise.all([
                 this.loadSummary(),
-                this.loadCMCData(),
+                this.loadBLCMData(),
                 this.loadFollowups(),
                 this.loadOverdue(),
                 this.loadEscalations(),
@@ -42,10 +42,10 @@ function dashboardPage() {
             } catch (e) {}
         },
 
-        // CMC-specific data (already included in summary endpoint)
-        async loadCMCData() {
+        // BLCM-specific data (already included in summary endpoint)
+        async loadBLCMData() {
             // Data comes from loadSummary - this is a placeholder
-            // for any additional CMC-specific API calls
+            // for any additional BLCM-specific API calls
         },
 
         async loadFollowups() {
@@ -85,8 +85,8 @@ function dashboardPage() {
 
         formatDate(dateStr) {
             if (!dateStr) return '-';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const d = new Date(dateStr + 'T00:00:00');
+            return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
         },
 
         getStatusLabel(status) {

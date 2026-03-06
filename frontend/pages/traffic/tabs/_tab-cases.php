@@ -40,10 +40,10 @@
                 <tr style="cursor:default;" :style="c.paid == 1 ? 'background:rgba(26,158,106,.03);' : ''">
                     <td>
                         <div class="sp-client" style="font-size:12px;" x-text="c.client_name"></div>
-                        <div x-show="c.client_phone" style="font-size:10px; color:#8a8a82; margin-top:1px;" x-text="c.client_phone"></div>
+                        <div x-show="c.client_phone" style="font-size:10px; color:#8a8a82; margin-top:1px;" x-text="formatPhoneNumber(c.client_phone)"></div>
                     </td>
                     <td><span style="font-size:12px; color:#1a2535;" x-text="c.court || '—'"></span></td>
-                    <td><span class="sp-date-main" style="font-size:11px;" x-text="c.court_date ? c.court_date.slice(0,10) : '—'"></span></td>
+                    <td><span class="sp-date-main" style="font-size:11px;" x-text="formatDate(c.court_date)"></span></td>
                     <td><span style="font-size:12px; color:#1a2535;" x-text="c.charge || '—'"></span></td>
                     <td><span class="sp-case-num" style="font-size:11px;" x-text="c.case_number || '—'"></span></td>
                     <td style="text-align:center;">

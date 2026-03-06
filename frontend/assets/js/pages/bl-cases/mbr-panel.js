@@ -372,7 +372,7 @@ function mbrPanel(caseId) {
 
         mbrFormatDate(d) {
             if (!d) return '';
-            return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return formatDate(d);
         },
 
         getMbrStatusLabel(status) {
@@ -489,7 +489,7 @@ function mbrPanel(caseId) {
 
             try {
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-                const res = await fetch('/CMCdemo/backend/api/mbr/' + this.caseId + '/import', {
+                const res = await fetch('/blcm/backend/api/mbr/' + this.caseId + '/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -521,7 +521,7 @@ function mbrPanel(caseId) {
 
             try {
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-                const res = await fetch('/CMCdemo/backend/api/mbr/' + this.caseId + '/import', {
+                const res = await fetch('/blcm/backend/api/mbr/' + this.caseId + '/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData

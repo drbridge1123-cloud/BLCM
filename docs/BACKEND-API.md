@@ -1,4 +1,4 @@
-# CMC Backend API Reference
+# BLCM Backend API Reference
 
 > Complete backend documentation covering routing, helpers, and all API endpoints.
 
@@ -7,7 +7,7 @@
 ## 1. API Architecture
 
 ### Router (backend/api/index.php)
-- **Base URL:** `/CMCdemo/backend/api/`
+- **Base URL:** `/blcm/backend/api/`
 - **Pattern:** `/{resource}/{id}/{action}`
 - **Method:** Determined by `$_SERVER['REQUEST_METHOD']`
 - **Auth:** Every request goes through `requireAuth()` (except login)
@@ -15,7 +15,7 @@
 
 ### URL Routing Flow
 ```
-Request: PUT /CMCdemo/backend/api/attorney/42
+Request: PUT /blcm/backend/api/attorney/42
   -> Router parses: resource='attorney', id=42, action=null
   -> Sets $GLOBALS['resource_id'] = 42
   -> Includes: backend/api/attorney/update.php

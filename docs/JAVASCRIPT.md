@@ -1,4 +1,4 @@
-# CMC JavaScript Reference
+# BLCM JavaScript Reference
 
 > Complete documentation of all JavaScript files, functions, and patterns.
 
@@ -36,7 +36,7 @@ const api = {
 }
 ```
 
-**Base URL:** All endpoints auto-prepend `/CMCdemo/backend/api/`
+**Base URL:** All endpoints auto-prepend `/blcm/backend/api/`
 **Auth:** 401 responses auto-redirect to login page
 **Errors:** Throws `{ response, data }` object on non-ok responses
 
@@ -227,7 +227,7 @@ Alpine.store('messages', {
 ### $store.sidebar
 ```javascript
 Alpine.store('sidebar', {
-    collapsed: false,     // Persisted to localStorage('cmc_sidebar_collapsed')
+    collapsed: false,     // Persisted to localStorage('blcm_sidebar_collapsed')
     toggle(),             // Toggle collapsed state
 })
 ```

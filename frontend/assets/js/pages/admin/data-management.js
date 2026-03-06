@@ -72,26 +72,26 @@ function dataManagementPage() {
 
         exportCases() {
             const q = this._qs({ assigned_to: this.filters.cases.staff });
-            window.location.href = '/CMCdemo/backend/api/cases/export' + q;
+            window.location.href = '/blcm/backend/api/cases/export' + q;
         },
         exportProviders() {
-            window.location.href = '/CMCdemo/backend/api/providers/export';
+            window.location.href = '/blcm/backend/api/providers/export';
         },
         exportCommissions() {
             const q = this._qs({ employee_id: this.filters.commissions.staff });
-            window.location.href = '/CMCdemo/backend/api/commissions/export' + q;
+            window.location.href = '/blcm/backend/api/commissions/export' + q;
         },
         exportExpenseReport() {
             const q = this._qs({ staff_id: this.filters.expenseReport.staff });
-            window.location.href = '/CMCdemo/backend/api/expense-report/export' + q;
+            window.location.href = '/blcm/backend/api/expense-report/export' + q;
         },
         exportAttorneyCases() {
             const q = this._qs({ attorney_user_id: this.filters.attorneyCases.staff });
-            window.location.href = '/CMCdemo/backend/api/attorney/export' + q;
+            window.location.href = '/blcm/backend/api/attorney/export' + q;
         },
         exportReferrals() {
             const q = this._qs({ lead_id: this.filters.referrals.staff });
-            window.location.href = '/CMCdemo/backend/api/referrals/export' + q;
+            window.location.href = '/blcm/backend/api/referrals/export' + q;
         },
 
         // ── Imports ──
@@ -105,7 +105,7 @@ function dataManagementPage() {
                 const formData = new FormData();
                 formData.append('file', file);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMCdemo/backend/api/attorney/import', {
+                const res = await fetch('/blcm/backend/api/attorney/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -128,7 +128,7 @@ function dataManagementPage() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                const res = await fetch('/CMCdemo/backend/api/health-ledger/import', { method: 'POST', body: formData });
+                const res = await fetch('/blcm/backend/api/health-ledger/import', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Import failed');
                 showToast(data.message || 'Import complete', 'success');
@@ -144,7 +144,7 @@ function dataManagementPage() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                const res = await fetch('/CMCdemo/backend/api/bank-reconciliation/import', { method: 'POST', body: formData });
+                const res = await fetch('/blcm/backend/api/bank-reconciliation/import', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Import failed');
                 showToast(data.message || 'Import complete', 'success');
@@ -164,7 +164,7 @@ function dataManagementPage() {
                 formData.append('file', file);
                 formData.append('case_number', caseNumber);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMCdemo/backend/api/mr-fee-payments/import', {
+                const res = await fetch('/blcm/backend/api/mr-fee-payments/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -188,7 +188,7 @@ function dataManagementPage() {
                 formData.append('file', file);
                 formData.append('case_number', caseNumber);
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMCdemo/backend/api/mbr/import', {
+                const res = await fetch('/blcm/backend/api/mbr/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -229,7 +229,7 @@ function dataManagementPage() {
                 if (this.prelitImportFiles.followups) formData.append('followups', this.prelitImportFiles.followups);
 
                 const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
-                const res = await fetch('/CMCdemo/backend/api/prelitigation/import', {
+                const res = await fetch('/blcm/backend/api/prelitigation/import', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -249,16 +249,16 @@ function dataManagementPage() {
         },
 
         downloadPrelitTemplate(type) {
-            window.location.href = '/CMCdemo/backend/api/prelitigation/template?type=' + type;
+            window.location.href = '/blcm/backend/api/prelitigation/template?type=' + type;
         },
 
         // ── Template downloads ──
 
         downloadCasesTemplate() {
-            window.location.href = '/CMCdemo/backend/api/cases/export?template=1';
+            window.location.href = '/blcm/backend/api/cases/export?template=1';
         },
         downloadProvidersTemplate() {
-            window.location.href = '/CMCdemo/backend/api/providers/export?template=1';
+            window.location.href = '/blcm/backend/api/providers/export?template=1';
         },
     };
 }

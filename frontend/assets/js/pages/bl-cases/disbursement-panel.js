@@ -313,7 +313,7 @@ function disbursementPanel(caseId) {
     @media print { body { margin: 20px; } }
 </style></head><body>
 <h1>${title}</h1>
-<div class="meta">Printed: ${new Date().toLocaleDateString()}</div>
+<div class="meta">Printed: ${formatDate(new Date().toISOString().split('T')[0])}</div>
 <table>${rows}</table>
 <script>window.print();<\/script>
 </body></html>`);

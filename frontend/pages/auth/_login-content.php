@@ -4,14 +4,14 @@
         this.error = '';
         this.loading = true;
         try {
-            const res = await fetch('/CMCdemo/backend/api/auth/login', {
+            const res = await fetch('/blcm/backend/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: this.username, password: this.password })
             });
             const data = await res.json();
             if (data.success) {
-                window.location.href = '/CMCdemo/frontend/pages/dashboard/index.php';
+                window.location.href = '/blcm/frontend/pages/dashboard/index.php';
             } else {
                 this.error = data.message || 'Login failed';
             }
@@ -25,7 +25,7 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-navy-800 rounded-xl mb-4">
-                <span class="text-2xl font-bold text-white">CMC</span>
+                <span class="text-2xl font-bold text-white">BLCM</span>
             </div>
             <h1 class="text-2xl font-bold text-v2-text">Case Management Center</h1>
             <p class="text-v2-text-light mt-1">Bridge Law & Associates</p>

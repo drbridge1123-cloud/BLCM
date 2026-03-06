@@ -248,7 +248,7 @@ function healthTrackerPage() {
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
 
-                const res = await fetch('/CMCdemo/backend/api/health-ledger/import', {
+                const res = await fetch('/blcm/backend/api/health-ledger/import', {
                     method: 'POST',
                     body: formData
                 });

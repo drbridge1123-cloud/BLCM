@@ -96,7 +96,7 @@
                         @click="toggleExpand(item.id)">
                         <td><span class="sp-case-num" x-text="item.case_number"></span></td>
                         <td><span class="sp-client" style="font-size:12px; max-width:150px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" x-text="item.client_name"></span></td>
-                        <td><span style="font-size:11px; color:#1a2535;" x-text="item.client_phone || '—'"></span></td>
+                        <td><span style="font-size:11px; color:#1a2535;" x-text="formatPhoneNumber(item.client_phone) || '—'"></span></td>
                         <td><span style="font-size:11px; color:#1a2535; max-width:160px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" x-text="item.client_email || '—'"></span></td>
                         <td><span class="sp-date-main" style="font-size:11px;" x-text="formatDate(item.doi)"></span></td>
                         <td>
@@ -209,23 +209,22 @@
     </div><!-- /sp-card -->
 
     <!-- ═══ Log Follow-up Modal ═══ -->
-    <div x-show="showFollowupModal" x-cloak class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" @click.self="showFollowupModal = false">
-        <div class="sp-card" style="width:100%; max-width:520px; margin:16px;" @click.stop>
-            <div class="sp-gold-bar"></div>
-            <div class="sp-header" style="padding:16px 20px;">
-                <h3 class="sp-title" style="font-size:15px; flex:1;">Log Follow-up</h3>
-                <button @click="showFollowupModal = false" style="color:#8a8a82; font-size:18px; cursor:pointer; background:none; border:none;">&times;</button>
+    <div x-show="showFollowupModal" x-cloak class="sp-modal-overlay" @click.self="showFollowupModal = false">
+        <div class="sp-modal-box" style="max-width:520px;" @click.stop>
+            <div class="sp-modal-header">
+                <h3 class="sp-modal-title">Log Follow-up</h3>
+                <button @click="showFollowupModal = false" class="sp-modal-close">&times;</button>
             </div>
-            <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px;">
+            <div class="sp-modal-body">
                 <div style="font-size:12px; color:#8a8a82;" x-text="followupForm._label"></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="sp-form-grid-2">
                     <div>
-                        <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Follow-up Date *</label>
-                        <input type="date" x-model="followupForm.followup_date" class="sp-search" style="width:100%; padding:8px 12px;">
+                        <label class="sp-form-label">Follow-up Date *</label>
+                        <input type="date" x-model="followupForm.followup_date" class="sp-search" style="width:100%;">
                     </div>
                     <div>
-                        <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Method *</label>
-                        <select x-model="followupForm.followup_type" class="sp-select" style="width:100%; padding:8px 12px;">
+                        <label class="sp-form-label">Method *</label>
+                        <select x-model="followupForm.followup_type" class="sp-select" style="width:100%;">
                             <option value="">Select...</option>
                             <option value="phone">Phone</option>
                             <option value="email">Email</option>
@@ -235,10 +234,10 @@
                         </select>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="sp-form-grid-2">
                     <div>
-                        <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Result *</label>
-                        <select x-model="followupForm.contact_result" class="sp-select" style="width:100%; padding:8px 12px;">
+                        <label class="sp-form-label">Result *</label>
+                        <select x-model="followupForm.contact_result" class="sp-select" style="width:100%;">
                             <option value="">Select...</option>
                             <option value="reached">Reached</option>
                             <option value="voicemail">Voicemail</option>
@@ -249,8 +248,8 @@
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Treatment Status</label>
-                        <select x-model="followupForm.treatment_status_update" class="sp-select" style="width:100%; padding:8px 12px;">
+                        <label class="sp-form-label">Treatment Status</label>
+                        <select x-model="followupForm.treatment_status_update" class="sp-select" style="width:100%;">
                             <option value="">No Change</option>
                             <option value="in_treatment">Still In Treatment</option>
                             <option value="treatment_done">Treatment Completed</option>
@@ -258,18 +257,18 @@
                     </div>
                 </div>
                 <div>
-                    <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Next Follow-up Date</label>
-                    <input type="date" x-model="followupForm.next_followup_date" class="sp-search" style="width:100%; padding:8px 12px;">
+                    <label class="sp-form-label">Next Follow-up Date</label>
+                    <input type="date" x-model="followupForm.next_followup_date" class="sp-search" style="width:100%;">
                     <p style="font-size:10px; color:#8a8a82; margin-top:4px;">Leave blank to auto-calculate (+21 days)</p>
                 </div>
                 <div>
-                    <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Notes</label>
-                    <textarea x-model="followupForm.notes" rows="2" class="sp-search" style="width:100%; padding:8px 12px; resize:none;" placeholder="Optional notes..."></textarea>
+                    <label class="sp-form-label">Notes</label>
+                    <textarea x-model="followupForm.notes" rows="2" class="sp-search" style="width:100%; resize:none;" placeholder="Optional notes..."></textarea>
                 </div>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px; padding:12px 20px; background:#fafaf8; border-top:1px solid #f5f2ee;">
+            <div class="sp-modal-footer">
                 <button @click="showFollowupModal = false" class="sp-btn">Cancel</button>
-                <button @click="submitFollowup()" :disabled="saving" class="sp-new-btn">
+                <button @click="submitFollowup()" :disabled="saving" class="sp-new-btn-navy">
                     <span x-show="!saving">Save Follow-up</span>
                     <span x-show="saving">Saving...</span>
                 </button>
@@ -278,25 +277,24 @@
     </div>
 
     <!-- ═══ Send to Billing Modal ═══ -->
-    <div x-show="showCompleteModal" x-cloak class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" @click.self="showCompleteModal = false">
-        <div class="sp-card" style="width:100%; max-width:420px; margin:16px;" @click.stop>
-            <div class="sp-gold-bar"></div>
-            <div class="sp-header" style="padding:16px 20px;">
-                <h3 class="sp-title" style="font-size:15px; flex:1;">Send to Billing</h3>
-                <button @click="showCompleteModal = false" style="color:#8a8a82; font-size:18px; cursor:pointer; background:none; border:none;">&times;</button>
+    <div x-show="showCompleteModal" x-cloak class="sp-modal-overlay" @click.self="showCompleteModal = false">
+        <div class="sp-modal-box" style="max-width:440px;" @click.stop>
+            <div class="sp-modal-header">
+                <h3 class="sp-modal-title">Send to Billing</h3>
+                <button @click="showCompleteModal = false" class="sp-modal-close">&times;</button>
             </div>
-            <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px;">
+            <div class="sp-modal-body">
                 <div style="background:rgba(26,158,106,.04); border:1px solid rgba(26,158,106,.15); border-radius:8px; padding:12px 16px; font-size:12px; color:#1a9e6a;">
                     <strong x-text="completeForm._label"></strong> treatment is complete. This will move the case to <strong>Billing (Records Collection)</strong> status.
                 </div>
                 <div>
-                    <label style="font-size:11px; font-weight:600; color:#8a8a82; display:block; margin-bottom:4px; font-family:'IBM Plex Sans',sans-serif;">Note (optional)</label>
-                    <textarea x-model="completeForm.note" rows="2" class="sp-search" style="width:100%; padding:8px 12px; resize:none;" placeholder="Optional note..."></textarea>
+                    <label class="sp-form-label">Note (optional)</label>
+                    <textarea x-model="completeForm.note" rows="2" class="sp-search" style="width:100%; resize:none;" placeholder="Optional note..."></textarea>
                 </div>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px; padding:12px 20px; background:#fafaf8; border-top:1px solid #f5f2ee;">
+            <div class="sp-modal-footer">
                 <button @click="showCompleteModal = false" class="sp-btn">Cancel</button>
-                <button @click="submitComplete()" :disabled="saving" class="sp-new-btn" style="background:#1a9e6a;">
+                <button @click="submitComplete()" :disabled="saving" class="sp-new-btn-navy" style="background:#1a9e6a;">
                     <span x-show="!saving">Confirm & Send to Billing</span>
                     <span x-show="saving">Processing...</span>
                 </button>

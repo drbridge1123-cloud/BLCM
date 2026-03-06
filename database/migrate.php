@@ -1,9 +1,9 @@
 <?php
 /**
- * CMC Data Migration Script
- * Migrates data from MRMS (mrms) + Commission (commission_db) → CMC (cmc_db)
+ * BLCM Data Migration Script
+ * Migrates data from MRMS (mrms) + Commission (commission_db) → BLCM (blcm_db)
  *
- * Run in browser: http://localhost/CMCdemo/database/migrate.php
+ * Run in browser: http://localhost/blcm/database/migrate.php
  */
 
 ini_set('display_errors', 1);
@@ -18,7 +18,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('X-Accel-Buffering: no');
 header('Cache-Control: no-cache');
 
-echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>CMC Migration</title>';
+echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>BLCM Migration</title>';
 echo '<style>body{font-family:monospace;background:#1a1a2e;color:#e0e0e0;padding:20px;font-size:13px;line-height:1.6}';
 echo '.ok{color:#4ade80}.err{color:#f87171}.warn{color:#fbbf24}.info{color:#60a5fa}.head{color:#c084fc;font-weight:bold;font-size:15px}';
 echo '.phase{background:#2a2a4a;padding:10px 15px;margin:15px 0 5px;border-left:3px solid #818cf8;font-size:14px;font-weight:bold;color:#a5b4fc}';
@@ -26,7 +26,7 @@ echo '.summary{background:#1e3a2e;padding:15px;margin:20px 0;border:1px solid #4
 echo '.fail-summary{background:#3a1e1e;border-color:#f87171}';
 echo '</style></head><body>';
 echo '<div class="head">═══════════════════════════════════════════</div>';
-echo '<div class="head">  CMC Data Migration: MRMS + Commission → CMC</div>';
+echo '<div class="head">  BLCM Data Migration: MRMS + Commission → BLCM</div>';
 echo '<div class="head">═══════════════════════════════════════════</div><br>';
 flush();
 
@@ -63,18 +63,18 @@ function phase($title) {
 // ────────────────────────────────────────
 $mrms = connectDB('mrms');
 $comm = connectDB('commission_db');
-$cmc  = connectDB('cmc_db');
+$blcm = connectDB('blcm_db');
 
-if (!$mrms || !$comm || !$cmc) {
+if (!$mrms || !$comm || !$blcm) {
     msg('Cannot proceed without all 3 database connections.', 'err');
     exit;
 }
-msg('Connected to all 3 databases: mrms, commission_db, cmc_db', 'ok');
+msg('Connected to all 3 databases: mrms, commission_db, blcm_db', 'ok');
 
 // ────────────────────────────────────────
 // Safety check & auto-truncate: clear existing data
 // ────────────────────────────────────────
-$allCmcTables = [
+$allBlcmTables = [
     // Reverse FK dependency order for safe truncation
     'hl_request_attachments', 'hl_requests', 'health_ledger_items',
     'bank_statement_entries', 'send_log', 'mbr_lines',
@@ -99,13 +99,13 @@ $allCmcTables = [
     'users',
 ];
 
-$cmc->exec('SET FOREIGN_KEY_CHECKS = 0');
+$blcm->exec('SET FOREIGN_KEY_CHECKS = 0');
 $hasData = false;
-foreach ($allCmcTables as $t) {
+foreach ($allBlcmTables as $t) {
     try {
-        $count = (int)$cmc->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
+        $count = (int)$blcm->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
         if ($count > 0) {
-            $cmc->exec("TRUNCATE TABLE {$t}");
+            $blcm->exec("TRUNCATE TABLE {$t}");
             msg("  Truncated {$t} ({$count} rows)", 'warn');
             $hasData = true;
         }
@@ -113,22 +113,22 @@ foreach ($allCmcTables as $t) {
         // Table might not exist yet
     }
 }
-$cmc->exec('SET FOREIGN_KEY_CHECKS = 1');
+$blcm->exec('SET FOREIGN_KEY_CHECKS = 1');
 if ($hasData) {
-    msg('Existing data cleared from cmc_db', 'warn');
+    msg('Existing data cleared from blcm_db', 'warn');
 } else {
-    msg('cmc_db tables are empty — ready for migration', 'ok');
+    msg('blcm_db tables are empty — ready for migration', 'ok');
 }
 echo '<br>';
 
 // ────────────────────────────────────────
 // Disable FK checks
 // ────────────────────────────────────────
-$cmc->exec('SET FOREIGN_KEY_CHECKS = 0');
+$blcm->exec('SET FOREIGN_KEY_CHECKS = 0');
 msg('Foreign key checks disabled', 'info');
 
 // ════════════════════════════════════════
-// PHASE 0: Schema alignment — add columns that exist in MRMS but not CMC
+// PHASE 0: Schema alignment — add columns that exist in MRMS but not BLCM
 // ════════════════════════════════════════
 phase('Phase 0: Schema Alignment');
 
@@ -156,7 +156,7 @@ $alterations = [
 
 foreach ($alterations as $sql) {
     try {
-        $cmc->exec($sql);
+        $blcm->exec($sql);
     } catch (PDOException $e) {
         // Column/modification may already exist — skip silently
         if (strpos($e->getMessage(), 'Duplicate column') === false) {
@@ -169,9 +169,9 @@ msg('Schema alignment complete — extra columns added to providers, letter_temp
 $stats = [];
 
 /**
- * Copy an entire table from source DB to cmc_db, preserving IDs
+ * Copy an entire table from source DB to blcm_db, preserving IDs
  */
-function copyTable($src, $cmc, $tableName, $srcTable = null, $transform = null, $ignoreDupes = false) {
+function copyTable($src, $blcm, $tableName, $srcTable = null, $transform = null, $ignoreDupes = false) {
     global $stats;
     $srcTable = $srcTable ?: $tableName;
 
@@ -210,7 +210,7 @@ function copyTable($src, $cmc, $tableName, $srcTable = null, $transform = null, 
 
             try {
                 $verb = $ignoreDupes ? 'INSERT IGNORE' : 'INSERT';
-                $stmt = $cmc->prepare("{$verb} INTO `{$tableName}` ({$colStr}) VALUES ({$phStr})");
+                $stmt = $blcm->prepare("{$verb} INTO `{$tableName}` ({$colStr}) VALUES ({$phStr})");
                 $stmt->execute(array_values($row));
                 if ($stmt->rowCount() > 0) $inserted++;
                 else $skipped++;
@@ -240,21 +240,21 @@ function copyTable($src, $cmc, $tableName, $srcTable = null, $transform = null, 
 // ════════════════════════════════════════
 phase('Phase 1: MRMS Independent Tables');
 
-// Users — MRMS uses password_hash, CMC also uses password_hash
-copyTable($mrms, $cmc, 'users');
-copyTable($mrms, $cmc, 'providers');
-copyTable($mrms, $cmc, 'insurance_companies');
+// Users — MRMS uses password_hash, BLCM also uses password_hash
+copyTable($mrms, $blcm, 'users');
+copyTable($mrms, $blcm, 'providers');
+copyTable($mrms, $blcm, 'insurance_companies');
 
 // ════════════════════════════════════════
 // PHASE 2: MRMS 1st-level Dependent Tables
 // ════════════════════════════════════════
 phase('Phase 2: MRMS 1st-level Dependent Tables');
 
-copyTable($mrms, $cmc, 'cases', null, null, true); // ignoreDupes for duplicate case_numbers
-copyTable($mrms, $cmc, 'adjusters');
-copyTable($mrms, $cmc, 'provider_contacts');
-copyTable($mrms, $cmc, 'letter_templates');
-copyTable($mrms, $cmc, 'letter_template_versions');
+copyTable($mrms, $blcm, 'cases', null, null, true); // ignoreDupes for duplicate case_numbers
+copyTable($mrms, $blcm, 'adjusters');
+copyTable($mrms, $blcm, 'provider_contacts');
+copyTable($mrms, $blcm, 'letter_templates');
+copyTable($mrms, $blcm, 'letter_template_versions');
 
 // ════════════════════════════════════════
 // PHASE 3: MRMS 2nd-level Dependent Tables
@@ -262,7 +262,7 @@ copyTable($mrms, $cmc, 'letter_template_versions');
 phase('Phase 3: MRMS 2nd-level Dependent Tables');
 
 // case_providers needs ENUM transform: treating→not_started, no_records→received_complete
-copyTable($mrms, $cmc, 'case_providers', null, function($row) {
+copyTable($mrms, $blcm, 'case_providers', null, function($row) {
     if ($row['overall_status'] === 'treating') {
         $row['overall_status'] = 'not_started';
     } elseif ($row['overall_status'] === 'no_records') {
@@ -271,10 +271,10 @@ copyTable($mrms, $cmc, 'case_providers', null, function($row) {
     return $row;
 });
 
-copyTable($mrms, $cmc, 'case_documents');
-copyTable($mrms, $cmc, 'notifications');
-copyTable($mrms, $cmc, 'activity_log');
-copyTable($mrms, $cmc, 'messages');
+copyTable($mrms, $blcm, 'case_documents');
+copyTable($mrms, $blcm, 'notifications');
+copyTable($mrms, $blcm, 'activity_log');
+copyTable($mrms, $blcm, 'messages');
 
 // ════════════════════════════════════════
 // PHASE 4: MRMS 3rd-level Dependent Tables
@@ -282,56 +282,56 @@ copyTable($mrms, $cmc, 'messages');
 phase('Phase 4: MRMS 3rd-level Dependent Tables');
 
 // record_requests — MRMS doesn't have template_id, department, template_data
-// We need to only copy columns that exist in MRMS and let CMC-only cols default to NULL
-copyTable($mrms, $cmc, 'record_requests', null, function($row) {
-    // Add CMC-only nullable columns if not present
+// We need to only copy columns that exist in MRMS and let BLCM-only cols default to NULL
+copyTable($mrms, $blcm, 'record_requests', null, function($row) {
+    // Add BLCM-only nullable columns if not present
     if (!isset($row['template_id'])) $row['template_id'] = null;
     if (!isset($row['department'])) $row['department'] = null;
     if (!isset($row['template_data'])) $row['template_data'] = null;
     return $row;
 });
 
-copyTable($mrms, $cmc, 'record_receipts');
-copyTable($mrms, $cmc, 'case_notes');
-copyTable($mrms, $cmc, 'request_attachments');
-copyTable($mrms, $cmc, 'deadline_changes');
-copyTable($mrms, $cmc, 'mbr_reports');
-copyTable($mrms, $cmc, 'case_negotiations');
-copyTable($mrms, $cmc, 'provider_negotiations');
-copyTable($mrms, $cmc, 'mr_fee_payments');
+copyTable($mrms, $blcm, 'record_receipts');
+copyTable($mrms, $blcm, 'case_notes');
+copyTable($mrms, $blcm, 'request_attachments');
+copyTable($mrms, $blcm, 'deadline_changes');
+copyTable($mrms, $blcm, 'mbr_reports');
+copyTable($mrms, $blcm, 'case_negotiations');
+copyTable($mrms, $blcm, 'provider_negotiations');
+copyTable($mrms, $blcm, 'mr_fee_payments');
 
 // ════════════════════════════════════════
 // PHASE 5: MRMS 4th-level Dependent Tables
 // ════════════════════════════════════════
 phase('Phase 5: MRMS 4th-level Dependent Tables');
 
-copyTable($mrms, $cmc, 'mbr_lines');
-copyTable($mrms, $cmc, 'send_log');
-copyTable($mrms, $cmc, 'bank_statement_entries');
-copyTable($mrms, $cmc, 'health_ledger_items');
-copyTable($mrms, $cmc, 'hl_requests');
-copyTable($mrms, $cmc, 'hl_request_attachments');
+copyTable($mrms, $blcm, 'mbr_lines');
+copyTable($mrms, $blcm, 'send_log');
+copyTable($mrms, $blcm, 'bank_statement_entries');
+copyTable($mrms, $blcm, 'health_ledger_items');
+copyTable($mrms, $blcm, 'hl_requests');
+copyTable($mrms, $blcm, 'hl_request_attachments');
 
 // ════════════════════════════════════════
 // PHASE 6: Commission Data
 // ════════════════════════════════════════
 phase('Phase 6: Commission Data');
 
-// Step 1: Merge Commission users into CMC users
+// Step 1: Merge Commission users into BLCM users
 msg('  Merging Commission users...', 'info');
 $commUsers = $comm->query("SELECT * FROM users")->fetchAll();
-$userIdMap = []; // commission user_id → cmc user_id
+$userIdMap = []; // commission user_id → blcm user_id
 
 foreach ($commUsers as $cu) {
-    // Check if username already exists in CMC (from MRMS import)
-    $existing = $cmc->query("SELECT id FROM users WHERE username = " . $cmc->quote($cu['username']))->fetch();
+    // Check if username already exists in BLCM (from MRMS import)
+    $existing = $blcm->query("SELECT id FROM users WHERE username = " . $blcm->quote($cu['username']))->fetch();
 
     if ($existing) {
         // User exists — update commission fields
         $userIdMap[$cu['id']] = (int)$existing['id'];
-        $cmc->prepare("UPDATE users SET commission_rate = ?, uses_presuit_offer = ?, display_name = COALESCE(display_name, ?) WHERE id = ?")
+        $blcm->prepare("UPDATE users SET commission_rate = ?, uses_presuit_offer = ?, display_name = COALESCE(display_name, ?) WHERE id = ?")
             ->execute([$cu['commission_rate'], $cu['uses_presuit_offer'], $cu['display_name'], $existing['id']]);
-        msg("    User '{$cu['username']}' matched to CMC id={$existing['id']} — commission fields updated", 'info');
+        msg("    User '{$cu['username']}' matched to BLCM id={$existing['id']} — commission fields updated", 'info');
     } else {
         // New user — insert with mapped fields
         $role = 'staff';
@@ -339,11 +339,11 @@ foreach ($commUsers as $cu) {
         elseif ($cu['role'] === 'admin') $role = 'admin';
         elseif (isset($cu['is_manager']) && $cu['is_manager']) $role = 'manager';
 
-        $stmt = $cmc->prepare("INSERT INTO users (username, password_hash, full_name, display_name, role, commission_rate, uses_presuit_offer, is_active, created_at)
+        $stmt = $blcm->prepare("INSERT INTO users (username, password_hash, full_name, display_name, role, commission_rate, uses_presuit_offer, is_active, created_at)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $cu['username'],
-            $cu['password'],  // Commission uses 'password', CMC uses 'password_hash'
+            $cu['password'],  // Commission uses 'password', BLCM uses 'password_hash'
             $cu['display_name'],
             $cu['display_name'],
             $role,
@@ -352,9 +352,9 @@ foreach ($commUsers as $cu) {
             $cu['is_active'],
             $cu['created_at'],
         ]);
-        $newId = (int)$cmc->lastInsertId();
+        $newId = (int)$blcm->lastInsertId();
         $userIdMap[$cu['id']] = $newId;
-        msg("    User '{$cu['username']}' created in CMC as id={$newId} (role={$role})", 'ok');
+        msg("    User '{$cu['username']}' created in BLCM as id={$newId} (role={$role})", 'ok');
     }
 }
 $stats['commission_users'] = ['status' => 'ok', 'count' => count($commUsers), 'mapped' => count($userIdMap)];
@@ -374,15 +374,15 @@ $empInserted = 0;
 $empErrors = 0;
 
 foreach ($empCases as $ec) {
-    $cmcUserId = $userIdMap[$ec['user_id']] ?? $ec['user_id'];
-    $cmcReviewedBy = ($ec['reviewed_by'] && isset($userIdMap[$ec['reviewed_by']])) ? $userIdMap[$ec['reviewed_by']] : $ec['reviewed_by'];
+    $blcmUserId = $userIdMap[$ec['user_id']] ?? $ec['user_id'];
+    $blcmReviewedBy = ($ec['reviewed_by'] && isset($userIdMap[$ec['reviewed_by']])) ? $userIdMap[$ec['reviewed_by']] : $ec['reviewed_by'];
 
     // Status mapping: pending → unpaid
     $status = $ec['status'];
     if ($status === 'pending') $status = 'unpaid';
 
     try {
-        $stmt = $cmc->prepare("INSERT INTO employee_commissions
+        $stmt = $blcm->prepare("INSERT INTO employee_commissions
             (case_number, client_name, case_type, employee_user_id, created_by,
              settled, presuit_offer, difference, fee_rate, legal_fee, discounted_legal_fee,
              commission_rate, commission, is_marketing,
@@ -391,11 +391,11 @@ foreach ($empCases as $ec) {
             VALUES (?,?,?,?,?, ?,?,?,?,?,?, ?,?,?, ?,?,?,?, ?,?,?,?)");
         $stmt->execute([
             $ec['case_number'], $ec['client_name'], $ec['case_type'] ?? 'Auto',
-            $cmcUserId, $cmcUserId,
+            $blcmUserId, $blcmUserId,
             $ec['settled'], $ec['presuit_offer'], $ec['difference'],
             $ec['fee_rate'], $ec['legal_fee'], $ec['discounted_legal_fee'],
             $ec['user_commission_rate'] ?? 10.00, $ec['commission'], 0,
-            $status, $ec['check_received'], $ec['reviewed_at'], $cmcReviewedBy,
+            $status, $ec['check_received'], $ec['reviewed_at'], $blcmReviewedBy,
             $ec['month'], $ec['note'], $ec['submitted_at'], $ec['deleted_at'],
         ]);
         $empInserted++;
@@ -415,7 +415,7 @@ $attInserted = 0;
 $attErrors = 0;
 
 foreach ($attCases as $ac) {
-    $cmcUserId = $userIdMap[$ac['user_id']] ?? $ac['user_id'];
+    $blcmUserId = $userIdMap[$ac['user_id']] ?? $ac['user_id'];
 
     // Map phase/status
     $phase = $ac['phase'] ?? 'demand';
@@ -427,7 +427,7 @@ foreach ($attCases as $ac) {
     $feeRate = $ac['fee_rate'] ?? null;
 
     try {
-        $stmt = $cmc->prepare("INSERT INTO attorney_cases
+        $stmt = $blcm->prepare("INSERT INTO attorney_cases
             (case_number, client_name, case_type, attorney_user_id, created_by,
              phase, status,
              assigned_date, demand_deadline, demand_settled_date,
@@ -446,7 +446,7 @@ foreach ($attCases as $ac) {
             VALUES (?,?,?,?,?, ?,?, ?,?,?, ?, ?,?,?, ?,?,?, ?,?,?,?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?)");
         $stmt->execute([
             $ac['case_number'], $ac['client_name'], $ac['case_type'] ?? 'Auto',
-            $cmcUserId, $cmcUserId,
+            $blcmUserId, $blcmUserId,
             $phase, $status,
             $ac['assigned_date'] ?? null, $ac['demand_deadline'] ?? null, $ac['demand_settled_date'] ?? null,
             $ac['demand_duration_days'] ?? null,
@@ -476,13 +476,13 @@ $stats['attorney_cases'] = ['status' => $attErrors > 0 ? 'partial' : 'ok', 'coun
 msg('  Migrating remaining Commission tables...', 'info');
 
 // litigation_cases
-copyTable($comm, $cmc, 'litigation_cases', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'litigation_cases', null, function($row) use ($userIdMap) {
     $row['user_id'] = $userIdMap[$row['user_id']] ?? $row['user_id'];
     return $row;
 });
 
 // referral_entries
-copyTable($comm, $cmc, 'referral_entries', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'referral_entries', null, function($row) use ($userIdMap) {
     if (isset($row['case_manager_id']) && $row['case_manager_id']) {
         $row['case_manager_id'] = $userIdMap[$row['case_manager_id']] ?? $row['case_manager_id'];
     }
@@ -496,7 +496,7 @@ copyTable($comm, $cmc, 'referral_entries', null, function($row) use ($userIdMap)
 });
 
 // traffic_cases
-copyTable($comm, $cmc, 'traffic_cases', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'traffic_cases', null, function($row) use ($userIdMap) {
     $row['user_id'] = $userIdMap[$row['user_id']] ?? $row['user_id'];
     if (isset($row['requested_by']) && $row['requested_by']) {
         $row['requested_by'] = $userIdMap[$row['requested_by']] ?? $row['requested_by'];
@@ -505,7 +505,7 @@ copyTable($comm, $cmc, 'traffic_cases', null, function($row) use ($userIdMap) {
 });
 
 // traffic_case_files
-copyTable($comm, $cmc, 'traffic_case_files', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'traffic_case_files', null, function($row) use ($userIdMap) {
     if (isset($row['uploaded_by']) && $row['uploaded_by']) {
         $row['uploaded_by'] = $userIdMap[$row['uploaded_by']] ?? $row['uploaded_by'];
     }
@@ -513,7 +513,7 @@ copyTable($comm, $cmc, 'traffic_case_files', null, function($row) use ($userIdMa
 });
 
 // demand_requests
-copyTable($comm, $cmc, 'demand_requests', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'demand_requests', null, function($row) use ($userIdMap) {
     if (isset($row['requested_by']) && $row['requested_by']) {
         $row['requested_by'] = $userIdMap[$row['requested_by']] ?? $row['requested_by'];
     }
@@ -524,7 +524,7 @@ copyTable($comm, $cmc, 'demand_requests', null, function($row) use ($userIdMap) 
 });
 
 // traffic_requests
-copyTable($comm, $cmc, 'traffic_requests', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'traffic_requests', null, function($row) use ($userIdMap) {
     if (isset($row['requested_by']) && $row['requested_by']) {
         $row['requested_by'] = $userIdMap[$row['requested_by']] ?? $row['requested_by'];
     }
@@ -535,20 +535,20 @@ copyTable($comm, $cmc, 'traffic_requests', null, function($row) use ($userIdMap)
 });
 
 // deadline_extension_requests
-copyTable($comm, $cmc, 'deadline_extension_requests', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'deadline_extension_requests', null, function($row) use ($userIdMap) {
     if (isset($row['user_id']) && $row['user_id']) {
         $row['user_id'] = $userIdMap[$row['user_id']] ?? $row['user_id'];
     }
     if (isset($row['reviewed_by']) && $row['reviewed_by']) {
         $row['reviewed_by'] = $userIdMap[$row['reviewed_by']] ?? $row['reviewed_by'];
     }
-    // Remove case_id if it references Commission DB cases (not CMC cases)
+    // Remove case_id if it references Commission DB cases (not BLCM cases)
     if (isset($row['case_id'])) $row['case_id'] = null;
     return $row;
 });
 
 // employee_goals
-copyTable($comm, $cmc, 'employee_goals', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'employee_goals', null, function($row) use ($userIdMap) {
     if (isset($row['user_id']) && $row['user_id']) {
         $row['user_id'] = $userIdMap[$row['user_id']] ?? $row['user_id'];
     }
@@ -559,11 +559,11 @@ copyTable($comm, $cmc, 'employee_goals', null, function($row) use ($userIdMap) {
 });
 
 // performance_snapshots
-copyTable($comm, $cmc, 'performance_snapshots', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'performance_snapshots', null, function($row) use ($userIdMap) {
     if (isset($row['employee_id']) && $row['employee_id']) {
         $row['employee_id'] = $userIdMap[$row['employee_id']] ?? $row['employee_id'];
     }
-    // Remove extra columns that may exist in Commission but not in CMC
+    // Remove extra columns that may exist in Commission but not in BLCM
     unset($row['avg_total_days'], $row['demand_resolution_rate'],
           $row['deadline_compliance_rate'], $row['avg_days_before_deadline'],
           $row['overdue_cases_count'], $row['active_cases_count'],
@@ -572,7 +572,7 @@ copyTable($comm, $cmc, 'performance_snapshots', null, function($row) use ($userI
 });
 
 // manager_team
-copyTable($comm, $cmc, 'manager_team', null, function($row) use ($userIdMap) {
+copyTable($comm, $blcm, 'manager_team', null, function($row) use ($userIdMap) {
     if (isset($row['manager_id']) && $row['manager_id']) {
         $row['manager_id'] = $userIdMap[$row['manager_id']] ?? $row['manager_id'];
     }
@@ -590,7 +590,7 @@ phase('Phase 7: Schema updates (Migration 004)');
 // Check if 'team' column already exists on users table
 $teamColExists = false;
 try {
-    $cols = $cmc->query("SHOW COLUMNS FROM users LIKE 'team'")->fetchAll();
+    $cols = $blcm->query("SHOW COLUMNS FROM users LIKE 'team'")->fetchAll();
     $teamColExists = count($cols) > 0;
 } catch (PDOException $e) {}
 
@@ -598,8 +598,8 @@ if (!$teamColExists) {
     msg('  Applying migration 004 schema changes...', 'info');
     try {
         // Add team to users
-        $cmc->exec("ALTER TABLE users ADD COLUMN team VARCHAR(50) NULL AFTER role");
-        $cmc->exec("CREATE INDEX idx_users_team ON users(team)");
+        $blcm->exec("ALTER TABLE users ADD COLUMN team VARCHAR(50) NULL AFTER role");
+        $blcm->exec("CREATE INDEX idx_users_team ON users(team)");
         msg('  users.team column added', 'ok');
     } catch (PDOException $e) {
         msg('  users.team: ' . $e->getMessage(), 'warn');
@@ -607,7 +607,7 @@ if (!$teamColExists) {
 
     try {
         // Update cases.status ENUM to new codes
-        $cmc->exec("ALTER TABLE cases MODIFY COLUMN status ENUM(
+        $blcm->exec("ALTER TABLE cases MODIFY COLUMN status ENUM(
             'ini','rec','verification','rfd','neg',
             'final_verification','accounting','closed'
         ) NOT NULL DEFAULT 'ini'");
@@ -630,7 +630,7 @@ if (!$teamColExists) {
     ];
     foreach ($addCols as $sql) {
         try {
-            $cmc->exec($sql);
+            $blcm->exec($sql);
         } catch (PDOException $e) {
             // Column may already exist
         }
@@ -639,7 +639,7 @@ if (!$teamColExists) {
 
     // Create prelitigation_followups if not exists
     try {
-        $cmc->exec("CREATE TABLE IF NOT EXISTS prelitigation_followups (
+        $blcm->exec("CREATE TABLE IF NOT EXISTS prelitigation_followups (
             id INT AUTO_INCREMENT PRIMARY KEY,
             case_id INT NOT NULL,
             followup_date DATE NOT NULL,
@@ -662,7 +662,7 @@ if (!$teamColExists) {
 
     // Create accounting_disbursements if not exists
     try {
-        $cmc->exec("CREATE TABLE IF NOT EXISTS accounting_disbursements (
+        $blcm->exec("CREATE TABLE IF NOT EXISTS accounting_disbursements (
             id INT AUTO_INCREMENT PRIMARY KEY,
             case_id INT NOT NULL,
             disbursement_type ENUM('client_payment','provider_payment','attorney_fee','mr_cost_reimbursement','lien_payment','other') NOT NULL,
@@ -694,7 +694,7 @@ if (!$teamColExists) {
 // ════════════════════════════════════════
 // RE-ENABLE FK CHECKS
 // ════════════════════════════════════════
-$cmc->exec('SET FOREIGN_KEY_CHECKS = 1');
+$blcm->exec('SET FOREIGN_KEY_CHECKS = 1');
 msg('<br>Foreign key checks re-enabled', 'info');
 
 // ════════════════════════════════════════

@@ -131,7 +131,7 @@ function trackerPage() {
         },
 
         goToCase(caseId, cpId) {
-            let url = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + caseId;
+            let url = '/blcm/frontend/pages/bl-cases/detail.php?id=' + caseId;
             if (cpId) url += '&cp=' + cpId;
             window.location.href = url;
         },

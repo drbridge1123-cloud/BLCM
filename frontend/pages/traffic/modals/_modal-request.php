@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <label class="sp-form-label">Phone</label>
-                    <input type="text" x-model="requestForm.client_phone" class="sp-search" style="width:100%;">
+                    <input type="text" x-model="requestForm.client_phone" @blur="autoFormatPhone($el)" class="sp-search" style="width:100%;">
                 </div>
             </div>
             <div class="sp-form-grid-2">

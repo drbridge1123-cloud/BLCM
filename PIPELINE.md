@@ -1,8 +1,8 @@
-# CMC Case Lifecycle Pipeline
+# BLCM Case Lifecycle Pipeline
 
 ## Overview
 
-This document describes the full case lifecycle from initial client contact to commission payout. Each stage corresponds to a page/module in the CMC system.
+This document describes the full case lifecycle from initial client contact to commission payout. Each stage corresponds to a page/module in the BLCM system.
 
 ---
 

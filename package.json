@@ -1,5 +1,5 @@
 {
-  "name": "cmcdemo",
+  "name": "blcm",
   "private": true,
   "scripts": {
     "build:css": "npx @tailwindcss/cli -i ./frontend/assets/css/tailwind-input.css -o ./frontend/assets/css/tailwind.css --minify",

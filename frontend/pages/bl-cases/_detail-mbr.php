@@ -430,29 +430,28 @@
                 </div>
 
                 <!-- Insurance Quick Add Modal (Full) -->
-                <div x-show="showInsQuickAdd" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
-                     @keydown.escape.window="showInsQuickAdd && (showInsQuickAdd = false)">
-                    <div class="fixed inset-0" style="background:rgba(0,0,0,.45)" @click="showInsQuickAdd = false"></div>
-                    <form @submit.prevent="saveInsQuickAdd()" class="icm relative z-10" @click.stop style="display:flex; flex-direction:column; max-height:90vh;">
-                        <div class="icm-header" style="flex-shrink:0;">
+                <div x-show="showInsQuickAdd" class="sp-modal-overlay" style="display:none;"
+                     @keydown.escape.window="showInsQuickAdd && (showInsQuickAdd = false)" @click="showInsQuickAdd = false">
+                    <form @submit.prevent="saveInsQuickAdd()" class="sp-modal-box" style="max-width:560px" @click.stop>
+                        <div class="sp-modal-header">
                             <div>
                                 <h3>New Insurance Company</h3>
-                                <p class="icm-subtitle">Add a new insurance company</p>
+                                <p class="mbr-modal-subtitle">Add a new insurance company</p>
                             </div>
-                            <button type="button" class="icm-close" @click="showInsQuickAdd = false">
+                            <button type="button" class="sp-modal-close" @click="showInsQuickAdd = false">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
-                        <div class="icm-body" style="flex:1; min-height:0;">
-                            <div class="icm-section"><span>Basic Info</span></div>
+                        <div class="sp-modal-body">
+                            <div class="mbr-modal-divider"><span>Basic Info</span></div>
                             <div style="display:flex; gap:12px;">
                                 <div style="flex:1;">
-                                    <label class="icm-label">Company Name <span class="icm-req">*</span></label>
-                                    <input type="text" x-model="insNewCompany.name" required class="icm-input">
+                                    <label class="sp-form-label">Company Name <span class="mbr-req">*</span></label>
+                                    <input type="text" x-model="insNewCompany.name" required class="sp-search">
                                 </div>
                                 <div style="flex:1;">
-                                    <label class="icm-label">Type <span class="icm-req">*</span></label>
-                                    <select x-model="insNewCompany.type" required class="icm-select">
+                                    <label class="sp-form-label">Type <span class="mbr-req">*</span></label>
+                                    <select x-model="insNewCompany.type" required class="sp-select">
                                         <option value="auto">Auto</option>
                                         <option value="health">Health</option>
                                         <option value="workers_comp">Worker's Comp</option>
@@ -464,55 +463,55 @@
                                 </div>
                             </div>
 
-                            <div class="icm-section"><span>Contact</span></div>
+                            <div class="mbr-modal-divider"><span>Contact</span></div>
                             <div style="display:flex; gap:12px;">
                                 <div style="flex:1;">
-                                    <label class="icm-label">Phone</label>
-                                    <input type="text" x-model="insNewCompany.phone" class="icm-input">
+                                    <label class="sp-form-label">Phone</label>
+                                    <input type="text" x-model="insNewCompany.phone" @blur="autoFormatPhone($el)" class="sp-search">
                                 </div>
                                 <div style="flex:1;">
-                                    <label class="icm-label">Fax</label>
-                                    <input type="text" x-model="insNewCompany.fax" class="icm-input">
+                                    <label class="sp-form-label">Fax</label>
+                                    <input type="text" x-model="insNewCompany.fax" @blur="autoFormatPhone($el)" class="sp-search">
                                 </div>
                                 <div style="flex:1;">
-                                    <label class="icm-label">Email</label>
-                                    <input type="email" x-model="insNewCompany.email" class="icm-input">
+                                    <label class="sp-form-label">Email</label>
+                                    <input type="email" x-model="insNewCompany.email" class="sp-search">
                                 </div>
                             </div>
 
-                            <div class="icm-section"><span>Address</span></div>
+                            <div class="mbr-modal-divider"><span>Address</span></div>
                             <div>
-                                <label class="icm-label">Street Address</label>
-                                <input type="text" x-model="insNewCompany.address" class="icm-input">
+                                <label class="sp-form-label">Street Address</label>
+                                <input type="text" x-model="insNewCompany.address" class="sp-search">
                             </div>
                             <div style="display:flex; gap:12px;">
                                 <div style="flex:3;">
-                                    <label class="icm-label">City</label>
-                                    <input type="text" x-model="insNewCompany.city" class="icm-input">
+                                    <label class="sp-form-label">City</label>
+                                    <input type="text" x-model="insNewCompany.city" class="sp-search">
                                 </div>
                                 <div style="flex:1;">
-                                    <label class="icm-label">State</label>
-                                    <input type="text" x-model="insNewCompany.state" maxlength="2" class="icm-input" style="text-transform:uppercase;">
+                                    <label class="sp-form-label">State</label>
+                                    <input type="text" x-model="insNewCompany.state" maxlength="2" class="sp-search" style="text-transform:uppercase;">
                                 </div>
                                 <div style="flex:1.5;">
-                                    <label class="icm-label">ZIP</label>
-                                    <input type="text" x-model="insNewCompany.zip" maxlength="10" class="icm-input">
+                                    <label class="sp-form-label">ZIP</label>
+                                    <input type="text" x-model="insNewCompany.zip" maxlength="10" class="sp-search">
                                 </div>
                             </div>
 
-                            <div class="icm-section"><span>Other</span></div>
+                            <div class="mbr-modal-divider"><span>Other</span></div>
                             <div>
-                                <label class="icm-label">Website</label>
-                                <input type="url" x-model="insNewCompany.website" class="icm-input" placeholder="https://...">
+                                <label class="sp-form-label">Website</label>
+                                <input type="url" x-model="insNewCompany.website" class="sp-search" placeholder="https://...">
                             </div>
                             <div>
-                                <label class="icm-label">Notes</label>
-                                <textarea x-model="insNewCompany.notes" class="icm-textarea" placeholder="Optional notes..."></textarea>
+                                <label class="sp-form-label">Notes</label>
+                                <textarea x-model="insNewCompany.notes" class="sp-search" style="resize:vertical;min-height:70px;line-height:1.5" placeholder="Optional notes..."></textarea>
                             </div>
                         </div>
-                        <div class="icm-footer" style="flex-shrink:0;">
-                            <button type="button" @click="showInsQuickAdd = false" class="icm-btn-cancel">Cancel</button>
-                            <button type="submit" :disabled="insQuickAddSaving" class="icm-btn-submit">
+                        <div class="sp-modal-footer">
+                            <button type="button" @click="showInsQuickAdd = false" class="sp-btn">Cancel</button>
+                            <button type="submit" :disabled="insQuickAddSaving" class="sp-new-btn">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -524,49 +523,13 @@
 
                 <!-- Insurance modal + autocomplete styles -->
                 <style>
-                    /* ICM (Insurance Company Modal) — reused from Database page */
-                    .icm { width: 560px; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,.24); overflow: hidden; background: #fff; }
-                    .icm-header { background: #0F1B2D; padding: 18px 24px; display: flex; align-items: flex-start; justify-content: space-between; }
-                    .icm-header h3 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
-                    .icm-subtitle { font-size: 12px; font-weight: 500; color: var(--gold, #C9A84C); margin: 2px 0 0; }
-                    .icm-close { background: none; border: none; color: rgba(255,255,255,.35); cursor: pointer; padding: 4px; transition: color .15s; }
-                    .icm-close:hover { color: rgba(255,255,255,.75); }
-                    .icm-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; }
-                    .icm-body::-webkit-scrollbar { width: 4px; }
-                    .icm-body::-webkit-scrollbar-track { background: transparent; }
-                    .icm-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
-                    .icm-section { display: flex; align-items: center; gap: 10px; margin: 0; }
-                    .icm-section::before, .icm-section::after { content: ''; flex: 1; height: 1px; background: var(--border, #d0cdc5); }
-                    .icm-section span { font-size: 9px; font-weight: 700; color: var(--muted, #8a8a82); text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
-                    .icm-label { display: block; font-size: 9.5px; font-weight: 700; color: var(--muted, #8a8a82); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
-                    .icm-req { color: var(--gold, #C9A84C); }
-                    .icm-input, .icm-select, .icm-textarea {
-                        width: 100%; background: #fafafa; border: 1.5px solid var(--border, #d0cdc5); border-radius: 7px;
-                        padding: 9px 12px; font-size: 13px; color: #1a2535; transition: all .15s; outline: none; font-family: inherit;
-                    }
-                    .icm-input:focus, .icm-select:focus, .icm-textarea:focus {
-                        border-color: var(--gold, #C9A84C); background: #fff;
-                        box-shadow: 0 0 0 3px rgba(201,168,76,.1);
-                    }
-                    .icm-select {
-                        appearance: none; cursor: pointer; padding-right: 30px;
-                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a82' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-                        background-repeat: no-repeat; background-position: right 10px center;
-                    }
-                    .icm-textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
-                    .icm-footer { padding: 14px 24px; border-top: 1px solid var(--border, #d0cdc5); display: flex; justify-content: flex-end; gap: 10px; }
-                    .icm-btn-cancel {
-                        background: #fff; border: 1.5px solid var(--border, #d0cdc5); border-radius: 7px;
-                        padding: 9px 18px; font-size: 13px; font-weight: 500; color: #5A6B82; cursor: pointer; transition: all .15s;
-                    }
-                    .icm-btn-cancel:hover { background: #f8f7f4; border-color: #ccc; }
-                    .icm-btn-submit {
-                        background: var(--gold, #C9A84C); color: #fff; border: none; border-radius: 7px;
-                        padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer;
-                        box-shadow: 0 2px 8px rgba(201,168,76,.35); display: flex; align-items: center; gap: 6px; transition: all .15s;
-                    }
-                    .icm-btn-submit:hover { filter: brightness(1.05); box-shadow: 0 4px 12px rgba(201,168,76,.45); }
-                    .icm-btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+                    /* Local modal helpers */
+                    .mbr-modal-subtitle { font-size: 12px; font-weight: 500; color: var(--gold, #C9A84C); margin: 2px 0 0; }
+                    .mbr-modal-divider { display: flex; align-items: center; gap: 10px; margin: 0; }
+                    .mbr-modal-divider::before, .mbr-modal-divider::after { content: ''; flex: 1; height: 1px; background: var(--border, #d0cdc5); }
+                    .mbr-modal-divider span { font-size: 9px; font-weight: 700; color: var(--muted, #8a8a82); text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
+                    .mbr-req { color: var(--gold, #C9A84C); }
+                    .sp-modal-header h3 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
 
                     /* Autocomplete styles */
                     .mbr-ins-display { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:7px 10px;
@@ -591,13 +554,7 @@
 
                 <!-- MBR Import Preview Modal -->
                 <style>
-                    .mim-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); }
-                    .mim-dialog { position:relative; width:800px; max-width:calc(100vw - 32px); border-radius:12px; box-shadow:0 24px 64px rgba(0,0,0,.24); overflow:hidden; background:#fff; z-index:10; }
-                    .mim-header { background:#0F1B2D; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; }
-                    .mim-header h3 { font-size:15px; font-weight:700; color:#fff; margin:0; }
-                    .mim-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,.35); transition:color .15s; padding:0; line-height:0; }
-                    .mim-close:hover { color:rgba(255,255,255,.75); }
-                    .mim-body { padding:24px; display:flex; flex-direction:column; gap:16px; }
+                    /* MIM content styles */
                     .mim-summary { display:flex; gap:12px; }
                     .mim-summary-card { flex:1; background:#fafafa; border-radius:8px; padding:10px 16px; text-align:center; }
                     .mim-summary-card .mim-val { font-size:17px; font-weight:700; color:#1a1a1a; }
@@ -618,26 +575,19 @@
                     .mim-type-badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; }
                     .mim-type-provider { background:#dbeafe; color:#1d4ed8; }
                     .mim-type-rx { background:#f3e8ff; color:#7c3aed; }
-                    .mim-footer { padding:14px 24px; border-top:1px solid var(--border,#d0cdc5); display:flex; justify-content:flex-end; gap:10px; }
-                    .mim-btn-cancel { padding:8px 18px; font-size:13px; font-weight:600; border-radius:7px; border:1.5px solid var(--border,#d0cdc5); background:#fff; color:#555; cursor:pointer; transition:all .15s; }
-                    .mim-btn-cancel:hover { background:#fafafa; border-color:#ccc; }
-                    .mim-btn-submit { padding:8px 18px; font-size:13px; font-weight:700; border-radius:7px; border:none; background:var(--gold,#C9A84C); color:#fff; cursor:pointer; box-shadow:0 2px 8px rgba(201,168,76,.35); display:flex; align-items:center; gap:6px; transition:all .15s; }
-                    .mim-btn-submit:hover { filter:brightness(1.05); }
-                    .mim-btn-submit:disabled { opacity:.55; cursor:not-allowed; }
                 </style>
-                <div x-show="showMbrImportModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
-                     @keydown.escape.window="showMbrImportModal = false">
-                    <div class="mim-backdrop" @click="showMbrImportModal = false"></div>
-                    <div class="mim-dialog" @click.stop>
-                        <div class="mim-header">
+                <div x-show="showMbrImportModal" class="sp-modal-overlay" style="display:none;"
+                     @keydown.escape.window="showMbrImportModal = false" @click="showMbrImportModal = false">
+                    <div class="sp-modal-box sp-modal-box-lg" @click.stop>
+                        <div class="sp-modal-header">
                             <h3>Import Medical Balance Preview</h3>
-                            <button type="button" class="mim-close" @click="showMbrImportModal = false">
+                            <button type="button" class="sp-modal-close" @click="showMbrImportModal = false">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         </div>
-                        <div class="mim-body">
+                        <div class="sp-modal-body">
                             <div class="mim-summary">
                                 <div class="mim-summary-card">
                                     <p class="mim-val" x-text="mbrImportSummary.count || 0"></p>
@@ -706,10 +656,10 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="mim-footer">
-                            <button type="button" @click="showMbrImportModal = false" class="mim-btn-cancel">Cancel</button>
+                        <div class="sp-modal-footer">
+                            <button type="button" @click="showMbrImportModal = false" class="sp-btn">Cancel</button>
                             <button type="button" @click="confirmMbrImport()" :disabled="mbrImporting"
-                                    class="mim-btn-submit">
+                                    class="sp-new-btn">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>

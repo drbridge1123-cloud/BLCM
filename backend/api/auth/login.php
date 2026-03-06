@@ -10,7 +10,7 @@ $errors = validateRequired($input, ['username', 'password']);
 if (!empty($errors)) errorResponse(implode(', ', $errors));
 
 // ── Rate limiting (file-based, per username) ──
-$rateLimitDir = sys_get_temp_dir() . '/cmc_rate_limit';
+$rateLimitDir = sys_get_temp_dir() . '/blcm_rate_limit';
 if (!is_dir($rateLimitDir)) @mkdir($rateLimitDir, 0700, true);
 
 $username = strtolower(trim($input['username']));

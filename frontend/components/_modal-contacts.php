@@ -54,7 +54,7 @@
                                         <template x-for="cl in clientResults" :key="cl.id">
                                             <button type="button" @click="selectClient(cl)" class="ct-dropdown-item">
                                                 <span x-text="cl.name" style="font-weight:600;"></span>
-                                                <span x-text="cl.dob || ''" style="font-size:11px; color:#8a8a82;"></span>
+                                                <span x-text="formatDate(cl.dob)" style="font-size:11px; color:#8a8a82;"></span>
                                             </button>
                                         </template>
                                         <button type="button" @click="startAddClient()" class="ct-dropdown-create">
@@ -74,16 +74,19 @@
                                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                         <span x-text="clientForm.name"></span>
                                     </p>
-                                    <button @click="clearClientMatch()" class="ct-change-btn">Change</button>
+                                    <div style="display:flex; gap:6px;">
+                                        <button @click="clientMatchStatus = 'adding'" class="ct-action-btn ct-btn-edit"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+                                        <button @click="clearClientMatch()" class="ct-action-btn ct-btn-change"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Change</button>
+                                    </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Date of Birth</label>
-                                        <input type="text" :value="clientForm.dob || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="clientForm.dob ? clientForm.dob.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$2/$3/$1') : '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" :value="clientForm.phone || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="formatPhoneNumber(clientForm.phone) || '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                 </div>
                                 <div>
@@ -101,8 +104,8 @@
                         <template x-if="clientMatchStatus === 'adding'">
                             <div style="display:flex; flex-direction:column; gap:14px;">
                                 <div style="display:flex; align-items:center; justify-content:space-between;">
-                                    <div class="ct-section-divider" style="flex:1;">New Client</div>
-                                    <button @click="clearClientMatch()" class="ct-change-btn" style="margin-left:8px;">Back to Search</button>
+                                    <div class="ct-section-divider" style="flex:1;" x-text="clientForm.id ? 'Edit Client' : 'New Client'"></div>
+                                    <button @click="clientForm.id ? (clientMatchStatus = 'matched') : clearClientMatch()" class="ct-btn-cancel" style="margin-left:8px;" x-text="clientForm.id ? 'Cancel' : 'Back to Search'"></button>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
@@ -117,7 +120,7 @@
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" x-model="clientForm.phone" class="ct-input" placeholder="(000) 000-0000">
+                                        <input type="text" x-model="clientForm.phone" @blur="autoFormatPhone($el)" class="ct-input" placeholder="(000) 000-0000">
                                     </div>
                                     <div>
                                         <label class="ct-label">Email</label>
@@ -186,7 +189,10 @@
                                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                         <span x-text="adjuster3rdForm.first_name + ' ' + adjuster3rdForm.last_name"></span>
                                     </p>
-                                    <button @click="clearAdjuster()" class="ct-change-btn">Change</button>
+                                    <div style="display:flex; gap:6px;">
+                                        <button @click="adjuster3rdMatchStatus = 'adding'; insuranceSearch = adjuster3rdForm.company_name || ''" class="ct-action-btn ct-btn-edit"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+                                        <button @click="clearAdjuster()" class="ct-action-btn ct-btn-change"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Change</button>
+                                    </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
@@ -201,11 +207,11 @@
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" :value="adjuster3rdForm.phone || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="formatPhoneNumber(adjuster3rdForm.phone) || '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                     <div>
                                         <label class="ct-label">Fax</label>
-                                        <input type="text" :value="adjuster3rdForm.fax || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="formatPhoneNumber(adjuster3rdForm.fax) || '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                 </div>
                                 <div>
@@ -219,8 +225,8 @@
                         <template x-if="adjuster3rdMatchStatus === 'adding'">
                             <div style="display:flex; flex-direction:column; gap:14px;">
                                 <div style="display:flex; align-items:center; justify-content:space-between;">
-                                    <div class="ct-section-divider" style="flex:1;">New Adjuster</div>
-                                    <button @click="clearAdjuster()" class="ct-change-btn" style="margin-left:8px;">Back to Search</button>
+                                    <div class="ct-section-divider" style="flex:1;" x-text="adjuster3rdForm.id ? 'Edit Adjuster' : 'New Adjuster'"></div>
+                                    <button @click="adjuster3rdForm.id ? (adjuster3rdMatchStatus = 'matched') : clearAdjuster()" class="ct-btn-cancel" style="margin-left:8px;" x-text="adjuster3rdForm.id ? 'Cancel' : 'Back to Search'"></button>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
@@ -276,11 +282,11 @@
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" x-model="adjuster3rdForm.phone" class="ct-input" placeholder="(000) 000-0000">
+                                        <input type="text" x-model="adjuster3rdForm.phone" @blur="autoFormatPhone($el)" class="ct-input" placeholder="(000) 000-0000">
                                     </div>
                                     <div>
                                         <label class="ct-label">Fax</label>
-                                        <input type="text" x-model="adjuster3rdForm.fax" class="ct-input" placeholder="(000) 000-0000">
+                                        <input type="text" x-model="adjuster3rdForm.fax" @blur="autoFormatPhone($el)" class="ct-input" placeholder="(000) 000-0000">
                                     </div>
                                 </div>
                                 <div>
@@ -330,7 +336,10 @@
                                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                         <span x-text="adjusterUmForm.first_name + ' ' + adjusterUmForm.last_name"></span>
                                     </p>
-                                    <button @click="clearAdjuster()" class="ct-change-btn">Change</button>
+                                    <div style="display:flex; gap:6px;">
+                                        <button @click="adjusterUmMatchStatus = 'adding'; insuranceSearch = adjusterUmForm.company_name || ''" class="ct-action-btn ct-btn-edit"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+                                        <button @click="clearAdjuster()" class="ct-action-btn ct-btn-change"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Change</button>
+                                    </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
@@ -345,11 +354,11 @@
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" :value="adjusterUmForm.phone || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="formatPhoneNumber(adjusterUmForm.phone) || '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                     <div>
                                         <label class="ct-label">Fax</label>
-                                        <input type="text" :value="adjusterUmForm.fax || '-'" class="ct-input ct-readonly" disabled>
+                                        <input type="text" :value="formatPhoneNumber(adjusterUmForm.fax) || '-'" class="ct-input ct-readonly" disabled>
                                     </div>
                                 </div>
                                 <div>
@@ -363,8 +372,8 @@
                         <template x-if="adjusterUmMatchStatus === 'adding'">
                             <div style="display:flex; flex-direction:column; gap:14px;">
                                 <div style="display:flex; align-items:center; justify-content:space-between;">
-                                    <div class="ct-section-divider" style="flex:1;">New Adjuster</div>
-                                    <button @click="clearAdjuster()" class="ct-change-btn" style="margin-left:8px;">Back to Search</button>
+                                    <div class="ct-section-divider" style="flex:1;" x-text="adjusterUmForm.id ? 'Edit Adjuster' : 'New Adjuster'"></div>
+                                    <button @click="adjusterUmForm.id ? (adjusterUmMatchStatus = 'matched') : clearAdjuster()" class="ct-btn-cancel" style="margin-left:8px;" x-text="adjusterUmForm.id ? 'Cancel' : 'Back to Search'"></button>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
@@ -420,11 +429,11 @@
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                     <div>
                                         <label class="ct-label">Phone</label>
-                                        <input type="text" x-model="adjusterUmForm.phone" class="ct-input" placeholder="(000) 000-0000">
+                                        <input type="text" x-model="adjusterUmForm.phone" @blur="autoFormatPhone($el)" class="ct-input" placeholder="(000) 000-0000">
                                     </div>
                                     <div>
                                         <label class="ct-label">Fax</label>
-                                        <input type="text" x-model="adjusterUmForm.fax" class="ct-input" placeholder="(000) 000-0000">
+                                        <input type="text" x-model="adjusterUmForm.fax" @blur="autoFormatPhone($el)" class="ct-input" placeholder="(000) 000-0000">
                                     </div>
                                 </div>
                                 <div>
@@ -507,11 +516,17 @@
     font-size:12.5px; font-weight:500; color:#C9A84C; margin:0;
     display:flex; align-items:center; gap:5px;
 }
-.ct-change-btn {
-    font-size:11px; color:#6b7280; background:none; border:none;
-    cursor:pointer; text-decoration:underline; font-family:inherit;
+.ct-action-btn {
+    font-size:11px; font-weight:500; font-family:inherit; cursor:pointer;
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 10px; border-radius:6px; border:1px solid; transition:all .15s;
 }
-.ct-change-btn:hover { color:#1a2535; }
+.ct-btn-edit { color:#92710a; background:#fdf8ec; border-color:#e8d8a0; }
+.ct-btn-edit:hover { background:#f8efd4; border-color:#d4be6a; }
+.ct-btn-change { color:#6b7280; background:#f9fafb; border-color:#e5e7eb; }
+.ct-btn-change:hover { background:#f3f4f6; border-color:#d1d5db; }
+.ct-btn-cancel { color:#6b7280; background:none; border:none; font-size:11px; font-weight:500; font-family:inherit; cursor:pointer; padding:3px 6px; }
+.ct-btn-cancel:hover { color:#1a2535; }
 .ct-section-divider {
     display:flex; align-items:center; gap:12px;
     font-size:9px; font-weight:700; color:#8a8a82;

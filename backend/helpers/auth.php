@@ -9,7 +9,7 @@ function startSecureSession() {
                  || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
         session_set_cookie_params([
             'lifetime' => SESSION_LIFETIME,
-            'path' => '/CMCdemo',
+            'path' => '/blcm',
             'domain' => '',
             'secure' => $isSecure,
             'httponly' => true,
@@ -29,7 +29,7 @@ function requireAuth() {
             echo json_encode(['success' => false, 'message' => 'Authentication required']);
             exit;
         }
-        header('Location: /CMCdemo/frontend/pages/auth/login.php');
+        header('Location: /blcm/frontend/pages/auth/login.php');
         exit;
     }
     return $_SESSION['user_id'];
@@ -41,7 +41,7 @@ function requireAdmin() {
         if (isApiRequest()) {
             errorResponse('Admin access required', 403);
         }
-        header('Location: /CMCdemo/frontend/pages/dashboard/index.php');
+        header('Location: /blcm/frontend/pages/dashboard/index.php');
         exit;
     }
 }
@@ -52,13 +52,13 @@ function requireAdminOrManager() {
         if (isApiRequest()) {
             errorResponse('Admin or Manager access required', 403);
         }
-        header('Location: /CMCdemo/frontend/pages/dashboard/index.php');
+        header('Location: /blcm/frontend/pages/dashboard/index.php');
         exit;
     }
 }
 
 /**
- * All available permissions in CMC
+ * All available permissions in BLCM
  */
 function getAllPermissions() {
     return [
@@ -147,7 +147,7 @@ function requirePermission($page) {
         if (isApiRequest()) {
             errorResponse('Access denied', 403);
         }
-        header('Location: /CMCdemo/frontend/pages/dashboard/index.php');
+        header('Location: /blcm/frontend/pages/dashboard/index.php');
         exit;
     }
 }

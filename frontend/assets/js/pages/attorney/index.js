@@ -654,18 +654,17 @@ function attorneyCasesPage() {
         //  SP format helpers (Settlement Pipeline design)
         // -------------------------------------------------------
 
-        /** Format date like "Jan 31, 2025" */
+        /** Format date → MM/DD/YYYY */
         spFormatDate(dateStr) {
             if (!dateStr) return '—';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return formatDate(dateStr) || '—';
         },
 
-        /** Format date short like "Feb 19" */
+        /** Format date short → MM/DD */
         spShort(dateStr) {
             if (!dateStr) return '—';
             const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
         },
 
         /** Days-left badge class */
@@ -752,7 +751,7 @@ function attorneyCasesPage() {
             }
             if (urlParams.get('from') === 'case-detail' && urlParams.get('case_id')) {
                 this.fromCaseDetail = true;
-                this.fromCaseDetailUrl = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
+                this.fromCaseDetailUrl = '/blcm/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
             }
 
             this.loadPendingCaseAssignments();

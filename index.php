@@ -1,3 +1,3 @@
 <?php
-header('Location: /CMCdemo/frontend/index.php');
+header('Location: /blcm/frontend/index.php');
 exit;

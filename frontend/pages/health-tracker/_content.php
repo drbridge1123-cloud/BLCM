@@ -157,7 +157,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-v2-text-mid mb-1">Carrier Contact Fax</label>
-                        <input type="text" x-model="addForm.carrier_contact_fax" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        <input type="text" x-model="addForm.carrier_contact_fax" @blur="autoFormatPhone($el)" class="w-full px-3 py-2 border rounded-lg text-sm">
                     </div>
                 </div>
                 <div>
@@ -235,7 +235,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-v2-text-mid mb-1">Carrier Contact Fax</label>
-                    <input type="text" x-model="editForm.carrier_contact_fax" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    <input type="text" x-model="editForm.carrier_contact_fax" @blur="autoFormatPhone($el)" class="w-full px-3 py-2 border rounded-lg text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-v2-text-mid mb-1">Note</label>

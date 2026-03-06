@@ -21,7 +21,7 @@
                                 </template>
                             </div>
                             <div style="display:flex; align-items:center; gap:10px; margin-top:2px;">
-                                <span style="font-size:11px; color:#9ca3af;" x-text="'DOI: ' + (pa.doi || '—')"></span>
+                                <span style="font-size:11px; color:#9ca3af;" x-text="'DOI: ' + formatDate(pa.doi)"></span>
                                 <template x-if="pa.assigned_by_name">
                                     <span style="font-size:11px; color:#9ca3af;" x-text="'From: ' + pa.assigned_by_name"></span>
                                 </template>

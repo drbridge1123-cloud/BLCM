@@ -1,5 +1,5 @@
 /**
- * CMC Shared Utilities & List Page Base Mixin
+ * BLCM Shared Utilities & List Page Base Mixin
  * ─────────────────────────────────────────────
  * Global helpers and a reusable mixin for all list pages.
  *

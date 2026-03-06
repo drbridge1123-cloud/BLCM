@@ -1,5 +1,5 @@
 /**
- * CMC - Alpine.js Global Stores
+ * BLCM - Alpine.js Global Stores
  */
 
 document.addEventListener('alpine:init', () => {
@@ -36,7 +36,7 @@ document.addEventListener('alpine:init', () => {
 
         async logout() {
             try { await api.post('auth/logout'); } catch (e) {}
-            window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
+            window.location.href = '/blcm/frontend/pages/auth/login.php';
         }
     });
 
@@ -95,11 +95,11 @@ document.addEventListener('alpine:init', () => {
 
     // Sidebar Store
     Alpine.store('sidebar', {
-        collapsed: localStorage.getItem('cmc_sidebar_collapsed') === 'true',
+        collapsed: localStorage.getItem('blcm_sidebar_collapsed') === 'true',
 
         toggle() {
             this.collapsed = !this.collapsed;
-            localStorage.setItem('cmc_sidebar_collapsed', this.collapsed);
+            localStorage.setItem('blcm_sidebar_collapsed', this.collapsed);
         }
     });
 });

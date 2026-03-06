@@ -775,7 +775,7 @@ function commissionsPage() {
             if (this.yearFilter) params.year = this.yearFilter;
             if (this.employeeFilter) params.employee_id = this.employeeFilter;
 
-            const url = '/CMCdemo/backend/api/commissions/export' + buildQueryString(params);
+            const url = '/blcm/backend/api/commissions/export' + buildQueryString(params);
             window.open(url, '_blank');
         },
 

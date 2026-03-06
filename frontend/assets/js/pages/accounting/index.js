@@ -66,7 +66,7 @@ function accountingTrackerPage() {
             }
             if (urlParams.get('case_id')) {
                 this.fromCaseDetail = true;
-                this.fromCaseDetailUrl = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
+                this.fromCaseDetailUrl = '/blcm/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
             }
 
             this.loadPendingCaseAssignments();
@@ -92,10 +92,10 @@ function accountingTrackerPage() {
 
         goToCase(item) {
             if (typeof item === 'object' && item.source_type === 'attorney') {
-                window.location.href = '/CMCdemo/frontend/pages/attorney/index.php';
+                window.location.href = '/blcm/frontend/pages/attorney/index.php';
             } else {
                 const id = typeof item === 'object' ? item.id : item;
-                window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + id;
+                window.location.href = '/blcm/frontend/pages/bl-cases/detail.php?id=' + id;
             }
         },
 

@@ -8,21 +8,30 @@ $userId = requireAuth();
 [$page, $perPage, $offset] = getPaginationParams();
 
 // Filters
-$status    = $_GET['status'] ?? null;
+$status = $_GET['status'] ?? null;
 $assignedTo = $_GET['assigned_to'] ?? null;
-$search    = $_GET['search'] ?? null;
-$sortBy    = $_GET['sort_by'] ?? 'c.created_at';
-$sortDir   = strtoupper($_GET['sort_dir'] ?? 'DESC');
+$search = $_GET['search'] ?? null;
+$sortBy = $_GET['sort_by'] ?? 'c.created_at';
+$sortDir = strtoupper($_GET['sort_dir'] ?? 'DESC');
 
 // Whitelist sort columns
 $allowedSorts = [
-    'c.id', 'c.case_number', 'c.client_name', 'c.client_dob', 'c.doi',
-    'c.status', 'c.created_at', 'c.updated_at', 'assigned_name'
+    'c.id',
+    'c.case_number',
+    'c.client_name',
+    'c.client_dob',
+    'c.doi',
+    'c.status',
+    'c.created_at',
+    'c.updated_at',
+    'assigned_name'
 ];
-if (!in_array($sortBy, $allowedSorts)) $sortBy = 'c.created_at';
-if (!in_array($sortDir, ['ASC', 'DESC'])) $sortDir = 'DESC';
+if (!in_array($sortBy, $allowedSorts))
+    $sortBy = 'c.created_at';
+if (!in_array($sortDir, ['ASC', 'DESC']))
+    $sortDir = 'DESC';
 
-$where  = '1=1';
+$where = '1=1';
 $params = [];
 
 // Multi-select status filter (comma-separated)
@@ -35,13 +44,38 @@ if ($status) {
 
 if ($assignedTo) {
     $where .= ' AND c.assigned_to = ?';
-    $params[] = (int)$assignedTo;
+    $params[] = (int) $assignedTo;
 }
 
 if ($search) {
     $where .= ' AND (c.client_name LIKE ? OR c.case_number LIKE ?)';
     $params[] = "%{$search}%";
     $params[] = "%{$search}%";
+}
+
+$clientId = $_GET['client_id'] ?? null;
+$providerId = $_GET['provider_id'] ?? null;
+$adjusterId = $_GET['adjuster_id'] ?? null;
+$insuranceCompanyId = $_GET['insurance_company_id'] ?? null;
+
+if ($clientId) {
+    $where .= ' AND c.client_id = ?';
+    $params[] = (int) $clientId;
+}
+
+if ($providerId) {
+    $where .= ' AND EXISTS (SELECT 1 FROM case_providers cp WHERE cp.case_id = c.id AND cp.provider_id = ?)';
+    $params[] = (int) $providerId;
+}
+
+if ($adjusterId) {
+    $where .= ' AND c.adjuster_id = ?';
+    $params[] = (int) $adjusterId;
+}
+
+if ($insuranceCompanyId) {
+    $where .= ' AND EXISTS (SELECT 1 FROM adjusters a WHERE a.id = c.adjuster_id AND a.insurance_company_id = ?)';
+    $params[] = (int) $insuranceCompanyId;
 }
 
 // Count total for pagination
@@ -91,10 +125,10 @@ $cases = dbFetchAll($sql, $queryParams);
 
 // Cast numeric fields
 foreach ($cases as &$row) {
-    $row['provider_total']    = (int)$row['provider_total'];
-    $row['provider_done']     = (int)$row['provider_done'];
-    $row['provider_overdue']  = (int)$row['provider_overdue'];
-    $row['provider_followup'] = (int)$row['provider_followup'];
+    $row['provider_total'] = (int) $row['provider_total'];
+    $row['provider_done'] = (int) $row['provider_done'];
+    $row['provider_overdue'] = (int) $row['provider_overdue'];
+    $row['provider_followup'] = (int) $row['provider_followup'];
 }
 unset($row);
 
@@ -126,19 +160,19 @@ $providerCounts = dbFetchOne("
 ");
 
 $summaryData = [
-    'total'                => (int)$summary['total'],
-    'active'               => (int)$summary['active'],
-    'ini'                  => (int)($summary['ini'] ?? 0),
-    'rec'                  => (int)($summary['rec'] ?? 0),
-    'verification'         => (int)($summary['verification'] ?? 0),
-    'rfd'                  => (int)($summary['rfd'] ?? 0),
-    'neg'                  => (int)($summary['neg'] ?? 0),
-    'lit'                  => (int)($summary['lit'] ?? 0),
-    'final_verification'   => (int)($summary['final_verification'] ?? 0),
-    'accounting'           => (int)($summary['accounting'] ?? 0),
-    'closed'               => (int)$summary['closed'],
-    'overdue_providers'    => (int)($providerCounts['overdue_providers'] ?? 0),
-    'not_started_providers'=> (int)($providerCounts['not_started_providers'] ?? 0),
+    'total' => (int) $summary['total'],
+    'active' => (int) $summary['active'],
+    'ini' => (int) ($summary['ini'] ?? 0),
+    'rec' => (int) ($summary['rec'] ?? 0),
+    'verification' => (int) ($summary['verification'] ?? 0),
+    'rfd' => (int) ($summary['rfd'] ?? 0),
+    'neg' => (int) ($summary['neg'] ?? 0),
+    'lit' => (int) ($summary['lit'] ?? 0),
+    'final_verification' => (int) ($summary['final_verification'] ?? 0),
+    'accounting' => (int) ($summary['accounting'] ?? 0),
+    'closed' => (int) $summary['closed'],
+    'overdue_providers' => (int) ($providerCounts['overdue_providers'] ?? 0),
+    'not_started_providers' => (int) ($providerCounts['not_started_providers'] ?? 0),
 ];
 
-paginatedResponse($cases, (int)$total, $page, $perPage, ['summary' => $summaryData]);
+paginatedResponse($cases, (int) $total, $page, $perPage, ['summary' => $summaryData]);

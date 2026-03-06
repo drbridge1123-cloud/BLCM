@@ -10,7 +10,7 @@
         <div class="sp-header" style="flex-wrap:wrap; gap:16px; padding:20px 24px 16px;">
             <div style="display:flex; align-items:center; width:100%; margin-bottom:12px;">
                 <div style="flex:1">
-                    <a x-show="fromAttorneyCases" x-cloak href="/CMCdemo/frontend/pages/attorney/index.php"
+                    <a x-show="fromAttorneyCases" x-cloak href="/blcm/frontend/pages/attorney/index.php"
                        style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#8a8a82; text-decoration:none; margin-bottom:4px;">&larr; Attorney Cases</a>
                     <div class="sp-eyebrow">Case Management</div>
                     <h1 class="sp-title">Cases</h1>
@@ -106,7 +106,7 @@
                         <tr><td colspan="12" class="sp-empty">No cases found</td></tr>
                     </template>
                     <template x-for="c in items" :key="c.id">
-                        <tr @click="window.location.href='/CMCdemo/frontend/pages/bl-cases/detail.php?id='+c.id"
+                        <tr @click="window.location.href='/blcm/frontend/pages/bl-cases/detail.php?id='+c.id"
                             :style="$store.auth.isStaff && !c.assigned_name ? 'opacity:.5' : ''">
 
                             <td><span class="sp-case-num" x-text="c.case_number"></span></td>

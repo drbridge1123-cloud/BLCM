@@ -79,11 +79,11 @@
                 <div class="sp-form-grid-2">
                     <div>
                         <label class="sp-form-label">Phone</label>
-                        <input type="text" x-model="quickAddForm.phone" class="qap-input" placeholder="(xxx) xxx-xxxx">
+                        <input type="text" x-model="quickAddForm.phone" @blur="autoFormatPhone($el)" class="qap-input" placeholder="(xxx) xxx-xxxx">
                     </div>
                     <div>
                         <label class="sp-form-label">Fax</label>
-                        <input type="text" x-model="quickAddForm.fax" class="qap-input" placeholder="(xxx) xxx-xxxx">
+                        <input type="text" x-model="quickAddForm.fax" @blur="autoFormatPhone($el)" class="qap-input" placeholder="(xxx) xxx-xxxx">
                     </div>
                 </div>
                 <div>

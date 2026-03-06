@@ -94,8 +94,7 @@ function clientsListPage() {
 
         formatDob(dob) {
             if (!dob) return '—';
-            const d = new Date(dob + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            return formatDate(dob) || '—';
         },
 
         formatAddress(c) {

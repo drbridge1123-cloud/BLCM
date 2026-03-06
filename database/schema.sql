@@ -1,13 +1,13 @@
 -- ============================================================
--- CMC (Case Management Center) — Full Database Schema
+-- BLCM (Bridge Law Case Management) — Full Database Schema
 -- Combines MRMS (28 tables) + Commission (13 tables)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS cmc_db
+CREATE DATABASE IF NOT EXISTS blcm_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE cmc_db;
+USE blcm_db;
 
 -- ============================================================
 -- 1. USERS

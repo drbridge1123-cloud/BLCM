@@ -36,7 +36,7 @@
                 <tr class="hover:bg-v2-bg">
                     <td class="px-3 py-2 font-medium" x-text="r.client_name"></td>
                     <td class="px-3 py-2 text-xs" x-text="r.court || '—'"></td>
-                    <td class="px-3 py-2 text-xs whitespace-nowrap" x-text="r.court_date ? r.court_date.slice(0,10) : '—'"></td>
+                    <td class="px-3 py-2 text-xs whitespace-nowrap" x-text="formatDate(r.court_date)"></td>
                     <td class="px-3 py-2 text-xs" x-text="r.charge || '—'"></td>
                     <td class="px-3 py-2 text-xs" x-text="r.requested_by_name"></td>
                     <td class="px-3 py-2 text-xs" x-text="r.assigned_to_name"></td>

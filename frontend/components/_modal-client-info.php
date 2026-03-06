@@ -32,7 +32,7 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <div>
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Phone</label>
-                    <input type="text" x-model="clientInfoForm.phone" class="sp-search" style="width:100%;" placeholder="(xxx) xxx-xxxx">
+                    <input type="text" x-model="clientInfoForm.phone" @blur="autoFormatPhone($el)" class="sp-search" style="width:100%;" placeholder="(xxx) xxx-xxxx">
                 </div>
                 <div>
                     <label style="display:block; font-size:9.5px; font-weight:700; color:#8a8a82; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Email</label>

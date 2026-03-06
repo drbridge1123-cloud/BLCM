@@ -147,13 +147,13 @@ function bankReconciliationPage() {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const response = await fetch('/CMCdemo/backend/api/bank-reconciliation/import', {
+                const response = await fetch('/blcm/backend/api/bank-reconciliation/import', {
                     method: 'POST',
                     body: formData
                 });
 
                 if (response.status === 401) {
-                    window.location.href = '/CMCdemo/frontend/pages/auth/login.php';
+                    window.location.href = '/blcm/frontend/pages/auth/login.php';
                     throw new Error('Session expired');
                 }
 
@@ -305,10 +305,7 @@ function bankReconciliationPage() {
         },
 
         formatDateTime(dateStr) {
-            if (!dateStr) return '-';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            return formatDateTime(dateStr);
         },
 
         paginationPages() {

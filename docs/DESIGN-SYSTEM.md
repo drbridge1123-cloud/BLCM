@@ -1,6 +1,6 @@
-# CMC Design System
+# BLCM Design System
 
-> Complete visual design reference for the CMC application.
+> Complete visual design reference for the BLCM application.
 
 ---
 

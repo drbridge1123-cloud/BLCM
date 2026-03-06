@@ -85,7 +85,7 @@ function prelitTrackerPage() {
         },
 
         goToCase(caseId) {
-            window.location.href = '/CMCdemo/frontend/pages/bl-cases/detail.php?id=' + caseId;
+            window.location.href = '/blcm/frontend/pages/bl-cases/detail.php?id=' + caseId;
         },
 
         getContactResultLabel(result) {
