@@ -755,9 +755,7 @@ function attorneyCasesPage() {
             }
 
             this.loadPendingCaseAssignments();
-            await this.loadUsers();
-            await this.loadStaff();
-            await this.loadStats();
+            await Promise.all([this.loadUsers(), this.loadStaff(), this.loadStats()]);
             if (this.search.trim()) {
                 // Search across all tabs when coming from URL
                 await Promise.all([

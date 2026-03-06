@@ -50,9 +50,8 @@ function bankReconciliationPage() {
 
         // ── Lifecycle ──
 
-        init() {
-            this.loadEntries();
-            this.loadBatchList();
+        async init() {
+            await Promise.all([this.loadEntries(), this.loadBatchList()]);
         },
 
         // ── Entries ──

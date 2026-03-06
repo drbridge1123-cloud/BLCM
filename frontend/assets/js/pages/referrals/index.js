@@ -93,8 +93,7 @@ function referralsPage() {
         //  Lifecycle
         // -------------------------------------------------------
         async init() {
-            await this.loadUsers();
-            await this.loadReferrals();
+            await Promise.all([this.loadUsers(), this.loadReferrals()]);
         },
 
         async loadUsers() {

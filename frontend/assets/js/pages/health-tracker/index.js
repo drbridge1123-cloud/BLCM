@@ -51,9 +51,8 @@ function healthTrackerPage() {
         importing: false,
         importResult: null,
 
-        init() {
-            this.loadUsers();
-            this.loadData(1);
+        async init() {
+            await Promise.all([this.loadUsers(), this.loadData(1)]);
         },
 
         // Override loadData to also compute stats

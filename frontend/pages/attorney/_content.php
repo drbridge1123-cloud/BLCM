@@ -14,7 +14,7 @@
     </div>
 
     <!-- Staff Tabs -->
-    <div class="sp-staff-bar" x-show="staffList.length > 1">
+    <div class="sp-staff-bar" x-show="staffList.length > 1" x-cloak>
         <button @click="staffFilter = ''; loadData(1)"
                 class="sp-staff-pill" :class="staffFilter === '' && 'on'">All</button>
         <template x-for="staff in staffList" :key="staff.id">
@@ -34,7 +34,7 @@
         <div class="sp-gold-bar"></div>
 
         <!-- Header: Demand -->
-        <div class="sp-header" x-show="activeTab === 'demand'">
+        <div class="sp-header" x-show="activeTab === 'demand'" x-cloak>
             <div>
                 <div class="sp-eyebrow">Settlement Pipeline</div>
                 <h2 class="sp-title">Negotiate &amp; Settle</h2>
@@ -60,7 +60,7 @@
         </div>
 
         <!-- Header: UIM -->
-        <div class="sp-header" x-show="activeTab === 'uim'">
+        <div class="sp-header" x-show="activeTab === 'uim'" x-cloak>
             <div>
                 <div class="sp-eyebrow">Uninsured Motorist</div>
                 <h2 class="sp-title">UIM Cases</h2>
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Header: Litigation -->
-        <div class="sp-header" x-show="activeTab === 'litigation'">
+        <div class="sp-header" x-show="activeTab === 'litigation'" x-cloak>
             <div>
                 <div class="sp-eyebrow">Attorney Cases</div>
                 <h2 class="sp-title">Litigation</h2>
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Header: Settled -->
-        <div class="sp-header" x-show="activeTab === 'settled'">
+        <div class="sp-header" x-show="activeTab === 'settled'" x-cloak>
             <div>
                 <div class="sp-eyebrow">Completed Cases</div>
                 <h2 class="sp-title">Settled Cases</h2>
@@ -188,7 +188,7 @@
         </div>
 
         <!-- Sub-filter bar (demand only) -->
-        <div class="sp-toolbar" x-show="activeTab === 'demand'" style="padding:8px 24px; gap:2px;">
+        <div class="sp-toolbar" x-show="activeTab === 'demand'" x-cloak style="padding:8px 24px; gap:2px;">
             <div class="sp-tabs">
                 <template x-for="f in demandSubFilters" :key="f.key">
                     <button class="sp-tab" :class="demandSubFilter === f.key && 'on'"
@@ -204,7 +204,7 @@
         </div>
 
         <!-- Sub-filter bar (UIM) -->
-        <div class="sp-toolbar" x-show="activeTab === 'uim'" style="padding:8px 24px; gap:2px;">
+        <div class="sp-toolbar" x-show="activeTab === 'uim'" x-cloak style="padding:8px 24px; gap:2px;">
             <div class="sp-tabs">
                 <template x-for="f in uimSubFilters" :key="f.key">
                     <button class="sp-tab" :class="uimSubFilter === f.key && 'on'"

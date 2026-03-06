@@ -95,9 +95,7 @@ function trackerPage() {
             const urlParams = new URLSearchParams(window.location.search);
             this.caseIdFilter = urlParams.get('case_id') || '';
 
-            this.loadStaff();
-            this.loadTemplates();
-            await this.loadData(1);
+            await Promise.all([this.loadStaff(), this.loadTemplates(), this.loadData(1)]);
 
             this.selectedItems = [];
             this.allSelected = false;

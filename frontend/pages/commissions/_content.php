@@ -201,7 +201,7 @@
             </div>
 
             <!-- Filters (active tab) -->
-            <div class="sp-toolbar-right" x-show="activeTab === 'active'" style="gap:6px;">
+            <div class="sp-toolbar-right" x-show="activeTab === 'active'" x-cloak style="gap:6px;">
                 <button class="ec-pill" :class="statusFilter === '' && 'on'"
                         @click="statusFilter = ''; commPage = 1; loadTab('active')">All</button>
                 <button class="ec-pill" :class="statusFilter === 'in_progress' && 'on'"
@@ -230,7 +230,7 @@
             </div>
 
             <!-- Filters (history tab) -->
-            <div class="sp-toolbar-right" x-show="activeTab === 'history'" style="gap:6px;">
+            <div class="sp-toolbar-right" x-show="activeTab === 'history'" x-cloak style="gap:6px;">
                 <button class="ec-pill" :class="historyStatusFilter === '' && 'on'"
                         @click="historyStatusFilter = ''; historyPage = 1; loadTab('history')">All</button>
                 <button class="ec-pill" :class="historyStatusFilter === 'paid' && 'on'"
@@ -259,7 +259,7 @@
             </div>
 
             <!-- Filters (attorney/my cases tab) -->
-            <div class="sp-toolbar-right" x-show="activeTab === 'attorney'" style="gap:6px;">
+            <div class="sp-toolbar-right" x-show="activeTab === 'attorney'" x-cloak style="gap:6px;">
                 <button class="ec-pill" :class="attorneyStatusFilter === '' && 'on'"
                         @click="attorneyStatusFilter = ''">All</button>
                 <button class="ec-pill" :class="attorneyStatusFilter === 'unpaid' && 'on'"

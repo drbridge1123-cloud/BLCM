@@ -21,8 +21,7 @@ function messagesPage() {
         },
 
         async init() {
-            this.loadStaff();
-            await this.loadMessages();
+            await Promise.all([this.loadStaff(), this.loadMessages()]);
 
             // Poll for new messages every 30 seconds
             setInterval(() => this.loadUnreadCount(), 30000);

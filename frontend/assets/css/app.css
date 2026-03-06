@@ -1,5 +1,8 @@
 /* BLCM App CSS Bundle — design system adapted from MRMS */
 
+/* Alpine.js cloak — hide elements until Alpine initializes */
+[x-cloak] { display: none !important; }
+
 /* ========== tokens.css ========== */
 /* BLCM — Design Tokens */
 :root {

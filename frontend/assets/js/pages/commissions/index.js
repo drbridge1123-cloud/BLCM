@@ -272,12 +272,13 @@ function commissionsPage() {
             if (this.isAdmin) {
                 this.tabs.push({ key: 'admin', label: 'Admin', count: 0 });
             }
-            await this.loadEmployees();
-            await Promise.all([this.loadStats(), this.loadAttorneyCases()]);
-            await this.loadTab('active');
-            if (this.isAdmin) {
-                await this.loadAdminCases();
-            }
+            await Promise.all([
+                this.loadEmployees(),
+                this.loadStats(),
+                this.loadAttorneyCases(),
+                this.loadTab('active'),
+                ...(this.isAdmin ? [this.loadAdminCases()] : [])
+            ]);
             this._syncTabCounts();
 
             // Handle hash navigation (e.g. #attorney from Attorney Cases page)

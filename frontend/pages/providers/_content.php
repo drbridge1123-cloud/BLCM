@@ -54,7 +54,7 @@
     </div>
 
     <!-- ══════ DATABASE TAB ══════ -->
-    <div x-show="pageTab === 'database'">
+    <div x-show="pageTab === 'database'" x-cloak>
 
         <style>
             .prov-row {

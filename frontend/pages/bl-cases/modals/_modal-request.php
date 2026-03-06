@@ -151,7 +151,7 @@
 
                 <!-- Template Selector -->
                 <div x-data="templateSelector('medical_records')"
-                    x-init="init(); $watch('selectedTemplateId', val => newRequest.template_id = val)"
+                    x-init="$watch('selectedTemplateId', val => newRequest.template_id = val)"
                     @template-selected="newRequest.template_id = $event.detail.templateId"
                     @auto-select-template.window="
                         if ($event.detail.type === 'follow_up') {
@@ -218,7 +218,7 @@
                 <div x-show="newRequest.request_method === 'email'"
                     x-data="{...documentSelector(caseId, currentProvider?.id), attachOpen: false}"
                     x-effect="if (selectedDocumentIds.length > 0) attachOpen = true"
-                    x-init="init(); $watch('selectedDocumentIds', val => newRequest.document_ids = val); $watch('showRequestModal', val => { if (val) loadDocuments() })"
+                    x-init="$watch('selectedDocumentIds', val => newRequest.document_ids = val); $watch('showRequestModal', val => { if (val) loadDocuments() })"
                     @documents-selected="newRequest.document_ids = $event.detail.documentIds"
                     @document-uploaded.window="loadDocuments()"
                     @document-generated.window="loadDocuments()"

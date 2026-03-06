@@ -69,9 +69,7 @@ function accountingTrackerPage() {
                 this.fromCaseDetailUrl = '/blcm/frontend/pages/bl-cases/detail.php?id=' + urlParams.get('case_id');
             }
 
-            this.loadPendingCaseAssignments();
-            this.loadStaff();
-            await this.loadData(1);
+            await Promise.all([this.loadPendingCaseAssignments(), this.loadStaff(), this.loadData(1)]);
         },
 
         async loadStaff() {

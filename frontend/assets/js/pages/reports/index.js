@@ -30,8 +30,7 @@ function reportsPage() {
         },
 
         async init() {
-            await this.loadEmployees();
-            await this.loadReport();
+            await Promise.all([this.loadEmployees(), this.loadReport()]);
         },
 
         switchTab(tab) {

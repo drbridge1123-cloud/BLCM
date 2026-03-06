@@ -48,8 +48,7 @@ function negotiatePanel(caseId) {
         },
 
         async init() {
-            await this.loadNegotiations();
-            await this.loadProviderNegotiations();
+            await Promise.all([this.loadNegotiations(), this.loadProviderNegotiations()]);
             this.loading = false;
         },
 

@@ -67,8 +67,7 @@ function trafficPage() {
         //  Lifecycle
         // -------------------------------------------------------
         async init() {
-            await this.loadCases();
-            await this.loadRequests();
+            await Promise.all([this.loadCases(), this.loadRequests()]);
         },
 
         async switchTab(tab) {
@@ -237,8 +236,7 @@ function trafficPage() {
                     showToast(e.message, 'error');
                 }
             }
-            await this.loadRequests();
-            await this.loadCases();
+            await Promise.all([this.loadRequests(), this.loadCases()]);
         },
 
         // -------------------------------------------------------
