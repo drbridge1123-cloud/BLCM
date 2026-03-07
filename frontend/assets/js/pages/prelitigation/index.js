@@ -37,9 +37,8 @@ function prelitTrackerPage() {
         _resetPageFilters() {
             this.activeFilter = '';
             this.treatmentStatusFilter = '';
-            // Preserve staffFilter for non-admin users (security)
             const user = Alpine.store('auth')?.user;
-            if (user && user.role !== 'admin' && user.role !== 'manager') {
+            if (user && user.team === 'prelitigation') {
                 this.staffFilter = user.id.toString();
             } else {
                 this.staffFilter = '';
@@ -51,9 +50,9 @@ function prelitTrackerPage() {
         },
 
         async init() {
-            // Auto-filter non-admin to own user
+            // Default to own cases if user belongs to this team
             const user = Alpine.store('auth')?.user;
-            if (user && user.role !== 'admin' && user.role !== 'manager') {
+            if (user && user.team === 'prelitigation') {
                 this.staffFilter = user.id.toString();
             }
 

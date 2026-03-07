@@ -24,7 +24,7 @@ $statusOrder = [
     'rfd'                => 4,
     'neg'                => 5,
     'lit'                => 6,
-    'final_verification' => 7,
+    'fbc'                => 7,
     'accounting'         => 8,
     'closed'             => 9,
 ];

@@ -15,23 +15,38 @@ $negotiations = dbFetchAll(
      FROM case_negotiations cn
      LEFT JOIN users u ON cn.created_by = u.id
      WHERE cn.case_id = ?
-     ORDER BY cn.coverage_type, cn.round_number",
+     ORDER BY cn.coverage_type, cn.coverage_index, cn.round_number",
     [$caseId]
 );
 
-// Group by coverage type
-$grouped = ['3rd_party' => [], 'um' => [], 'uim' => [], 'dv' => []];
-$bestOffers = ['3rd_party' => 0, 'um' => 0, 'uim' => 0, 'dv' => 0];
+// Group by (coverage_type, coverage_index) → tabs
+$tabMap = []; // key => ['rounds' => [], 'best_offer' => 0, 'adjuster_info' => {...}]
 $emptyAdj = ['insurance_company' => '', 'party' => '', 'adjuster_phone' => '', 'adjuster_fax' => '', 'adjuster_email' => '', 'claim_number' => ''];
-$adjusterInfo = ['3rd_party' => $emptyAdj, 'um' => $emptyAdj, 'uim' => $emptyAdj, 'dv' => $emptyAdj];
+$typeCounts = []; // count how many tabs per type (for labeling)
+$bestOffersByType = ['3rd_party' => 0, 'um' => 0, 'uim' => 0, 'pip' => 0, 'pd' => 0, 'dv' => 0, 'bi' => 0];
 
 foreach ($negotiations as $n) {
     $type = $n['coverage_type'];
-    $grouped[$type][] = $n;
+    $index = (int)$n['coverage_index'];
+    $key = "{$type}_{$index}";
 
-    // Extract adjuster info from the latest round (last one wins)
+    if (!isset($tabMap[$key])) {
+        $tabMap[$key] = [
+            'coverage_type' => $type,
+            'coverage_index' => $index,
+            'key' => $key,
+            'rounds' => [],
+            'best_offer' => 0,
+            'adjuster_info' => $emptyAdj,
+        ];
+        $typeCounts[$type] = ($typeCounts[$type] ?? 0) + 1;
+    }
+
+    $tabMap[$key]['rounds'][] = $n;
+
+    // Extract adjuster info from latest round (last one wins)
     if (!empty($n['insurance_company']) || !empty($n['party']) || !empty($n['adjuster_phone']) || !empty($n['adjuster_fax']) || !empty($n['adjuster_email']) || !empty($n['claim_number'])) {
-        $adjusterInfo[$type] = [
+        $tabMap[$key]['adjuster_info'] = [
             'insurance_company' => $n['insurance_company'] ?? '',
             'party' => $n['party'] ?? '',
             'adjuster_phone' => $n['adjuster_phone'] ?? '',
@@ -41,35 +56,80 @@ foreach ($negotiations as $n) {
         ];
     }
 
-    // Best offer = accepted round's offer, or highest offer if none accepted
+    // Best offer per tab: accepted > highest non-rejected
     $offer = (float)$n['offer_amount'];
     if ($n['status'] === 'accepted' && $offer > 0) {
-        $bestOffers[$type] = $offer;
-    } elseif ($bestOffers[$type] === 0 || ($offer > $bestOffers[$type] && $n['status'] !== 'rejected')) {
-        // Only update if no accepted offer found yet
+        $tabMap[$key]['best_offer'] = $offer;
+    } else {
         $hasAccepted = false;
-        foreach ($grouped[$type] as $r) {
+        foreach ($tabMap[$key]['rounds'] as $r) {
             if ($r['status'] === 'accepted') { $hasAccepted = true; break; }
         }
-        if (!$hasAccepted && $offer > $bestOffers[$type]) {
-            $bestOffers[$type] = $offer;
+        if (!$hasAccepted && $offer > $tabMap[$key]['best_offer']) {
+            $tabMap[$key]['best_offer'] = $offer;
         }
     }
 }
 
-// Determine active coverages (ones with at least one round)
-$activeCoverages = [];
-foreach ($grouped as $type => $rounds) {
-    if (!empty($rounds)) {
-        $activeCoverages[] = $type;
+// Build tabs array with labels
+$labels = ['3rd_party' => '3rd Party', 'um' => 'UM', 'uim' => 'UIM', 'pip' => 'PIP', 'pd' => 'PD', 'dv' => 'DV', 'bi' => 'BI'];
+$tabs = [];
+foreach ($tabMap as $key => $tab) {
+    $type = $tab['coverage_type'];
+    $baseLabel = $labels[$type] ?? $type;
+    // If multiple tabs of same type, append index
+    if (($typeCounts[$type] ?? 0) > 1) {
+        $tab['label'] = "{$baseLabel} ({$tab['coverage_index']})";
+    } else {
+        $tab['label'] = $baseLabel;
+    }
+    $tabs[] = $tab;
+
+    // Sum best offers by coverage type (for disbursement)
+    $bestOffersByType[$type] = ($bestOffersByType[$type] ?? 0) + $tab['best_offer'];
+}
+
+// Determine active coverages (unique types with at least one tab)
+$activeCoverages = array_values(array_unique(array_column($tabs, 'coverage_type')));
+
+// Fallback: if adjuster info is empty, populate from case_adjusters table
+$caseAdjusters = dbFetchAll(
+    "SELECT ca.coverage_type, ca.coverage_index, a.first_name, a.last_name, a.phone, a.fax, a.email, a.claim_number,
+            ic.name AS company_name
+     FROM case_adjusters ca
+     JOIN adjusters a ON a.id = ca.adjuster_id
+     LEFT JOIN insurance_companies ic ON ic.id = a.insurance_company_id
+     WHERE ca.case_id = ?",
+    [$caseId]
+);
+$adjFallback = [];
+foreach ($caseAdjusters as $adj) {
+    $key = $adj['coverage_type'] . '_' . ($adj['coverage_index'] ?? 1);
+    $adjFallback[$key] = [
+        'insurance_company' => $adj['company_name'] ?? '',
+        'party' => trim(($adj['first_name'] ?? '') . ' ' . ($adj['last_name'] ?? '')),
+        'adjuster_phone' => $adj['phone'] ?? '',
+        'adjuster_fax' => $adj['fax'] ?? '',
+        'adjuster_email' => $adj['email'] ?? '',
+        'claim_number' => $adj['claim_number'] ?? '',
+    ];
+}
+// Apply fallback to tabs with empty adjuster info (match by type_index key)
+foreach ($tabs as &$tab) {
+    $key = $tab['key'];
+    if (isset($adjFallback[$key])) {
+        $info = $tab['adjuster_info'];
+        $isEmpty = empty($info['insurance_company']) && empty($info['party']) && empty($info['adjuster_phone']) && empty($info['adjuster_fax']) && empty($info['adjuster_email']);
+        if ($isEmpty) {
+            $tab['adjuster_info'] = $adjFallback[$key];
+        }
     }
 }
+unset($tab);
 
 jsonResponse([
     'success' => true,
-    'negotiations' => $negotiations,
-    'grouped' => $grouped,
-    'best_offers' => $bestOffers,
+    'tabs' => $tabs,
+    'best_offers' => $bestOffersByType,
     'active_coverages' => $activeCoverages,
-    'adjuster_info' => $adjusterInfo,
 ]);

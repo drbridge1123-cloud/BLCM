@@ -507,6 +507,41 @@ switch ($resource) {
         }
         break;
 
+    // ── Case Tasks (Checklist) ──
+    case 'case-tasks':
+        if ($method === 'GET' && $id === 'summary') {
+            require __DIR__ . '/case-tasks/summary.php';
+        } elseif ($method === 'GET' && !$id) {
+            require __DIR__ . '/case-tasks/list.php';
+        } elseif ($method === 'POST' && $id === 'initialize') {
+            require __DIR__ . '/case-tasks/initialize.php';
+        } elseif ($method === 'POST' && !$id) {
+            require __DIR__ . '/case-tasks/create.php';
+        } elseif ($method === 'PUT' && $id) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/case-tasks/update.php';
+        } elseif ($method === 'DELETE' && $id) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/case-tasks/delete.php';
+        } else {
+            errorResponse('Case tasks endpoint not found', 404);
+        }
+        break;
+
+    // ── Case Adjusters ──
+    case 'case-adjusters':
+        if ($method === 'GET' && !$id) {
+            require __DIR__ . '/case-adjusters/list.php';
+        } elseif ($method === 'POST' && !$id) {
+            require __DIR__ . '/case-adjusters/save.php';
+        } elseif ($method === 'DELETE' && $id) {
+            $_GET['id'] = $id;
+            require __DIR__ . '/case-adjusters/delete.php';
+        } else {
+            errorResponse('Case Adjusters endpoint not found', 404);
+        }
+        break;
+
     // ── Case Providers ──
     case 'case-providers':
         if ($method === 'GET' && !$id) {
@@ -522,6 +557,8 @@ switch ($resource) {
         } elseif ($method === 'PUT' && $id && $action === 'update-deadline') {
             $_GET['id'] = $id;
             require __DIR__ . '/case-providers/update-deadline.php';
+        } elseif ($method === 'PUT' && $id === 'bulk-respond') {
+            require __DIR__ . '/case-providers/bulk-respond.php';
         } elseif ($method === 'PUT' && $id && $action === 'respond') {
             $_GET['id'] = $id;
             require __DIR__ . '/case-providers/respond.php';
@@ -785,7 +822,13 @@ switch ($resource) {
 
     // ── Case Negotiations ──
     case 'negotiations':
-        if ($method === 'GET' && $id) {
+        if ($method === 'DELETE' && $id === 'group' && isset($segments[2], $segments[3], $segments[4])) {
+            // DELETE /api/negotiations/group/{case_id}/{coverage_type}/{coverage_index}
+            $_GET['case_id'] = $segments[2];
+            $_GET['coverage_type'] = $segments[3];
+            $_GET['coverage_index'] = $segments[4];
+            require __DIR__ . '/negotiations/delete-group.php';
+        } elseif ($method === 'GET' && $id) {
             $_GET['id'] = $id;
             require __DIR__ . '/negotiations/get.php';
         } elseif ($method === 'POST' && $id) {

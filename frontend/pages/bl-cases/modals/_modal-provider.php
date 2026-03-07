@@ -63,7 +63,7 @@
     <div x-show="showAddProviderModal" class="sp-modal-overlay"
         style="display:none;" @keydown.escape.window="showAddProviderModal && (showAddProviderModal = false)">
         <div class="fixed inset-0" @click="showAddProviderModal = false"></div>
-        <form @submit.prevent="addProvider()" class="sp-modal-box relative z-10" @click.stop>
+        <form @submit.prevent="addProvider()" class="sp-modal-box relative z-10" style="overflow:visible;" @click.stop>
 
             <!-- Header -->
             <div class="sp-modal-header">
@@ -74,7 +74,7 @@
             </div>
 
             <!-- Body -->
-            <div class="sp-modal-body">
+            <div class="sp-modal-body" style="overflow:visible;">
 
                 <!-- Provider Search -->
                 <div>

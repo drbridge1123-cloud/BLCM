@@ -1,6 +1,7 @@
 function caseDetailPage() {
     return {
         ...contactsMixin(),
+        ...checklistMixin(),
         caseId: getQueryParam('id'),
         caseData: null,
         providers: [],
@@ -68,13 +69,13 @@ function caseDetailPage() {
         // Workflow stepper
         workflowSteps: [
             { key: 'treatment', label: 'TREATMENT', statuses: ['ini'] },
-            { key: 'collection', label: 'COLLECTION', statuses: ['rec'] },
+            { key: 'collection', label: 'RECORDS', statuses: ['rec'] },
             { key: 'verification', label: 'VERIFICATION', statuses: ['verification'] },
             { key: 'demand', label: 'DEMAND', statuses: ['rfd'] },
             { key: 'negotiate', label: 'NEGOTIATE', statuses: ['neg'] },
             { key: 'litigation', label: 'LITIGATION', statuses: ['lit'] },
-            { key: 'settlement', label: 'SETTLEMENT', statuses: ['final_verification'] },
-            { key: 'accounting', label: 'ACCOUNTING', statuses: ['accounting'] },
+            { key: 'final_review', label: 'FINAL REVIEW', statuses: ['fbc'] },
+            { key: 'settlement', label: 'SETTLEMENT', statuses: ['accounting'] },
         ],
 
         // INI activation state
@@ -84,6 +85,7 @@ function caseDetailPage() {
         iniProviderIds: [],  // specific provider IDs to activate (empty = all)
         iniRecordTypes: { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false },
         iniNotes: '',
+        iniChangeStatus: '',  // optional status change on activation
 
         // Treatment Complete modal state
         showTxCompleteModal: false,
@@ -110,7 +112,7 @@ function caseDetailPage() {
             Alpine.store('sidebar').collapsed = true;
             // Set default deadline (2 weeks from today)
             this.newProvider.deadline = this.getDefaultDeadline();
-            await Promise.all([this.loadCase(), this.loadProviders(), this.loadNotes(), this.loadStaffList(), this.loadAllCosts()]);
+            await Promise.all([this.loadCase(), this.loadProviders(), this.loadNotes(), this.loadStaffList(), this.loadAllCosts(), this.clLoadBadge()]);
 
             // Auto-collapse providers if all are complete
             if (this.providers.length > 0 && this.providers.every(p => ['received_complete', 'no_records', 'verified'].includes(p.overall_status))) {
@@ -253,6 +255,7 @@ function caseDetailPage() {
             this.iniSelectedStaff = '';
             this.iniRecordTypes = { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false };
             this.iniNotes = '';
+            this.iniChangeStatus = '';
             this.showIniStaffModal = true;
         },
 
@@ -294,6 +297,7 @@ function caseDetailPage() {
             this.iniSelectedStaff = '';
             this.iniRecordTypes = { request_mr: true, request_bill: true, request_chart: false, request_img: false, request_op: false };
             this.iniNotes = '';
+            this.iniChangeStatus = (FORWARD_TRANSITIONS[this.caseData?.status] || [])[0] || '';
             this.showIniStaffModal = true;
         },
 
@@ -313,6 +317,20 @@ function caseDetailPage() {
                     payload.provider_ids = this.iniProviderIds;
                 }
                 const res = await api.post('bl-cases/' + this.caseId + '/activate-providers', payload);
+
+                // Optionally change case status
+                if (this.iniChangeStatus && this.iniChangeStatus !== this.caseData?.status) {
+                    try {
+                        await api.post('bl-cases/' + this.caseId + '/change-status', {
+                            new_status: this.iniChangeStatus,
+                            note: 'Status changed during provider activation',
+                            assign_to: parseInt(this.iniSelectedStaff)
+                        });
+                    } catch (e) {
+                        showToast(e.data?.message || 'Providers activated but status change failed', 'error');
+                    }
+                }
+
                 showToast(res.message || 'Providers activated');
                 this.showIniStaffModal = false;
                 this.iniProviderIds = [];
@@ -333,13 +351,13 @@ function caseDetailPage() {
             if (!this.caseData) return 'Status';
             const map = {
                 ini: '1. Treatment',
-                rec: '2. Collection',
+                rec: '2. Records',
                 verification: '3. Verification',
                 rfd: '4. Demand',
                 neg: '5. Negotiate',
                 lit: '6. Litigation',
-                final_verification: '7. Settlement',
-                accounting: '8. Accounting',
+                fbc: '7. Final Review',
+                accounting: '8. Settlement',
                 closed: 'Closed',
             };
             return map[this.caseData.status] || 'Status';
@@ -354,9 +372,9 @@ function caseDetailPage() {
                 rfd: 'demand',
                 neg: 'negotiate',
                 lit: 'litigation',
-                final_verification: 'settlement',
-                accounting: 'accounting',
-                closed: 'accounting',
+                fbc: 'final_review',
+                accounting: 'settlement',
+                closed: 'settlement',
             };
             return map[this.caseData.status] || null;
         },
@@ -371,8 +389,8 @@ function caseDetailPage() {
                 demand: 'rfd',
                 negotiate: 'neg',
                 litigation: 'lit',
-                settlement: 'final_verification',
-                accounting: 'accounting',
+                final_review: 'fbc',
+                settlement: 'accounting',
             };
 
             const targetStatus = stepToStatus[stepKey];
@@ -380,7 +398,7 @@ function caseDetailPage() {
 
             const statusOrder = {
                 ini: 1, rec: 2, verification: 3,
-                rfd: 4, neg: 5, lit: 6, final_verification: 7, accounting: 8, closed: 9
+                rfd: 4, neg: 5, lit: 6, fbc: 7, accounting: 8, closed: 9
             };
 
             const currentOrder = statusOrder[this.caseData.status] ?? 0;
@@ -395,7 +413,7 @@ function caseDetailPage() {
             const toLabel = (this.workflowSteps.indexOf(step) + 1) + '. ' + step.label;
 
             // Pre-select default owner for backward/reassign
-            const defaultOwners = { ini:'2', rec:'1', verification:'4', rfd:'4', neg:'1', lit:'4', final_verification:'4', accounting:'6' };
+            const defaultOwners = { ini:'2', rec:'1', verification:'4', rfd:'4', neg:'1', lit:'4', fbc:'4', accounting:'6' };
             const defaultAssign = direction === 'forward' ? '' : (defaultOwners[targetStatus] || '');
 
             this.statusChangeForm = {
@@ -914,7 +932,7 @@ function caseDetailPage() {
         // ---- Workflow Stepper ----
 
         getStepState(stepKey) {
-            const statusOrder = ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification', 'accounting', 'closed'];
+            const statusOrder = ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'fbc', 'accounting', 'closed'];
             const status = this.caseData.status;
             const currentIdx = statusOrder.indexOf(status);
             const step = this.workflowSteps.find(s => s.key === stepKey);
@@ -977,7 +995,7 @@ function caseDetailPage() {
                 rfd:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
                 neg:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
                 lit:                '/blcm/frontend/pages/attorney/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&from=case-detail&case_id=' + this.caseData.id,
-                final_verification: '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
+                fbc: '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
                 accounting:         '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
                 closed:             '/blcm/frontend/pages/accounting/index.php?search=' + encodeURIComponent(this.caseData.case_number) + '&case_id=' + this.caseData.id,
             };
@@ -994,7 +1012,7 @@ function caseDetailPage() {
                 rfd:                'Attorney Cases',
                 neg:                'Attorney Cases',
                 lit:                'Attorney Cases',
-                final_verification: 'Accounting',
+                fbc: 'Accounting',
                 accounting:         'Accounting',
                 closed:             'Accounting',
             };
@@ -1251,7 +1269,8 @@ function caseDetailPage() {
                 paid_by: '',
                 receipt_document_id: null,
                 receipt_file_name: '',
-                notes: ''
+                notes: '',
+                _noRecordFee: provider?.charges_record_fee == 0
             };
             this.paymentProviderSearch = provider?.provider_name || '';
             this.paymentProviderResults = [];
@@ -1259,6 +1278,9 @@ function caseDetailPage() {
         },
 
         editPayment(pmt) {
+            const linkedProvider = pmt.case_provider_id
+                ? this.providers.find(p => p.id == pmt.case_provider_id)
+                : null;
             this.paymentForm = {
                 id: pmt.id,
                 case_provider_id: pmt.case_provider_id || null,
@@ -1274,7 +1296,8 @@ function caseDetailPage() {
                 paid_by: pmt.paid_by || '',
                 receipt_document_id: pmt.receipt_document_id || null,
                 receipt_file_name: pmt.receipt_file_name || '',
-                notes: pmt.notes || ''
+                notes: pmt.notes || '',
+                _noRecordFee: linkedProvider ? linkedProvider.charges_record_fee == 0 : false
             };
             this.paymentProviderSearch = pmt.provider_name || pmt.linked_provider_name || '';
             this.paymentProviderResults = [];

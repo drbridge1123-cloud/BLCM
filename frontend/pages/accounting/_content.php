@@ -61,29 +61,22 @@
                 <!-- Gold bar -->
                 <div class="sp-gold-bar"></div>
 
-                <!-- Header -->
-                <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-                    <div class="sp-stats">
-                        <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('')" :style="activeFilter === '' ? 'box-shadow:0 0 0 2px #C9A84C;' : ''">
-                            <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total ?? '-'"></div>
-                            <div class="sp-stat-label">Total</div>
-                        </div>
-                        <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('overdue')" :style="activeFilter === 'overdue' ? 'box-shadow:0 0 0 2px #e74c3c;' : ''">
-                            <div class="sp-stat-num" style="color:#e74c3c;" x-text="summary.overdue ?? '-'"></div>
-                            <div class="sp-stat-label">Overdue (>7d)</div>
-                        </div>
-                        <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('pending')" :style="activeFilter === 'pending' ? 'box-shadow:0 0 0 2px #D97706;' : ''">
-                            <div class="sp-stat-num" style="color:#D97706;" x-text="summary.pending ?? '-'"></div>
-                            <div class="sp-stat-label">Pending</div>
-                        </div>
-                        <div class="sp-stat">
-                            <div class="sp-stat-num" style="color:#1a9e6a; font-size:14px;" x-text="'$' + formatNumber(summary.total_settlement ?? 0)"></div>
-                            <div class="sp-stat-label">Total Settlement</div>
-                        </div>
+                <!-- Toolbar -->
+                <div class="sp-toolbar" style="flex-wrap:wrap;">
+                    <div class="sp-tabs">
+                        <button class="sp-tab" :class="activeFilter === '' && 'on'" @click="toggleFilter('')">All
+                            <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.total ?? 0"></span>
+                        </button>
+                        <button class="sp-tab" :class="activeFilter === 'overdue' && 'on'" @click="toggleFilter('overdue')">Overdue
+                            <span class="sp-tab-count" style="background:rgba(231,76,60,.1); color:#e74c3c;" x-text="summary.overdue ?? 0"></span>
+                        </button>
+                        <button class="sp-tab" :class="activeFilter === 'pending' && 'on'" @click="toggleFilter('pending')">Pending
+                            <span class="sp-tab-count" style="background:rgba(217,119,6,.1); color:#d97706;" x-text="summary.pending ?? 0"></span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Toolbar -->
+                <!-- Search -->
                 <div class="sp-toolbar">
                     <input type="text" x-model="search" @input.debounce.300ms="loadData(1)" placeholder="Search case # or client name..."
                            class="sp-search" style="width:280px;">
@@ -338,27 +331,6 @@
             <!-- ═══ Unified Card ═══ -->
             <div class="sp-card">
                 <div class="sp-gold-bar"></div>
-                <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-                    <div class="sp-stats">
-                        <div class="sp-stat">
-                            <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total_entries"></div>
-                            <div class="sp-stat-label">Total</div>
-                        </div>
-                        <div class="sp-stat">
-                            <div class="sp-stat-num" style="color:#dc2626;" x-text="summary.unmatched_count"></div>
-                            <div class="sp-stat-label">Unmatched</div>
-                        </div>
-                        <div class="sp-stat">
-                            <div class="sp-stat-num" style="color:#16a34a;" x-text="summary.matched_count"></div>
-                            <div class="sp-stat-label">Matched</div>
-                        </div>
-                        <div class="sp-stat">
-                            <div class="sp-stat-num" style="color:#9ca3af;" x-text="summary.ignored_count"></div>
-                            <div class="sp-stat-label">Ignored</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Tabs -->
                 <div class="sp-toolbar">
                     <div class="sp-tabs">

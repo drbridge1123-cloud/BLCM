@@ -13,6 +13,13 @@
                     <div class="hero-actions">
                         <button @click="showEditModal = true" class="hero-btn hero-btn-ghost">Edit</button>
                         <button @click="openContacts(caseData)" class="hero-btn hero-btn-ghost">Contacts</button>
+                        <button @click="openChecklist()" class="hero-btn hero-btn-ghost" style="position:relative;">
+                            Checklist
+                            <template x-if="clSummary.initialized">
+                                <span style="position:absolute; top:-4px; right:-4px; background:#1a9e6a; color:#fff; font-size:9px; font-weight:700; border-radius:8px; padding:1px 5px; min-width:18px; text-align:center;"
+                                      x-text="(clSummary.overall?.percent || 0) + '%'"></span>
+                            </template>
+                        </button>
                         <!-- Status Dropdown -->
                         <!-- Status Dropdown -->
                         <style>

@@ -106,6 +106,8 @@ function mbrPanel(caseId) {
 
         cellVal(lineId, field, value) {
             if (this._editingField === lineId + '_' + field) return '';
+            const num = Number(value) || 0;
+            if (num === 0) return '';
             return formatCurrency(value);
         },
 
@@ -405,7 +407,13 @@ function mbrPanel(caseId) {
 
         closeInsAuto() {
             // Small delay so click on result registers first
-            setTimeout(() => { this.insAutoField = null; }, 150);
+            const wasField = this.insAutoField;
+            setTimeout(() => {
+                // Only close if no other field was opened in the meantime
+                if (this.insAutoField === wasField) {
+                    this.insAutoField = null;
+                }
+            }, 150);
         },
 
         async searchInsurance() {

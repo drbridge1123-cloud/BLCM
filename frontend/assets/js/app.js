@@ -189,13 +189,13 @@ const STATUS_LABELS = {
     received_complete: 'Complete',
     verified: 'Verified',
     ini: 'Treatment',
-    rec: 'Collection',
+    rec: 'Records',
     verification: 'Verification',
     rfd: 'Demand',
     neg: 'Negotiate',
     lit: 'Litigation',
-    final_verification: 'Settlement',
-    accounting: 'Accounting',
+    fbc: 'Final Review',
+    accounting: 'Settlement',
     closed: 'Closed',
 };
 
@@ -222,11 +222,12 @@ const FORWARD_TRANSITIONS = {
     verification:        ['rfd'],
     rfd:                 ['neg'],
     neg:                 ['lit'],
-    lit:                 ['final_verification'],
-    final_verification:  ['accounting'],
+    lit:                 ['fbc'],
+    fbc:                 ['accounting'],
     accounting:          ['closed'],
     closed:              [],
 };
+
 
 const BACKWARD_TRANSITIONS = {
     ini:                 [],
@@ -235,7 +236,7 @@ const BACKWARD_TRANSITIONS = {
     rfd:                 ['ini', 'rec', 'verification'],
     neg:                 ['ini', 'rec', 'verification', 'rfd'],
     lit:                 ['ini', 'rec', 'verification', 'rfd', 'neg'],
-    final_verification:  ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit'],
-    accounting:          ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification'],
-    closed:              ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'final_verification', 'accounting'],
+    fbc:                 ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit'],
+    accounting:          ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'fbc'],
+    closed:              ['ini', 'rec', 'verification', 'rfd', 'neg', 'lit', 'fbc', 'accounting'],
 };

@@ -6,20 +6,6 @@
             <h1 class="text-xl font-bold text-v2-text">Health Tracker</h1>
             <p class="text-sm text-v2-text-light">Track health insurance ledger items and requests</p>
         </div>
-        <div class="flex items-center gap-3 text-sm">
-            <div class="bg-white border border-v2-card-border rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <span class="text-v2-text-light">Total:</span>
-                <span class="font-semibold text-v2-text" x-text="pagination ? pagination.total : 0"></span>
-            </div>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <span class="text-blue-600">Requesting:</span>
-                <span class="font-semibold text-blue-700" x-text="stats.requesting"></span>
-            </div>
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <span class="text-yellow-600">Follow Up:</span>
-                <span class="font-semibold text-yellow-700" x-text="stats.follow_up"></span>
-            </div>
-        </div>
     </div>
 
     <!-- Filter Bar -->

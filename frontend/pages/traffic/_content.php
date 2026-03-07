@@ -9,34 +9,12 @@
         <div class="sp-gold-bar"></div>
 
         <!-- Header -->
-        <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-            <div style="flex:1;">
+        <div class="sp-header">
+            <div>
                 <div class="sp-eyebrow">Case Management</div>
                 <h1 class="sp-title">Traffic Cases</h1>
             </div>
-            <div class="sp-stats">
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.active_count || 0"></div>
-                    <div class="sp-stat-label">Active</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#1a9e6a;" x-text="summary.resolved_count || 0"></div>
-                    <div class="sp-stat-label">Resolved</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#2563eb; font-size:14px;" x-text="formatCurrency(summary.total_commission)"></div>
-                    <div class="sp-stat-label">Total Comm.</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#1a9e6a; font-size:14px;" x-text="formatCurrency(summary.paid_commission)"></div>
-                    <div class="sp-stat-label">Paid</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#D97706; font-size:14px;" x-text="formatCurrency(summary.unpaid_commission)"></div>
-                    <div class="sp-stat-label">Unpaid</div>
-                </div>
-            </div>
-            <button @click="openCreateModal()" class="sp-new-btn-navy">+ New Case</button>
+            <button @click="openCreateModal()" class="sp-new-btn">+ New Case</button>
         </div>
 
         <!-- Toolbar -->

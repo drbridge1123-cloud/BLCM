@@ -265,11 +265,11 @@
                         </div>
                     </div>
                     <div x-show="!paymentForm._noRecordFee">
-                        <label class="sp-form-label">Paid Amount <span class="lpm-req">*</span></label>
+                        <label class="sp-form-label">Paid Amount</label>
                         <div class="lpm-amount-wrap">
                             <span class="lpm-dollar">$</span>
                             <input type="number" step="0.01" min="0" x-model.number="paymentForm.paid_amount"
-                                :required="!paymentForm._noRecordFee" class="lpm-input">
+                                class="lpm-input">
                         </div>
                     </div>
                     <div>

@@ -51,7 +51,7 @@ define('STATUS_OWNER_MAP', [
     'rfd'                 => 4,
     'neg'                 => 1,
     'lit'                 => 4,
-    'final_verification'  => 4,
+    'fbc'                 => 4,
     'accounting'          => 6,
     'closed'              => 3,
 ]);

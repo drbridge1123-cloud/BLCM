@@ -44,7 +44,7 @@ foreach ($allowedFields as $field) {
         case 'status':
             $validStatuses = [
                 'ini','rec','verification','rfd',
-                'neg','lit','final_verification','accounting','closed'
+                'neg','lit','fbc','accounting','closed'
             ];
             if (!validateEnum($newValue, $validStatuses)) {
                 errorResponse('Invalid status value');

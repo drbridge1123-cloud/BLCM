@@ -42,6 +42,7 @@ foreach ($optionalFields as $field) {
 
 if (isset($input['preferred_method'])) $data['preferred_method'] = $input['preferred_method'];
 if (isset($input['uses_third_party'])) $data['uses_third_party'] = (int)$input['uses_third_party'];
+if (isset($input['charges_record_fee'])) $data['charges_record_fee'] = (int)$input['charges_record_fee'];
 if (isset($input['avg_response_days'])) $data['avg_response_days'] = (int)$input['avg_response_days'];
 if (isset($input['difficulty_level'])) $data['difficulty_level'] = $input['difficulty_level'];
 

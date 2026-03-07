@@ -14,42 +14,32 @@
             <div class="sp-gold-bar"></div>
 
             <!-- Header -->
-            <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-                <div style="flex:1;">
+            <div class="sp-header">
+                <div>
                     <div class="sp-eyebrow">Medical Records</div>
                     <h1 class="sp-title">Medical Bills Data Summary</h1>
                 </div>
-                <div class="sp-stats">
-                    <div class="sp-stat">
-                        <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total || 0"></div>
-                        <div class="sp-stat-label">Total</div>
-                    </div>
-                    <div class="sp-stat">
-                        <div class="sp-stat-num" style="color:#2563eb;" x-text="summary.draft || 0"></div>
-                        <div class="sp-stat-label">Draft</div>
-                    </div>
-                    <div class="sp-stat">
-                        <div class="sp-stat-num" style="color:#D97706;" x-text="summary.completed || 0"></div>
-                        <div class="sp-stat-label">Completed</div>
-                    </div>
-                    <div class="sp-stat">
-                        <div class="sp-stat-num" style="color:#1a9e6a;" x-text="summary.approved || 0"></div>
-                        <div class="sp-stat-label">Approved</div>
-                    </div>
-                </div>
-                <button @click="openCreateModal()" class="sp-new-btn-navy">+ Create Report</button>
+                <button @click="openCreateModal()" class="sp-new-btn">+ Create Report</button>
             </div>
 
             <!-- Toolbar -->
             <div class="sp-toolbar" style="gap:8px;">
+                <div class="sp-tabs">
+                    <button class="sp-tab" :class="statusFilter === '' && 'on'" @click="statusFilter = ''; loadData(1)">All
+                        <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.total || 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="statusFilter === 'draft' && 'on'" @click="statusFilter = 'draft'; loadData(1)">Draft
+                        <span class="sp-tab-count" style="background:rgba(217,119,6,.1); color:#d97706;" x-text="summary.draft || 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="statusFilter === 'completed' && 'on'" @click="statusFilter = 'completed'; loadData(1)">Completed
+                        <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.completed || 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="statusFilter === 'approved' && 'on'" @click="statusFilter = 'approved'; loadData(1)">Approved
+                        <span class="sp-tab-count" style="background:rgba(16,185,129,.1); color:#059669;" x-text="summary.approved || 0"></span>
+                    </button>
+                </div>
                 <input type="text" x-model="search" @input.debounce.300ms="loadData(1)" placeholder="Search case # or client..."
                        class="sp-search" style="width:240px;">
-                <select x-model="statusFilter" @change="loadData(1)" class="sp-select">
-                    <option value="">All Statuses</option>
-                    <option value="draft">Draft</option>
-                    <option value="completed">Completed</option>
-                    <option value="approved">Approved</option>
-                </select>
                 <button @click="resetFilters()" class="sp-btn" x-show="search || statusFilter">Reset</button>
             </div>
 

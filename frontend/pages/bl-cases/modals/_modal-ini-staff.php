@@ -57,6 +57,25 @@
                 </select>
             </div>
 
+            <!-- Case Status -->
+            <div>
+                <label class="sp-form-label">Case Status</label>
+                <select x-model="iniChangeStatus" class="ecm-select">
+                    <option value="">Keep current status</option>
+                    <option value="ini">1. Treatment</option>
+                    <option value="rec">2. Records</option>
+                    <option value="verification">3. Verification</option>
+                    <option value="rfd">4. Demand</option>
+                    <option value="neg">5. Negotiate</option>
+                    <option value="lit">6. Litigation</option>
+                    <option value="fbc">7. Final Review</option>
+                    <option value="accounting">8. Settlement</option>
+                </select>
+                <p x-show="iniChangeStatus && iniChangeStatus !== caseData?.status" style="font-size:11px; color:#C9A84C; margin:4px 0 0;">
+                    Status will change from <strong x-text="getPipelineLabel()"></strong> → <strong x-text="{ini:'1. Treatment',rec:'2. Records',verification:'3. Verification',rfd:'4. Demand',neg:'5. Negotiate',lit:'6. Litigation',fbc:'7. Final Review',accounting:'8. Settlement'}[iniChangeStatus]"></strong>
+                </p>
+            </div>
+
             <!-- Notes -->
             <div>
                 <label class="sp-form-label">Notes</label>

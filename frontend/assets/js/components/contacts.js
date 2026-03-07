@@ -1,9 +1,7 @@
 /**
- * Contacts Modal Mixin (Client + 3rd Adjuster + UM Adjuster)
- * Search → Auto-fill pattern (Add Provider style):
- *   - Type to search → dropdown with matches + "Create" option
- *   - Select existing → auto-fill read-only
- *   - Create → inline form → save → auto-fill read-only
+ * Contacts Modal Mixin (Client + Dynamic Adjuster Tabs)
+ * Supports multiple instances of same coverage type via coverage_index.
+ * e.g., two 3rd Party adjusters for multi-party accidents.
  * Spread into any Alpine component: ...contactsMixin()
  */
 function contactsMixin() {
@@ -15,27 +13,23 @@ function contactsMixin() {
         _contactsCaseId: null,
         _contactsCaseItem: null,
 
-        // Separate form objects per tab
+        // Client
         clientForm: {},
-        adjuster3rdForm: {},
-        adjusterUmForm: {},
-
-        // Match status per tab: idle | matched | adding
         clientMatchStatus: 'idle',
-        adjuster3rdMatchStatus: 'idle',
-        adjusterUmMatchStatus: 'idle',
-
-        // Client search
         clientSearch: '',
         clientResults: [],
         showClientDropdown: false,
 
-        // Adjuster search
+        // Dynamic adjuster tabs (each has tabKey = "type_index")
+        adjusterTabs: [],
+        showAddTabMenu: false,
+
+        // Adjuster search (shared, reset on tab switch)
         adjusterSearchQuery: '',
         adjusterSearchResults: [],
         showAdjusterDropdown: false,
 
-        // Insurance company search (for adjuster "adding" mode)
+        // Insurance company search
         insuranceSearch: '',
         insuranceResults: [],
         showInsuranceDropdown: false,
@@ -48,6 +42,39 @@ function contactsMixin() {
         ],
         customTitle: false,
 
+        coverageLabels: {
+            '3rd_party': '3rd Party',
+            'um': 'UM',
+            'uim': 'UIM',
+            'pip': 'PIP',
+            'pd': 'PD',
+            'dv': 'DV',
+        },
+
+        coverageTags: {
+            '3rd_party': 'BI',
+            'um': 'Uninsured',
+            'uim': 'Underinsured',
+            'pip': 'Personal Injury Protection',
+            'pd': 'Property',
+            'dv': 'Diminished Value',
+        },
+
+        allCoverageTypes: ['3rd_party','um','uim','pip','pd','dv'],
+
+        getActiveTab() {
+            return this.adjusterTabs.find(t => t.tabKey === this.contactsTab) || null;
+        },
+
+        _getTabLabel(tab) {
+            const baseLabel = this.coverageLabels[tab.coverage_type] || tab.coverage_type;
+            const sameType = this.adjusterTabs.filter(t => t.coverage_type === tab.coverage_type);
+            if (sameType.length > 1) {
+                return `${baseLabel} (${tab.coverage_index})`;
+            }
+            return baseLabel;
+        },
+
         async openContacts(caseItem) {
             this._contactsCaseId = caseItem.id;
             this._contactsCaseItem = caseItem;
@@ -55,29 +82,150 @@ function contactsMixin() {
             this.contactsLoading = true;
             this.showContactsModal = true;
             this.clientForm = {};
-            this.adjuster3rdForm = {};
-            this.adjusterUmForm = {};
+            this.adjusterTabs = [];
             this.clientMatchStatus = 'idle';
-            this.adjuster3rdMatchStatus = 'idle';
-            this.adjusterUmMatchStatus = 'idle';
             this.clientSearch = '';
             this.clientResults = [];
             this.showClientDropdown = false;
+            this._resetAdjusterSearch();
+            this.showAddTabMenu = false;
+
+            await Promise.all([
+                this._loadClientTab(caseItem),
+                this._loadAdjusterTabs(caseItem.id),
+            ]);
+
+            this.contactsLoading = false;
+        },
+
+        // ── Load adjuster tabs from case_adjusters ──
+        async _loadAdjusterTabs(caseId) {
+            try {
+                // Load adjusters and negotiations in parallel
+                const [adjRes, negRes] = await Promise.all([
+                    api.get('case-adjusters?case_id=' + caseId),
+                    api.get('negotiations/' + caseId),
+                ]);
+                const rows = adjRes.data || [];
+                // Build set of negotiate keys from existing negotiation tabs
+                const negKeys = new Set();
+                if (negRes.success && negRes.tabs) {
+                    negRes.tabs.forEach(t => negKeys.add(t.key));
+                }
+                this.adjusterTabs = rows.map(r => {
+                    const tabKey = r.coverage_type + '_' + (r.coverage_index || 1);
+                    return {
+                        coverage_type: r.coverage_type,
+                        coverage_index: r.coverage_index || 1,
+                        tabKey,
+                        caseAdjusterId: r.id,
+                        matchStatus: 'matched',
+                        negotiateChecked: negKeys.has(tabKey),
+                        form: {
+                            id: r.adjuster_id,
+                            first_name: r.first_name || '',
+                            last_name: r.last_name || '',
+                            title: r.title || '',
+                            insurance_company_id: r.insurance_company_id || '',
+                            company_name: r.company_name || '',
+                            phone: r.phone || '',
+                            fax: r.fax || '',
+                            email: r.email || '',
+                            claim_number: r.claim_number || '',
+                        },
+                    };
+                });
+            } catch (e) {
+                this.adjusterTabs = [];
+            }
+        },
+
+        addAdjusterTab(coverageType) {
+            const existing = this.adjusterTabs.filter(t => t.coverage_type === coverageType);
+            const nextIndex = existing.length > 0 ? Math.max(...existing.map(t => t.coverage_index)) + 1 : 1;
+            const tabKey = coverageType + '_' + nextIndex;
+
+            // If adding a second of same type, relabel the first one
+            if (existing.length === 1) {
+                // Force reactivity by touching label-dependent rendering
+            }
+
+            this.adjusterTabs.push({
+                coverage_type: coverageType,
+                coverage_index: nextIndex,
+                tabKey,
+                caseAdjusterId: null,
+                matchStatus: 'idle',
+                negotiateChecked: false,
+                form: this._emptyAdjusterForm(),
+            });
+            this.contactsTab = tabKey;
+            this.showAddTabMenu = false;
+            this._resetAdjusterSearch();
+        },
+
+        async toggleNegotiate(tab) {
+            if (!tab || !tab.caseAdjusterId) return;
+            const caseId = this._contactsCaseId;
+            if (tab.negotiateChecked) {
+                // Create local tab in negotiate panel (no DB round yet)
+                document.dispatchEvent(new CustomEvent('negotiate-add-tab', { detail: {
+                    coverage_type: tab.coverage_type,
+                    coverage_index: tab.coverage_index,
+                    insurance_company: tab.form.company_name || '',
+                    party: ((tab.form.first_name || '') + ' ' + (tab.form.last_name || '')).trim(),
+                    adjuster_phone: tab.form.phone || '',
+                    adjuster_fax: tab.form.fax || '',
+                    adjuster_email: tab.form.email || '',
+                    claim_number: tab.form.claim_number || '',
+                }}));
+            } else {
+                // Remove negotiate tab — delete all rounds for this group
+                try {
+                    await api.delete(`negotiations/group/${caseId}/${tab.coverage_type}/${tab.coverage_index}`);
+                } catch (e) { /* may not have DB rounds yet */ }
+                document.dispatchEvent(new CustomEvent('negotiate-remove-tab', { detail: {
+                    coverage_type: tab.coverage_type,
+                    coverage_index: tab.coverage_index,
+                }}));
+            }
+        },
+
+        async removeAdjusterTab(tabKey) {
+            const tab = this.adjusterTabs.find(t => t.tabKey === tabKey);
+            if (!tab) return;
+            if (tab.caseAdjusterId) {
+                try {
+                    await api.delete('case-adjusters/' + tab.caseAdjusterId);
+                } catch (e) { /* silent */ }
+            }
+            this.adjusterTabs = this.adjusterTabs.filter(t => t.tabKey !== tabKey);
+            if (this.contactsTab === tabKey) {
+                this.contactsTab = 'client';
+            }
+            // Notify negotiate panel
+            document.dispatchEvent(new CustomEvent('adjuster-removed', {
+                detail: { coverage_type: tab.coverage_type, coverage_index: tab.coverage_index }
+            }));
+        },
+
+        switchAdjusterTab(tabKey) {
+            this.contactsTab = tabKey;
+            this._resetAdjusterSearch();
+            const tab = this.getActiveTab();
+            if (tab && (tab.matchStatus === 'adding' || tab.matchStatus === 'matched')) {
+                this.insuranceSearch = tab.form.company_name || '';
+            }
+        },
+
+        _resetAdjusterSearch() {
             this.adjusterSearchQuery = '';
             this.adjusterSearchResults = [];
             this.showAdjusterDropdown = false;
             this.insuranceSearch = '';
             this.insuranceResults = [];
             this.showInsuranceDropdown = false;
-
-            // Load all 3 tabs in parallel
-            await Promise.all([
-                this._loadClientTab(caseItem),
-                this._loadAdjusterTab(caseItem, '3rd', 'adjuster_3rd_id'),
-                this._loadAdjusterTab(caseItem, 'um', 'adjuster_um_id'),
-            ]);
-
-            this.contactsLoading = false;
+            this.customTitle = false;
         },
 
         // ── Client tab ──
@@ -111,7 +259,22 @@ function contactsMixin() {
             };
         },
 
-        // Client search (partial name match)
+        _emptyAdjusterForm() {
+            return {
+                id: null,
+                first_name: '',
+                last_name: '',
+                title: '',
+                insurance_company_id: '',
+                company_name: '',
+                phone: '',
+                fax: '',
+                email: '',
+                claim_number: '',
+            };
+        },
+
+        // Client search
         async searchClients() {
             if (this.clientSearch.length < 2) {
                 this.clientResults = [];
@@ -124,7 +287,7 @@ function contactsMixin() {
                 this.showClientDropdown = true;
             } catch (e) {
                 this.clientResults = [];
-                this.showClientDropdown = true; // still show dropdown for Create option
+                this.showClientDropdown = true;
             }
         },
 
@@ -135,7 +298,6 @@ function contactsMixin() {
             this.clientResults = [];
             this.showClientDropdown = false;
 
-            // Auto-link to case
             try {
                 await api.post('clients/save', {
                     id: client.id,
@@ -163,61 +325,27 @@ function contactsMixin() {
             this.clientSearch = '';
         },
 
-        // ── Adjuster tab ──
-        async _loadAdjusterTab(caseItem, tabKey, fkField) {
-            const formKey = tabKey === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            const statusKey = tabKey === '3rd' ? 'adjuster3rdMatchStatus' : 'adjusterUmMatchStatus';
-            const adjusterId = caseItem[fkField];
-
-            if (adjusterId) {
-                try {
-                    const res = await api.get('adjusters/' + adjusterId);
-                    this[formKey] = { ...res.data };
-                    this[statusKey] = 'matched';
-                } catch (e) {
-                    this[formKey] = this._emptyAdjusterForm(tabKey);
-                    this[statusKey] = 'idle';
-                }
-                return;
-            }
-            this[formKey] = this._emptyAdjusterForm(tabKey);
-            this[statusKey] = 'idle';
-        },
-
-        _emptyAdjusterForm(tabKey) {
-            return {
-                id: null,
-                first_name: '',
-                last_name: '',
-                title: '',
-                insurance_company_id: '',
-                company_name: '',
-                adjuster_type: tabKey === '3rd' ? '3rd_party' : 'um',
-                phone: '',
-                fax: '',
-                email: '',
-            };
-        },
-
+        // ── Adjuster tab helpers ──
         getAdjusterMatchStatus() {
-            return this.contactsTab === '3rd' ? this.adjuster3rdMatchStatus : this.adjusterUmMatchStatus;
+            const tab = this.getActiveTab();
+            return tab ? tab.matchStatus : 'idle';
         },
 
         getActiveAdjusterForm() {
-            return this.contactsTab === '3rd' ? this.adjuster3rdForm : this.adjusterUmForm;
+            const tab = this.getActiveTab();
+            return tab ? tab.form : this._emptyAdjusterForm();
         },
 
         startAddAdjuster() {
-            const statusKey = this.contactsTab === '3rd' ? 'adjuster3rdMatchStatus' : 'adjusterUmMatchStatus';
-            const formKey = this.contactsTab === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            this[formKey] = this._emptyAdjusterForm(this.contactsTab);
-            // Pre-fill name from search query
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            tab.form = this._emptyAdjusterForm();
             if (this.adjusterSearchQuery) {
                 const parts = this.adjusterSearchQuery.trim().split(/\s+/);
-                this[formKey].first_name = parts[0] || '';
-                this[formKey].last_name = parts.slice(1).join(' ') || '';
+                tab.form.first_name = parts[0] || '';
+                tab.form.last_name = parts.slice(1).join(' ') || '';
             }
-            this[statusKey] = 'adding';
+            tab.matchStatus = 'adding';
             this.adjusterSearchResults = [];
             this.showAdjusterDropdown = false;
             this.insuranceSearch = '';
@@ -227,26 +355,21 @@ function contactsMixin() {
         },
 
         clearAdjuster() {
-            const statusKey = this.contactsTab === '3rd' ? 'adjuster3rdMatchStatus' : 'adjusterUmMatchStatus';
-            const formKey = this.contactsTab === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            this[formKey] = this._emptyAdjusterForm(this.contactsTab);
-            this[statusKey] = 'idle';
-            this.adjusterSearchQuery = '';
-            this.adjusterSearchResults = [];
-            this.showAdjusterDropdown = false;
-            this.insuranceSearch = '';
-            this.insuranceResults = [];
-            this.showInsuranceDropdown = false;
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            tab.form = this._emptyAdjusterForm();
+            tab.matchStatus = 'idle';
+            this._resetAdjusterSearch();
         },
 
-        // ── Save (tab-aware) ──
+        // ── Save ──
         async saveContacts() {
             this.contactsSaving = true;
             try {
                 if (this.contactsTab === 'client') {
                     await this._saveClientTab();
                 } else {
-                    await this._saveAdjusterTab(this.contactsTab);
+                    await this._saveAdjusterTab();
                 }
             } catch (e) {
                 showToast(e.data?.message || 'Failed to save', 'error');
@@ -282,19 +405,18 @@ function contactsMixin() {
             showToast(res.message || 'Client saved', 'success');
         },
 
-        async _saveAdjusterTab(tabKey) {
-            const formKey = tabKey === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            const form = this[formKey];
-            const statusKey = tabKey === '3rd' ? 'adjuster3rdMatchStatus' : 'adjusterUmMatchStatus';
+        async _saveAdjusterTab() {
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            const form = tab.form;
             if (!form.first_name?.trim() || !form.last_name?.trim()) {
                 this.contactsSaving = false;
                 return showToast('First name and last name are required', 'error');
             }
 
-            // Resolve insurance company: if user typed a name but didn't select from dropdown
+            // Resolve insurance company
             let insuranceCompanyId = form.insurance_company_id || null;
             const insuranceName = (this.insuranceSearch || '').trim();
-
             if (!insuranceCompanyId && insuranceName) {
                 try {
                     const searchRes = await api.get('insurance-companies?search=' + encodeURIComponent(insuranceName));
@@ -317,8 +439,10 @@ function contactsMixin() {
                 }
             }
 
-            const linkField = tabKey === '3rd' ? 'adjuster_3rd_id' : 'adjuster_um_id';
             const payload = {
+                case_id: this._contactsCaseId,
+                coverage_type: tab.coverage_type,
+                coverage_index: tab.coverage_index,
                 id: form.id || null,
                 first_name: form.first_name,
                 last_name: form.last_name,
@@ -327,27 +451,46 @@ function contactsMixin() {
                 phone: form.phone || '',
                 fax: form.fax || '',
                 email: form.email || '',
-                case_id: this._contactsCaseId,
-                link_field: linkField,
-                adjuster_type: tabKey === '3rd' ? '3rd_party' : 'um',
+                claim_number: form.claim_number || '',
             };
-            const res = await api.post('adjusters/save', payload);
+
+            const res = await api.post('case-adjusters', payload);
             if (res.data && res.data.id) {
-                this[formKey] = { ...res.data };
-                this[statusKey] = 'matched';
+                tab.form = {
+                    id: res.data.id,
+                    first_name: res.data.first_name || '',
+                    last_name: res.data.last_name || '',
+                    title: res.data.title || '',
+                    insurance_company_id: res.data.insurance_company_id || '',
+                    company_name: res.data.company_name || '',
+                    phone: res.data.phone || '',
+                    fax: res.data.fax || '',
+                    email: res.data.email || '',
+                    claim_number: res.data.claim_number || '',
+                };
+                tab.matchStatus = 'matched';
+                if (res.data.case_adjuster_id) {
+                    tab.caseAdjusterId = res.data.case_adjuster_id;
+                }
                 this.adjusterSearchQuery = '';
-                if (this.caseData && this.caseData.id === this._contactsCaseId) {
-                    this.caseData[linkField] = res.data.id;
-                }
-                if (this._contactsCaseItem) {
-                    this._contactsCaseItem[linkField] = res.data.id;
-                }
-                if (this.items) {
-                    const item = this.items.find(i => i.id === this._contactsCaseId);
-                    if (item) item[linkField] = res.data.id;
-                }
             }
             showToast(res.message || 'Adjuster saved', 'success');
+
+            // Notify negotiate panel
+            this._dispatchAdjusterSaved(tab);
+        },
+
+        _dispatchAdjusterSaved(tab) {
+            document.dispatchEvent(new CustomEvent('adjuster-saved', { detail: {
+                coverage_type: tab.coverage_type,
+                coverage_index: tab.coverage_index,
+                insurance_company: tab.form.company_name || '',
+                party: ((tab.form.first_name || '') + ' ' + (tab.form.last_name || '')).trim(),
+                adjuster_phone: tab.form.phone || '',
+                adjuster_fax: tab.form.fax || '',
+                adjuster_email: tab.form.email || '',
+                claim_number: tab.form.claim_number || '',
+            }}));
         },
 
         // ── Adjuster autocomplete ──
@@ -364,57 +507,50 @@ function contactsMixin() {
                 this.showAdjusterDropdown = true;
             } catch (e) {
                 this.adjusterSearchResults = [];
-                this.showAdjusterDropdown = true; // still show for Create option
+                this.showAdjusterDropdown = true;
             }
         },
 
         selectAdjuster(adj) {
-            const formKey = this.contactsTab === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            const statusKey = this.contactsTab === '3rd' ? 'adjuster3rdMatchStatus' : 'adjusterUmMatchStatus';
-            this[formKey] = {
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            tab.form = {
                 id: adj.id,
-                first_name: adj.first_name,
-                last_name: adj.last_name,
+                first_name: adj.first_name || '',
+                last_name: adj.last_name || '',
                 title: adj.title || '',
                 insurance_company_id: adj.insurance_company_id || '',
                 company_name: adj.company_name || '',
-                adjuster_type: adj.adjuster_type || (this.contactsTab === '3rd' ? '3rd_party' : 'um'),
                 phone: adj.phone || '',
                 fax: adj.fax || '',
                 email: adj.email || '',
+                claim_number: adj.claim_number || '',
             };
-            this[statusKey] = 'matched';
+            tab.matchStatus = 'matched';
             this.adjusterSearchQuery = '';
             this.adjusterSearchResults = [];
             this.showAdjusterDropdown = false;
 
             // Auto-save link to case
-            this._saveAdjusterLink(adj.id);
+            this._saveAdjusterLink(tab);
         },
 
-        async _saveAdjusterLink(adjusterId) {
-            const tabKey = this.contactsTab;
-            const linkField = tabKey === '3rd' ? 'adjuster_3rd_id' : 'adjuster_um_id';
+        async _saveAdjusterLink(tab) {
             try {
-                const form = tabKey === '3rd' ? this.adjuster3rdForm : this.adjusterUmForm;
-                await api.post('adjusters/save', {
-                    id: adjusterId,
+                const res = await api.post('case-adjusters', {
                     case_id: this._contactsCaseId,
-                    link_field: linkField,
-                    first_name: form.first_name,
-                    last_name: form.last_name,
-                    adjuster_type: form.adjuster_type,
+                    coverage_type: tab.coverage_type,
+                    coverage_index: tab.coverage_index,
+                    adjuster_id: tab.form.id,
                 });
-                if (this.caseData && this.caseData.id === this._contactsCaseId) {
-                    this.caseData[linkField] = adjusterId;
+                if (res.data && res.data.case_adjuster_id) {
+                    tab.caseAdjusterId = res.data.case_adjuster_id;
                 }
-                if (this._contactsCaseItem) {
-                    this._contactsCaseItem[linkField] = adjusterId;
-                }
+                this._dispatchAdjusterSaved(tab);
             } catch (e) { /* silent */ }
         },
 
-        // ── Insurance Company search (for adding mode) ──
+        // ── Insurance Company search ──
         async searchInsuranceCompanies(query) {
             this.insuranceSearch = query;
             if (query.length < 2) {
@@ -433,9 +569,11 @@ function contactsMixin() {
         },
 
         selectInsuranceCompany(co) {
-            const formKey = this.contactsTab === '3rd' ? 'adjuster3rdForm' : 'adjusterUmForm';
-            this[formKey].insurance_company_id = co.id;
-            this[formKey].company_name = co.name;
+            const tab = this.getActiveTab();
+            if (tab) {
+                tab.form.insurance_company_id = co.id;
+                tab.form.company_name = co.name;
+            }
             this.insuranceSearch = co.name;
             this.insuranceResults = [];
             this.showInsuranceDropdown = false;
@@ -455,13 +593,12 @@ function contactsMixin() {
             }
         },
 
-        // Check if current tab can save (only in adding mode)
         canSave() {
             if (this.contactsTab === 'client') {
                 return this.clientMatchStatus === 'adding';
             }
-            const status = this.getAdjusterMatchStatus();
-            return status === 'adding';
+            const tab = this.getActiveTab();
+            return tab && tab.matchStatus === 'adding';
         },
     };
 }

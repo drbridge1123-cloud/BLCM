@@ -190,13 +190,19 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
         $pipAmount = $pip1Total;
     }
 
-    // 5. Expenses (MR costs)
+    // 5. Expenses: Records Fee + Litigation Fee for attorney calcs, Other Expenses separate
     $expenses = dbFetchOne(
-        "SELECT COALESCE(SUM(CASE WHEN expense_category = 'mr_cost' THEN paid_amount ELSE 0 END), 0) AS reimbursable
+        "SELECT
+            COALESCE(SUM(CASE WHEN expense_category = 'mr_cost' THEN paid_amount ELSE 0 END), 0) AS records_fee,
+            COALESCE(SUM(CASE WHEN expense_category = 'litigation' THEN paid_amount ELSE 0 END), 0) AS litigation_fee,
+            COALESCE(SUM(CASE WHEN expense_category = 'other' THEN paid_amount ELSE 0 END), 0) AS other_expenses
          FROM mr_fee_payments WHERE case_id = ?",
         [$mainCaseId]
     );
-    $costs = round((float)($expenses['reimbursable'] ?? 0), 2);
+    $recordsFee = round((float)($expenses['records_fee'] ?? 0), 2);
+    $litigationFee = round((float)($expenses['litigation_fee'] ?? 0), 2);
+    $costs = $recordsFee + $litigationFee; // Records + Litigation only (excludes Other)
+    $otherExpenses = round((float)($expenses['other_expenses'] ?? 0), 2);
 
     // 6. Calculate based on method
     $medicalBalance = 0;
@@ -208,7 +214,7 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
         $afe = $fee + $costs;
         $attorneyPercent = $gross > 0 ? $afe / $gross : 0;
         $carrierShare = $policyLimit ? 0 : round($pipAmount * (1 - $attorneyPercent), 2);
-        $totalDeductions = $fee + $costs + $carrierShare + $medicalBalance + $healthSubrogation;
+        $totalDeductions = $fee + $costs + $otherExpenses + $carrierShare + $medicalBalance + $healthSubrogation;
         $clientNet = round($gross - $totalDeductions, 2);
 
         // PIP carrier share
@@ -220,10 +226,10 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
         $umOffer = $bestOffers['um'] + $bestOffers['uim'];
         $gross = $thirdParty + $umOffer + $pipAmount;
         $fee = round($gross * $feePercent, 2);
-        $legalFeeAndExpenses = $fee + $costs;
+        $legalFeeAndExpenses = $fee + $costs; // excludes Other Expenses
         $pipRatio = $gross > 0 ? $pipAmount / $gross : 0;
         $clientCredit = round($pipRatio * $legalFeeAndExpenses, 2);
-        $totalDeductions = $fee + $costs + $pipAmount + $medicalBalance + $healthSubrogation - $clientCredit;
+        $totalDeductions = $fee + $costs + $otherExpenses + $pipAmount + $medicalBalance + $healthSubrogation - $clientCredit;
         $clientNet = round($gross - $totalDeductions, 2);
 
         // Full PIP payment to carrier
@@ -231,15 +237,18 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
             $items[] = ['type' => 'lien_payment', 'payee' => $pipCompany, 'amount' => $pipAmount];
         }
     } else {
-        // Standard
+        // Standard — exclude DV from gross
         $gross = $settlementAmount;
         if (!$gross) {
             $gross = $bestOffers['3rd_party'] + $bestOffers['um'] + $bestOffers['uim'];
         }
         $fee = round($gross * $feePercent, 2);
-        $totalDeductions = $fee + $costs + $medicalBalance + $healthSubrogation;
+        $totalDeductions = $fee + $costs + $otherExpenses + $medicalBalance + $healthSubrogation;
         $clientNet = round($gross - $totalDeductions, 2);
     }
+
+    // DV (Diminished Value) — no attorney fee, pass-through to client
+    $dvAmount = $bestOffers['dv'] ?? 0;
 
     // 7. Build standard disbursement items
 
@@ -248,9 +257,19 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
         $items[] = ['type' => 'attorney_fee', 'payee' => 'Law Office', 'amount' => $fee];
     }
 
-    // Costs (MR reimbursable)
-    if ($costs > 0) {
-        $items[] = ['type' => 'mr_cost_reimbursement', 'payee' => 'Law Office', 'amount' => $costs];
+    // Records Fee
+    if ($recordsFee > 0) {
+        $items[] = ['type' => 'mr_cost_reimbursement', 'payee' => 'Law Office (Records Fee)', 'amount' => $recordsFee];
+    }
+
+    // Litigation Fee
+    if ($litigationFee > 0) {
+        $items[] = ['type' => 'mr_cost_reimbursement', 'payee' => 'Law Office (Litigation Fee)', 'amount' => $litigationFee];
+    }
+
+    // Other Expenses
+    if ($otherExpenses > 0) {
+        $items[] = ['type' => 'other', 'payee' => 'Other Expenses', 'amount' => $otherExpenses];
     }
 
     // Medical providers
@@ -266,6 +285,11 @@ function buildDisbursementItems($mainCaseId, $mainCase) {
     // Client net proceeds
     if ($clientNet > 0) {
         $items[] = ['type' => 'client_payment', 'payee' => $clientName, 'amount' => $clientNet];
+    }
+
+    // DV pass-through (no attorney fee, separate payment to client)
+    if ($dvAmount > 0) {
+        $items[] = ['type' => 'client_payment', 'payee' => $clientName . ' (DV - No Attorney Fee)', 'amount' => $dvAmount];
     }
 
     return $items;

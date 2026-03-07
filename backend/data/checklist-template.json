@@ -1,0 +1,879 @@
+[
+  {
+    "phase": "Phase 1 - Treatment",
+    "phase_key": "ini",
+    "phase_order": 1,
+    "stages": [
+      {
+        "stage": "Initial Intake",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "Retainer signed", "task_number": "1"},
+          {"task_name": "Intro call to client", "task_number": "2"},
+          {"task_name": "Medical provider coordination", "task_number": "3"},
+          {
+            "task_name": "Police report?",
+            "task_number": "4",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request full report from the police department", "task_number": "4.1"},
+                {"task_name": "Request Police Report", "task_number": "4.2"},
+                {"task_name": "Received Police Report", "task_number": "4.3"}
+              ],
+              "no": []
+            }
+          },
+          {"task_name": "Health available check", "task_number": "5"},
+          {"task_name": "CMS available check", "task_number": "6"},
+          {"task_name": "Attorney reviewed and flagged issues", "task_number": "7"}
+        ]
+      },
+      {
+        "stage": "Representation Letters",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "Representation letter to 1st party", "task_number": "1"},
+          {"task_name": "Representation letter to 3rd party", "task_number": "2"},
+          {"task_name": "Representation letter to other parties if applicable", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "Acknowledgement Letters",
+        "stage_order": 3,
+        "tasks": [
+          {"task_name": "Acknowledgement letter received from 1st party", "task_number": "1"},
+          {"task_name": "Acknowledgement letter received from 3rd party", "task_number": "2"},
+          {"task_name": "Acknowledgement letter received from other parties", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "PIP",
+        "stage_order": 4,
+        "tasks": [
+          {
+            "task_name": "PIP coverage available?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "PIP Application Submitted", "task_number": "1.a"},
+                {"task_name": "PIP info to Providers", "task_number": "1.b"},
+                {
+                  "task_name": "Wage Loss?",
+                  "task_number": "2",
+                  "is_conditional": true,
+                  "subtasks": {
+                    "yes": [
+                      {"task_name": "Doctor's Note", "task_number": "2.a"},
+                      {"task_name": "Employee Verification", "task_number": "2.b"},
+                      {"task_name": "Pay Stub", "task_number": "2.c"},
+                      {"task_name": "Request Wage loss from Insurance", "task_number": "2.d"},
+                      {"task_name": "Payment Received", "task_number": "2.e"},
+                      {"task_name": "Send the Wage loss check to Client", "task_number": "2.f"}
+                    ],
+                    "no": []
+                  }
+                },
+                {
+                  "task_name": "Essential Services?",
+                  "task_number": "3",
+                  "is_conditional": true,
+                  "subtasks": {
+                    "yes": [
+                      {"task_name": "Service Provider Bill", "task_number": "3.a"},
+                      {"task_name": "Doctor's Note", "task_number": "3.b"},
+                      {"task_name": "Request Essential Service from Insurance", "task_number": "3.c"},
+                      {"task_name": "Payment Received", "task_number": "3.d"},
+                      {"task_name": "Send the Essential Service check to Client", "task_number": "3.e"}
+                    ],
+                    "no": []
+                  }
+                }
+              ],
+              "no": [
+                {"task_name": "PIP Declination on File", "task_number": "1.a"}
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Property Damage",
+        "stage_order": 5,
+        "tasks": [
+          {
+            "task_name": "Office Assisted Property Damage?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Repair Schedule", "task_number": "1.1"},
+                {"task_name": "Rental Setup", "task_number": "1.2"},
+                {"task_name": "Repair Drop-off Confirmation", "task_number": "1.3"}
+              ],
+              "no": []
+            }
+          },
+          {
+            "task_name": "Is the vehicle repairable?",
+            "task_number": "2",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "PD Photos", "task_number": "2.1"},
+                {"task_name": "Final Repair Estimate", "task_number": "2.2"}
+              ],
+              "no": [
+                {"task_name": "Valuation Report", "task_number": "2.1"},
+                {"task_name": "Received PD Settlement Check", "task_number": "2.2"}
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "stage": "PD Reimbursements",
+        "stage_order": 6,
+        "tasks": [
+          {
+            "task_name": "Deductible reimbursement applicable?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request the Deductible Reimbursement", "task_number": "1.1"},
+                {"task_name": "Received the Deductible Check", "task_number": "1.2"},
+                {"task_name": "Sent the Deductible Check to Client", "task_number": "1.3"}
+              ],
+              "no": []
+            }
+          },
+          {
+            "task_name": "Car seat reimbursement applicable?",
+            "task_number": "2",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request Car Seat Reimbursement", "task_number": "2.1"},
+                {"task_name": "Received Car Seat Reimbursement Check", "task_number": "2.2"},
+                {"task_name": "Sent the Car Seat Check to Client", "task_number": "2.3"}
+              ],
+              "no": []
+            }
+          },
+          {
+            "task_name": "Diminished Value claim applicable?",
+            "task_number": "3",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request Diminished Value Report", "task_number": "3.1"},
+                {"task_name": "DV Report by Appraisal", "task_number": "3.2"},
+                {"task_name": "DV Report by Bridge Law", "task_number": "3.3"},
+                {"task_name": "Received Diminished Value Report", "task_number": "3.4"}
+              ],
+              "no": []
+            }
+          },
+          {
+            "task_name": "Loss of Use applicable?",
+            "task_number": "4",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request Loss of Use", "task_number": "4.1"},
+                {"task_name": "Received Loss of Use Check", "task_number": "4.2"},
+                {"task_name": "Sent LOU Check to Client", "task_number": "4.3"}
+              ],
+              "no": []
+            }
+          },
+          {
+            "task_name": "Other Property Damage applicable?",
+            "task_number": "5",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Request Other Property Damage", "task_number": "5.1"},
+                {"task_name": "Received Other Property Damage Check", "task_number": "5.2"},
+                {"task_name": "Sent Other Property Damage Check to Client", "task_number": "5.3"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Liability Review",
+        "stage_order": 7,
+        "tasks": [
+          {"task_name": "Liability accepted by BI carrier", "task_number": "1"},
+          {"task_name": "Liability denied", "task_number": "2"},
+          {"task_name": "Accepted by UM", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "Policy Information",
+        "stage_order": 8,
+        "tasks": [
+          {
+            "task_name": "Client Policy",
+            "task_number": "1",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Dec Sheet", "task_number": "1.a"},
+              {"task_name": "Policy", "task_number": "1.b"}
+            ]
+          },
+          {
+            "task_name": "3rd Party PD / BI Limit",
+            "task_number": "2",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Dec Sheet", "task_number": "2.a"}
+            ]
+          }
+        ]
+      },
+      {
+        "stage": "Client Follow Ups",
+        "stage_order": 9,
+        "tasks": [
+          {"task_name": "Flag attorneys for case/treatment review", "task_number": "1"},
+          {"task_name": "General damages information collected", "task_number": "2"},
+          {"task_name": "Treatment follow-up #1", "task_number": "3"},
+          {"task_name": "Treatment follow-up #2", "task_number": "4"}
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 2 - Records",
+    "phase_key": "rec",
+    "phase_order": 2,
+    "stages": [
+      {
+        "stage": "Prior Records",
+        "stage_order": 1,
+        "tasks": [
+          {
+            "task_name": "Prior records required?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Client Prior Record Confirmation", "task_number": "1.a"},
+                {"task_name": "Legal Review of Prior Record", "task_number": "1.b"},
+                {"task_name": "Prior Record Acquisition Strategy", "task_number": "1.c"},
+                {"task_name": "Prior Record Request Submission", "task_number": "1.d"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Billing - CMS",
+        "stage_order": 2,
+        "tasks": [
+          {
+            "task_name": "CMS billing applicable?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Health Open / Representation Letter", "task_number": "1.a"},
+                {"task_name": "Health Acknowledgment Letter Received", "task_number": "1.b"},
+                {"task_name": "Request Payment Ledger", "task_number": "1.c"},
+                {"task_name": "Received Payment Ledger", "task_number": "1.d"},
+                {"task_name": "Request Health Final Ledger", "task_number": "1.e"},
+                {"task_name": "Received Most Recent Conditional Payment Letter", "task_number": "1.f"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Billing - Health",
+        "stage_order": 3,
+        "tasks": [
+          {
+            "task_name": "Health billing applicable?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "ERISA", "task_number": "1.a"},
+                {"task_name": "Health Open / Representation Letter", "task_number": "1.b"},
+                {"task_name": "Health Acknowledgment Letter Received", "task_number": "1.c"},
+                {"task_name": "Request Payment Ledger", "task_number": "1.d"},
+                {"task_name": "Received Payment Ledger", "task_number": "1.e"},
+                {"task_name": "Request Health Final Ledger", "task_number": "1.f"},
+                {"task_name": "Received Final Ledger", "task_number": "1.g"},
+                {"task_name": "Dispute Health Letter", "task_number": "1.h"},
+                {"task_name": "Closed Letter / Final Lien after Mahler Discount", "task_number": "1.i"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Medical Record Collection",
+        "stage_order": 4,
+        "tasks": [],
+        "provider_template": {
+          "task_name": "Provider",
+          "subtasks": [
+            {"task_name": "Request medical bills", "task_number": "a"},
+            {"task_name": "Request medical records", "task_number": "b"},
+            {"task_name": "Received record fees invoice", "task_number": "c"},
+            {"task_name": "Paid invoice", "task_number": "d"},
+            {"task_name": "Received medical bills", "task_number": "e"},
+            {"task_name": "Received medical records", "task_number": "f"},
+            {"task_name": "Verify balance with provider", "task_number": "g"},
+            {"task_name": "Sent balance verification to provider", "task_number": "h"},
+            {"task_name": "Notify Prelit Team with any outstanding balance", "task_number": "i"}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "phase": "Phase 3 - Verification",
+    "phase_key": "verification",
+    "phase_order": 3,
+    "stages": [
+      {
+        "stage": "Final Balance Check",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "Final PIP Ledger", "task_number": "1"},
+          {"task_name": "Total Meds Confirmed", "task_number": "2"},
+          {"task_name": "Medical Balance Sheet", "task_number": "3"},
+          {"task_name": "CMS Closing Letter", "task_number": "4"},
+          {"task_name": "Final Health Ledger", "task_number": "5"},
+          {"task_name": "Health Mahler", "task_number": "6"}
+        ]
+      },
+      {
+        "stage": "MBR Verification",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "All providers entered in MBR", "task_number": "1"},
+          {"task_name": "Charges confirmed with providers", "task_number": "2"},
+          {"task_name": "Balances confirmed with providers", "task_number": "3"},
+          {"task_name": "PIP amounts verified", "task_number": "4"},
+          {"task_name": "Health subrogation amounts verified", "task_number": "5"},
+          {"task_name": "MBR reviewed by attorney", "task_number": "6"}
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 4 - Demand",
+    "phase_key": "rfd",
+    "phase_order": 4,
+    "stages": [
+      {
+        "stage": "Demand Review",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "In Review by Attorney", "task_number": "1"},
+          {"task_name": "Demand Writer Assigned", "task_number": "2"}
+        ]
+      },
+      {
+        "stage": "Draft & Send Demand",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "3rd Party / UM Demand Draft", "task_number": "1"},
+          {"task_name": "Demand Out", "task_number": "2"},
+          {"task_name": "Confirm Receipt of Demand", "task_number": "3"},
+          {"task_name": "Supplemental Demand (if needed)", "task_number": "4"}
+        ]
+      },
+      {
+        "stage": "UIM",
+        "stage_order": 3,
+        "tasks": [
+          {
+            "task_name": "UIM applicable?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "UIM Open", "task_number": "1.1"},
+                {"task_name": "Hamilton Buyout Confirmation", "task_number": "1.2"},
+                {"task_name": "UIM Demand Draft", "task_number": "1.3"},
+                {"task_name": "UIM Demand Out", "task_number": "1.4"},
+                {"task_name": "Confirm Receipt of Demand", "task_number": "1.5"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 5 - Negotiate",
+    "phase_key": "neg",
+    "phase_order": 5,
+    "stages": [
+      {
+        "stage": "3rd Party / UM Negotiation",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "Initial Offer Received", "task_number": "1"},
+          {"task_name": "Counter Offer", "task_number": "2"},
+          {"task_name": "Offer Received from Insurance", "task_number": "3"},
+          {"task_name": "Client Authority Confirmed", "task_number": "4"},
+          {"task_name": "Settlement Accepted", "task_number": "5"}
+        ]
+      },
+      {
+        "stage": "DV Negotiation",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "DV Initial Offer Received", "task_number": "1"},
+          {"task_name": "DV Counter Offer", "task_number": "2"},
+          {"task_name": "DV Settlement Accepted", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "UIM Negotiation",
+        "stage_order": 3,
+        "tasks": [
+          {
+            "task_name": "UIM negotiation applicable?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Follow up for Initial Offer", "task_number": "1.1"},
+                {"task_name": "Initial Offer Received", "task_number": "1.2"},
+                {"task_name": "Counter Offer 1 Made", "task_number": "1.3"},
+                {"task_name": "UIM Settlement Accepted", "task_number": "1.4"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Potential Settlement",
+        "stage_order": 4,
+        "tasks": [
+          {"task_name": "Balance Verification", "task_number": "1"},
+          {"task_name": "Run Settlement Numbers", "task_number": "2"},
+          {"task_name": "Get Client Authority", "task_number": "3"},
+          {"task_name": "Set up Litigation Meeting with Client", "task_number": "4"}
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 6 - Litigation",
+    "phase_key": "lit",
+    "phase_order": 6,
+    "stages": [
+      {
+        "stage": "Litigation Meeting",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "Assign Litigation Intake to Attorneys", "task_number": "1"},
+          {"task_name": "Set up Litigation Intake", "task_number": "2"}
+        ]
+      },
+      {
+        "stage": "Litigation Intake",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "If client ok's lawsuit - set filing due date", "task_number": "1"}
+        ]
+      },
+      {
+        "stage": "Filed",
+        "stage_order": 3,
+        "tasks": [
+          {"task_name": "Draft summons complaint (cover sheet)", "task_number": "1"},
+          {
+            "task_name": "Filing Process",
+            "task_number": "2",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "File suit with the Court", "task_number": "2.a"},
+              {"task_name": "Enter filing fee into costs", "task_number": "2.b"},
+              {"task_name": "Enter case number", "task_number": "2.c"},
+              {"task_name": "Save conformed copies", "task_number": "2.d"},
+              {"task_name": "Draft RFPs to Defendant", "task_number": "2.e"},
+              {"task_name": "Send conformed copies to UIM adjuster", "task_number": "2.f"}
+            ]
+          }
+        ]
+      },
+      {
+        "stage": "Served",
+        "stage_order": 4,
+        "tasks": [
+          {"task_name": "TLO the defendant", "task_number": "1"},
+          {"task_name": "Send Summons, Complaint, Cover Sheet to get served", "task_number": "2"},
+          {"task_name": "Got Declaration of Service", "task_number": "3"},
+          {"task_name": "Enter cost of service", "task_number": "4"},
+          {"task_name": "Send courtesy copies to Adjuster", "task_number": "5"},
+          {"task_name": "Set Answer Received deadline", "task_number": "6"}
+        ]
+      },
+      {
+        "stage": "Secretary of State Service",
+        "stage_order": 5,
+        "tasks": [
+          {
+            "task_name": "Secretary of State Service Needed?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Send stuff to SOS", "task_number": "1.a"},
+                {"task_name": "Received Letter from SOS", "task_number": "1.b"},
+                {"task_name": "Draft PIIT Affy Decl of Due Diligence", "task_number": "1.c"},
+                {"task_name": "Send to Defendant's last known address", "task_number": "1.d"},
+                {"task_name": "Send SOS letter to Insurance company", "task_number": "1.e"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Notice of Appearance",
+        "stage_order": 6,
+        "tasks": [
+          {"task_name": "If no NOA after 2 weeks, follow up with adjuster", "task_number": "1"},
+          {"task_name": "Save NOA and enter OC info", "task_number": "2"},
+          {"task_name": "File confirmation of service if required", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "Discovery",
+        "stage_order": 7,
+        "tasks": [
+          {"task_name": "Defendant RFP Responses Due (40 days from service)", "task_number": "1"},
+          {"task_name": "Draft and send CR 26i letter if overdue", "task_number": "2"},
+          {"task_name": "Check responses for completeness", "task_number": "3"},
+          {"task_name": "Plaintiff Discovery Response drafted", "task_number": "4"},
+          {"task_name": "Plaintiff Discovery Response sent to OC", "task_number": "5"}
+        ]
+      },
+      {
+        "stage": "Intro Packet",
+        "stage_order": 8,
+        "tasks": [
+          {"task_name": "Draft Letter Response to NOA", "task_number": "1"},
+          {"task_name": "Draft Statement of Damages", "task_number": "2"},
+          {"task_name": "Draft Proposed Med Stip", "task_number": "3"},
+          {"task_name": "Send Packet to OC", "task_number": "4"}
+        ]
+      },
+      {
+        "stage": "Answer Received",
+        "stage_order": 9,
+        "tasks": [
+          {"task_name": "Follow up for answer", "task_number": "1"},
+          {"task_name": "File Motion for Default", "task_number": "2"},
+          {"task_name": "Strike Motion if Answer received", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "Medical Stipulation",
+        "stage_order": 10,
+        "tasks": [
+          {"task_name": "Follow up with OC about Med Stip", "task_number": "1"},
+          {"task_name": "Get client's signature if agreed", "task_number": "2"},
+          {"task_name": "Attorney sign and return to OC", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "Arbitration",
+        "stage_order": 11,
+        "tasks": [
+          {"task_name": "Draft & File Statement of Arbitrability", "task_number": "1"},
+          {"task_name": "Strike List completed", "task_number": "2"},
+          {"task_name": "Strike List Returned", "task_number": "3"},
+          {"task_name": "Arbitrator Appointed", "task_number": "4"},
+          {
+            "task_name": "Doctor Declaration needed?",
+            "task_number": "5",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "Add doctor list for declarations", "task_number": "5.a"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      },
+      {
+        "stage": "Deposition",
+        "stage_order": 12,
+        "tasks": [
+          {"task_name": "Run proposed dates by client", "task_number": "1"},
+          {"task_name": "Confirm date with OC", "task_number": "2"},
+          {"task_name": "Schedule dep prep with client", "task_number": "3"},
+          {"task_name": "Send Zoom link for dep prep", "task_number": "4"},
+          {"task_name": "Meet with client for dep prep", "task_number": "5"},
+          {"task_name": "Send Zoom link for deposition", "task_number": "6"},
+          {"task_name": "Confirm deposition day before", "task_number": "7"},
+          {"task_name": "Attend deposition with client", "task_number": "8"}
+        ]
+      },
+      {
+        "stage": "Pre-Hearing",
+        "stage_order": 13,
+        "tasks": [
+          {"task_name": "Draft Prehearing Statement", "task_number": "1"},
+          {"task_name": "Make Medical Exhibits", "task_number": "2"},
+          {"task_name": "Make Mileage maps", "task_number": "3"},
+          {"task_name": "Include DV, PD, Wage if applicable", "task_number": "4"},
+          {"task_name": "Request Final Billing from Billing Team", "task_number": "5"}
+        ]
+      },
+      {
+        "stage": "Arbitration Hearing",
+        "stage_order": 14,
+        "tasks": [
+          {"task_name": "Run dates by client", "task_number": "1"},
+          {"task_name": "Communicate preferred dates to OC and Arbitrator", "task_number": "2"},
+          {
+            "task_name": "Get confirmed date",
+            "task_number": "3",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Schedule Arb Prep with client", "task_number": "3.a"},
+              {"task_name": "Send Zoom link for Arb Prep", "task_number": "3.b"},
+              {"task_name": "Confirm Arb Prep day before", "task_number": "3.c"},
+              {"task_name": "Attend Arb Prep", "task_number": "3.d"},
+              {"task_name": "Send Arb Zoom link to client", "task_number": "3.e"},
+              {"task_name": "Confirm Arb day before", "task_number": "3.f"},
+              {"task_name": "Schedule interpreter if necessary", "task_number": "3.g"}
+            ]
+          },
+          {"task_name": "Attend Arbitration Hearing", "task_number": "4"}
+        ]
+      },
+      {
+        "stage": "Post Arbitration",
+        "stage_order": 15,
+        "tasks": [
+          {"task_name": "Arbitration Award Received", "task_number": "1"},
+          {"task_name": "Set De Novo due date (20 days out)", "task_number": "2"},
+          {"task_name": "Run numbers after Award", "task_number": "3"},
+          {"task_name": "Communicate numbers to Client", "task_number": "4"},
+          {"task_name": "Send Post Arb Letter to OC", "task_number": "5"},
+          {"task_name": "Sign ppw and return to OC if check received", "task_number": "6"},
+          {"task_name": "If no check, draft judgment ppw", "task_number": "7"}
+        ]
+      },
+      {
+        "stage": "De Novo",
+        "stage_order": 16,
+        "default_collapsed": true,
+        "tasks": [
+          {"task_name": "Review the Notice of De Novo", "task_number": "1"},
+          {"task_name": "Confirm De Novo Filing with the Court", "task_number": "2"},
+          {
+            "task_name": "Prepare for New Trial",
+            "task_number": "3",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Organize all evidence", "task_number": "3.a"},
+              {"task_name": "Identify and contact witnesses", "task_number": "3.b"},
+              {"task_name": "Draft summary of arguments", "task_number": "3.c"}
+            ]
+          },
+          {"task_name": "Submit Required Court Documents", "task_number": "4"},
+          {"task_name": "Attend the New Trial", "task_number": "5"},
+          {"task_name": "Post-Trial Actions", "task_number": "6"}
+        ]
+      },
+      {
+        "stage": "Litigation Settlement",
+        "stage_order": 17,
+        "tasks": [
+          {"task_name": "Notify OC of settlement", "task_number": "1"},
+          {
+            "task_name": "All Releases Received",
+            "task_number": "2",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Follow up with OC if not within 1 week", "task_number": "2.a"}
+            ]
+          },
+          {"task_name": "Signed Release Sent to OC", "task_number": "3"},
+          {
+            "task_name": "Check Received",
+            "task_number": "4",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Follow up with OC if not within 10 days", "task_number": "4.a"}
+            ]
+          },
+          {"task_name": "File Dismissal with Court", "task_number": "5"}
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 7 - Final Review",
+    "phase_key": "fbc",
+    "phase_order": 7,
+    "stages": [
+      {
+        "stage": "Settlement Process",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "3rd Party Settled", "task_number": "1"},
+          {
+            "task_name": "UM Settled",
+            "task_number": "2",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Hamm / Winters Confirmed", "task_number": "2.a"}
+            ]
+          },
+          {
+            "task_name": "UIM Settled",
+            "task_number": "3",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Hamm / Winters Confirmed", "task_number": "3.a"}
+            ]
+          },
+          {"task_name": "All Releases Received", "task_number": "4"},
+          {"task_name": "Final Balance Confirmed", "task_number": "5"},
+          {"task_name": "Final Disbursement Statement", "task_number": "6"},
+          {"task_name": "Final Settlement Confirmation with Client", "task_number": "7"}
+        ]
+      },
+      {
+        "stage": "Client Documents",
+        "stage_order": 2,
+        "tasks": [
+          {
+            "task_name": "Documents Sent to Client for Signature",
+            "task_number": "1",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Final Disbursement", "task_number": "1.a"},
+              {"task_name": "3rd Party Release", "task_number": "1.b"},
+              {"task_name": "PD Release", "task_number": "1.c"}
+            ]
+          },
+          {
+            "task_name": "Signed Documents Returned by Client",
+            "task_number": "2",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "In-Person", "task_number": "2.a"},
+              {"task_name": "Electronic Signature", "task_number": "2.b"}
+            ]
+          },
+          {"task_name": "Signed Release Sent to Insurance", "task_number": "3"}
+        ]
+      },
+      {
+        "stage": "SGAL",
+        "stage_order": 3,
+        "default_collapsed": true,
+        "tasks": [
+          {
+            "task_name": "SGAL needed?",
+            "task_number": "1",
+            "is_conditional": true,
+            "subtasks": {
+              "yes": [
+                {"task_name": "SGAL Appointed", "task_number": "1.1"},
+                {"task_name": "Files to SGAL", "task_number": "1.2"},
+                {"task_name": "Report", "task_number": "1.3"},
+                {"task_name": "Order", "task_number": "1.4"},
+                {"task_name": "Blocked Account Setup", "task_number": "1.5"}
+              ],
+              "no": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "phase": "Phase 8 - Settlement",
+    "phase_key": "accounting",
+    "phase_order": 8,
+    "stages": [
+      {
+        "stage": "Settlement Check Received",
+        "stage_order": 1,
+        "tasks": [
+          {"task_name": "BI/UM Check", "task_number": "1"},
+          {"task_name": "DV Check", "task_number": "2"},
+          {"task_name": "UIM Check", "task_number": "3"},
+          {"task_name": "Hamm/Winter Check", "task_number": "4"},
+          {"task_name": "LOU Check", "task_number": "5"},
+          {"task_name": "OOP Check", "task_number": "6"},
+          {"task_name": "Deductible Reimbursement", "task_number": "7"},
+          {"task_name": "PD Check", "task_number": "8"}
+        ]
+      },
+      {
+        "stage": "Closing Process",
+        "stage_order": 2,
+        "tasks": [
+          {"task_name": "Deposit checks to TRUST", "task_number": "1"},
+          {"task_name": "Settlement Check Signature by Attorney", "task_number": "2"},
+          {
+            "task_name": "Client's Settlement Payment",
+            "task_number": "3",
+            "has_subtasks": true,
+            "subtasks": [
+              {"task_name": "Mail", "task_number": "3.a"},
+              {"task_name": "Deposit", "task_number": "3.b"},
+              {"task_name": "Pick-up", "task_number": "3.c"}
+            ]
+          },
+          {"task_name": "Send Payment to Providers", "task_number": "4"},
+          {"task_name": "PIP - Mahler reduction request", "task_number": "5"},
+          {"task_name": "Health - Mahler reduction request", "task_number": "6"}
+        ]
+      },
+      {
+        "stage": "Final Accounting",
+        "stage_order": 3,
+        "tasks": [
+          {"task_name": "QuickBooks Ledger", "task_number": "1"},
+          {"task_name": "Final Case Log", "task_number": "2"}
+        ]
+      },
+      {
+        "stage": "Closure",
+        "stage_order": 4,
+        "tasks": [
+          {"task_name": "Case Closed", "task_number": "1"}
+        ]
+      },
+      {
+        "stage": "Provider Discount",
+        "stage_order": 5,
+        "tasks": [],
+        "dynamic_providers": true,
+        "provider_subtasks": [
+          {"task_name": "Send reduction request", "task_number": "1"},
+          {"task_name": "Approval from provider", "task_number": "2"}
+        ]
+      }
+    ]
+  }
+]

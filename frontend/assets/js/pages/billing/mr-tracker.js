@@ -78,7 +78,8 @@ function trackerPage() {
             this.activeFilter = '';
             this.tierFilter = '';
             this.assignedFilter = '';
-            this.staffFilter = '';
+            const user = Alpine.store('auth')?.user;
+            this.staffFilter = (user && user.team === 'billing') ? user.id.toString() : '';
             this.caseIdFilter = '';
             // Clean URL param
             const url = new URL(window.location);
@@ -91,6 +92,12 @@ function trackerPage() {
         },
 
         async init() {
+            // Default to own cases if user belongs to this team
+            const user = Alpine.store('auth')?.user;
+            if (user && user.team === 'billing') {
+                this.staffFilter = user.id.toString();
+            }
+
             // Check for case_id URL param (from "Manage in Tracker")
             const urlParams = new URLSearchParams(window.location.search);
             this.caseIdFilter = urlParams.get('case_id') || '';

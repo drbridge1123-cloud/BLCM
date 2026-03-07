@@ -13,7 +13,7 @@ if (!empty($errors)) errorResponse(implode(', ', $errors));
 $caseId = (int)$input['case_id'];
 $coverageType = sanitizeString($input['coverage_type']);
 
-$validTypes = ['3rd_party', 'um', 'uim', 'dv'];
+$validTypes = ['3rd_party', 'um', 'uim', 'pip', 'pd', 'dv', 'bi'];
 if (!validateEnum($coverageType, $validTypes)) errorResponse('Invalid coverage_type');
 
 // Auto-calculate round_number

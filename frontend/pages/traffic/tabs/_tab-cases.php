@@ -1,13 +1,24 @@
 <!-- Traffic Cases Tab -->
 <div style="padding:12px 24px 0;">
     <div style="display:flex; align-items:center; gap:6px; margin-bottom:0;">
-        <button class="sp-staff-pill" :class="statusFilter === '' && 'on'"
-                @click="statusFilter = ''; loadCases()">All</button>
-        <button class="sp-staff-pill" :class="statusFilter === 'active' && 'on'"
-                @click="statusFilter = 'active'; loadCases()">Active</button>
-        <button class="sp-staff-pill" :class="statusFilter === 'resolved' && 'on'"
-                @click="statusFilter = 'resolved'; loadCases()">Resolved</button>
-
+        <div class="sp-tabs">
+            <button class="sp-tab" :class="statusFilter === '' && 'on'"
+                    @click="statusFilter = ''; loadCases()">All
+                <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="(summary.active_count||0) + (summary.resolved_count||0)"></span>
+            </button>
+            <button class="sp-tab" :class="statusFilter === 'active' && 'on'"
+                    @click="statusFilter = 'active'; loadCases()">Active
+                <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.active_count || 0"></span>
+            </button>
+            <button class="sp-tab" :class="statusFilter === 'resolved' && 'on'"
+                    @click="statusFilter = 'resolved'; loadCases()">Resolved
+                <span class="sp-tab-count" style="background:rgba(16,185,129,.1); color:#059669;" x-text="summary.resolved_count || 0"></span>
+            </button>
+            <button class="sp-tab" :class="statusFilter === 'unpaid' && 'on'"
+                    @click="statusFilter = 'unpaid'; loadCases()">Unpaid
+                <span class="sp-tab-count" style="background:rgba(217,119,6,.1); color:#d97706;" x-text="summary.unpaid_count || 0"></span>
+            </button>
+        </div>
         <input type="text" x-model="search" @input="handleSearch()" placeholder="Search client, case #..."
                class="sp-search" style="margin-left:auto;">
     </div>

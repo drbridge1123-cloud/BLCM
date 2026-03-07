@@ -48,32 +48,26 @@
                 <button @click="resetFilters()" style="font-size:12px; color:#2563eb; text-decoration:underline; background:none; border:none; cursor:pointer;">Show All</button>
             </div>
 
-            <!-- Summary Cards -->
-            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:12px 24px;">
-                <div @click="toggleFilter('')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:10px 14px; border:1.5px solid #e8e4dc;"
-                     :style="activeFilter === '' ? 'border-color:#C9A84C; box-shadow:0 0 0 2px rgba(201,168,76,.15);' : ''">
-                    <div class="sp-stat-label" style="font-size:10px;">Total</div>
-                    <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total ?? '-'"></div>
-                </div>
-                <div @click="toggleFilter('overdue')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:10px 14px; border:1.5px solid #e8e4dc;"
-                     :style="activeFilter === 'overdue' ? 'border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,.15);' : ''">
-                    <div class="sp-stat-label" style="font-size:10px;">Overdue</div>
-                    <div class="sp-stat-num" style="color:#dc2626;" x-text="summary.overdue ?? '-'"></div>
-                </div>
-                <div @click="toggleFilter('followup_due')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:10px 14px; border:1.5px solid #e8e4dc;"
-                     :style="activeFilter === 'followup_due' ? 'border-color:#f59e0b; box-shadow:0 0 0 2px rgba(245,158,11,.15);' : ''">
-                    <div class="sp-stat-label" style="font-size:10px;">Follow-up Due</div>
-                    <div class="sp-stat-num" style="color:#d97706;" x-text="summary.followup_due ?? '-'"></div>
-                </div>
-                <div @click="toggleFilter('no_request')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:10px 14px; border:1.5px solid #e8e4dc;"
-                     :style="activeFilter === 'no_request' ? 'border-color:#9ca3af; box-shadow:0 0 0 2px rgba(156,163,175,.15);' : ''">
-                    <div class="sp-stat-label" style="font-size:10px;">Not Started</div>
-                    <div class="sp-stat-num" style="color:#6b7280;" x-text="summary.not_started ?? '-'"></div>
+            <!-- Filter Tabs -->
+            <div style="padding:12px 24px 0;">
+                <div class="sp-tabs">
+                    <button class="sp-tab" :class="activeFilter === '' && 'on'" @click="toggleFilter('')">All
+                        <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.total ?? 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="activeFilter === 'overdue' && 'on'" @click="toggleFilter('overdue')">Overdue
+                        <span class="sp-tab-count" style="background:rgba(231,76,60,.1); color:#e74c3c;" x-text="summary.overdue ?? 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="activeFilter === 'followup_due' && 'on'" @click="toggleFilter('followup_due')">Follow-up Due
+                        <span class="sp-tab-count" style="background:rgba(234,88,12,.1); color:#ea580c;" x-text="summary.followup_due ?? 0"></span>
+                    </button>
+                    <button class="sp-tab" :class="activeFilter === 'no_request' && 'on'" @click="toggleFilter('no_request')">Not Started
+                        <span class="sp-tab-count" x-text="summary.not_started ?? 0"></span>
+                    </button>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div style="padding:0 24px 12px;">
+            <div style="padding:8px 24px 12px;">
                 <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
                     <input type="text" x-model="search" @input.debounce.300ms="loadData(1)" placeholder="Search case #, client, or provider..."
                            class="sp-search" style="flex:1; min-width:200px;">

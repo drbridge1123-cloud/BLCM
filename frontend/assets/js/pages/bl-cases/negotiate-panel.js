@@ -2,20 +2,11 @@ function negotiatePanel(caseId) {
     return {
         open: false,
         loading: true,
-        activeCoverage: '3rd_party',
-        activeCoverages: [],
-        coverageNegotiations: { '3rd_party': [], um: [], uim: [], dv: [] },
-        bestOffers: { '3rd_party': 0, um: 0, uim: 0, dv: 0 },
-        adjusterInfo: {
-            '3rd_party': { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' },
-            um: { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' },
-            uim: { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' },
-            dv: { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' },
-        },
+        tabs: [],
+        activeTabKey: null,
+        bestOffersByType: { '3rd_party': 0, um: 0, uim: 0, dv: 0 },
         providerNegotiations: [],
 
-        showRoundForm: false,
-        editingRound: null,
         roundForm: {
             demand_date: new Date().toISOString().split('T')[0],
             demand_amount: 0,
@@ -26,49 +17,130 @@ function negotiatePanel(caseId) {
         },
 
         viewingNote: null,
-
         _saveTimer: null,
         _adjSaveTimer: null,
 
+        getActiveTab() {
+            return this.tabs.find(t => t.key === this.activeTabKey) || null;
+        },
+
         formatPhone(field) {
-            let val = this.adjusterInfo[this.activeCoverage][field] || '';
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            let val = tab.adjuster_info[field] || '';
             let digits = val.replace(/\D/g, '');
             if (digits.length === 0) return;
             if (digits.length > 10 && digits[0] === '1') digits = digits.substring(1);
             if (digits.length === 10) {
-                this.adjusterInfo[this.activeCoverage][field] = '(' + digits.substring(0,3) + ') ' + digits.substring(3,6) + '-' + digits.substring(6);
+                tab.adjuster_info[field] = '(' + digits.substring(0,3) + ') ' + digits.substring(3,6) + '-' + digits.substring(6);
             }
             this.saveAdjusterInfo();
         },
 
         formatEmail() {
-            let val = this.adjusterInfo[this.activeCoverage].adjuster_email || '';
-            this.adjusterInfo[this.activeCoverage].adjuster_email = val.trim().toLowerCase();
+            const tab = this.getActiveTab();
+            if (!tab) return;
+            let val = tab.adjuster_info.adjuster_email || '';
+            tab.adjuster_info.adjuster_email = val.trim().toLowerCase();
             this.saveAdjusterInfo();
         },
 
         async init() {
             await Promise.all([this.loadNegotiations(), this.loadProviderNegotiations()]);
             this.loading = false;
+
+            // Auto-fill adjuster fields when contacts modal saves
+            document.addEventListener('adjuster-saved', (e) => {
+                const d = e.detail;
+                const matchKey = d.coverage_type + '_' + (d.coverage_index || 1);
+                const found = this.tabs.find(t => t.key === matchKey);
+                if (found) {
+                    found.adjuster_info.insurance_company = d.insurance_company;
+                    found.adjuster_info.party = d.party;
+                    found.adjuster_info.adjuster_phone = d.adjuster_phone;
+                    found.adjuster_info.adjuster_fax = d.adjuster_fax;
+                    found.adjuster_info.adjuster_email = d.adjuster_email;
+                    found.adjuster_info.claim_number = d.claim_number;
+                    this.saveAdjusterInfo();
+                }
+            });
+
+            // Contacts negotiate toggle ON → create local tab with adjuster info
+            document.addEventListener('negotiate-add-tab', (e) => {
+                const d = e.detail;
+                const key = d.coverage_type + '_' + d.coverage_index;
+                if (this.tabs.find(t => t.key === key)) return; // already exists
+                const baseLabel = this.getCoverageLabel(d.coverage_type);
+                const sameType = this.tabs.filter(t => t.coverage_type === d.coverage_type);
+                const totalOfType = sameType.length + 1;
+                const label = totalOfType > 1 ? `${baseLabel} (${d.coverage_index})` : baseLabel;
+                if (totalOfType === 2 && sameType[0]) {
+                    sameType[0].label = `${baseLabel} (${sameType[0].coverage_index})`;
+                }
+                this.tabs.push({
+                    coverage_type: d.coverage_type,
+                    coverage_index: d.coverage_index,
+                    key,
+                    label,
+                    rounds: [],
+                    best_offer: 0,
+                    adjuster_info: {
+                        insurance_company: d.insurance_company || '',
+                        party: d.party || '',
+                        adjuster_phone: d.adjuster_phone || '',
+                        adjuster_fax: d.adjuster_fax || '',
+                        adjuster_email: d.adjuster_email || '',
+                        claim_number: d.claim_number || '',
+                    },
+                    _isLocal: true,
+                });
+                this.activeTabKey = key;
+            });
+
+            // Contacts negotiate toggle OFF → remove tab
+            document.addEventListener('negotiate-remove-tab', (e) => {
+                const key = e.detail.coverage_type + '_' + e.detail.coverage_index;
+                this.tabs = this.tabs.filter(t => t.key !== key);
+                // Fix labels after removal
+                const type = e.detail.coverage_type;
+                const remaining = this.tabs.filter(t => t.coverage_type === type);
+                const baseLabel = this.getCoverageLabel(type);
+                if (remaining.length === 1) {
+                    remaining[0].label = baseLabel;
+                }
+                if (this.activeTabKey === key) {
+                    this.activeTabKey = this.tabs.length > 0 ? this.tabs[0].key : null;
+                }
+            });
+
+            // Clear adjuster info when contacts tab removed
+            document.addEventListener('adjuster-removed', (e) => {
+                const matchKey = e.detail.coverage_type + '_' + (e.detail.coverage_index || 1);
+                for (const tab of this.tabs) {
+                    if (tab.key === matchKey) {
+                        tab.adjuster_info = { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' };
+                    }
+                }
+            });
         },
 
         async loadNegotiations() {
             try {
                 const res = await api.get(`negotiations/${caseId}`);
                 if (res.success) {
-                    this.coverageNegotiations = res.grouped;
-                    this.bestOffers = res.best_offers;
-                    this.activeCoverages = res.active_coverages;
-                    if (res.adjuster_info) {
-                        for (const type of ['3rd_party', 'um', 'uim', 'dv']) {
-                            if (res.adjuster_info[type]) {
-                                this.adjusterInfo[type] = { ...res.adjuster_info[type] };
-                            }
-                        }
+                    this.tabs = res.tabs;
+                    this.bestOffersByType = res.best_offers;
+                    // Maintain active tab or select first
+                    if (this.tabs.length > 0 && !this.tabs.find(t => t.key === this.activeTabKey)) {
+                        this.activeTabKey = this.tabs[0].key;
                     }
-                    if (this.activeCoverages.length > 0 && !this.activeCoverages.includes(this.activeCoverage)) {
-                        this.activeCoverage = this.activeCoverages[0];
+                    if (this.tabs.length === 0) {
+                        this.activeTabKey = null;
                     }
+                    // Notify disbursement panel
+                    window.dispatchEvent(new CustomEvent('negotiation-updated', {
+                        detail: { bestOffers: res.best_offers, activeCoverages: res.active_coverages }
+                    }));
                 }
             } catch (e) {
                 console.error('Failed to load negotiations:', e);
@@ -87,17 +159,59 @@ function negotiatePanel(caseId) {
         },
 
         getCoverageLabel(type) {
-            const labels = {
-                '3rd_party': '3rd Party',
-                'um': 'UM',
-                'uim': 'UIM',
-                'dv': 'DV',
-            };
+            const labels = { '3rd_party': '3rd Party', 'um': 'UM', 'uim': 'UIM', 'pip': 'PIP', 'pd': 'PD', 'dv': 'DV', 'bi': 'BI' };
             return labels[type] || type;
         },
 
         getTotalBestOffer() {
-            return Object.values(this.bestOffers).reduce((sum, v) => sum + (v || 0), 0);
+            return Object.values(this.bestOffersByType).reduce((sum, v) => sum + (v || 0), 0);
+        },
+
+        addCoverage(type) {
+            const existing = this.tabs.filter(t => t.coverage_type === type);
+            const nextIndex = existing.length > 0 ? Math.max(...existing.map(t => t.coverage_index)) + 1 : 1;
+            const baseLabel = this.getCoverageLabel(type);
+            // Check total count of this type (existing + this new one)
+            const totalOfType = existing.length + 1;
+            const label = totalOfType > 1 ? `${baseLabel} (${nextIndex})` : baseLabel;
+            // If adding a second of same type, relabel the first one
+            if (totalOfType === 2) {
+                const first = existing[0];
+                if (first) first.label = `${baseLabel} (${first.coverage_index})`;
+            }
+            const key = `${type}_${nextIndex}`;
+            this.tabs.push({
+                coverage_type: type,
+                coverage_index: nextIndex,
+                key,
+                label,
+                rounds: [],
+                best_offer: 0,
+                adjuster_info: { insurance_company: '', party: '', adjuster_phone: '', adjuster_fax: '', adjuster_email: '', claim_number: '' },
+                _isLocal: true,
+            });
+            this.activeTabKey = key;
+        },
+
+        async removeCoverage(tabKey) {
+            if (!confirm('이 커버리지와 모든 라운드를 삭제하시겠습니까?')) return;
+            const tab = this.tabs.find(t => t.key === tabKey);
+            if (!tab) return;
+            if (tab._isLocal) {
+                // Local tab (not yet saved) — just remove from array
+                this.tabs = this.tabs.filter(t => t.key !== tabKey);
+                if (this.activeTabKey === tabKey) {
+                    this.activeTabKey = this.tabs.length > 0 ? this.tabs[0].key : null;
+                }
+                return;
+            }
+            try {
+                await api.delete(`negotiations/group/${caseId}/${tab.coverage_type}/${tab.coverage_index}`);
+                showToast('Coverage removed', 'success');
+                await this.loadNegotiations();
+            } catch (e) {
+                showToast('Failed to remove coverage', 'error');
+            }
         },
 
         resetRoundForm() {
@@ -121,11 +235,14 @@ function negotiatePanel(caseId) {
             this.autoFillDate(round);
             clearTimeout(this._inlineSaveTimers?.[round.id]);
             if (!this._inlineSaveTimers) this._inlineSaveTimers = {};
+            const tab = this.getActiveTab();
+            if (!tab) return;
             this._inlineSaveTimers[round.id] = setTimeout(async () => {
                 try {
-                    const adj = this.adjusterInfo[this.activeCoverage];
+                    const adj = tab.adjuster_info;
                     await api.post(`negotiations/${caseId}`, {
-                        coverage_type: this.activeCoverage,
+                        coverage_type: tab.coverage_type,
+                        coverage_index: tab.coverage_index,
                         round: {
                             id: round.id,
                             round_number: round.round_number,
@@ -133,12 +250,12 @@ function negotiatePanel(caseId) {
                             demand_amount: round.demand_amount || 0,
                             offer_date: round.offer_date || null,
                             offer_amount: round.offer_amount || 0,
-                            insurance_company: adj.insurance_company || null,
-                            party: adj.party || null,
-                            adjuster_phone: adj.adjuster_phone || null,
-                            adjuster_fax: adj.adjuster_fax || null,
-                            adjuster_email: adj.adjuster_email || null,
-                            claim_number: adj.claim_number || null,
+                            insurance_company: adj?.insurance_company || null,
+                            party: adj?.party || null,
+                            adjuster_phone: adj?.adjuster_phone || null,
+                            adjuster_fax: adj?.adjuster_fax || null,
+                            adjuster_email: adj?.adjuster_email || null,
+                            claim_number: adj?.claim_number || null,
                             status: round.status,
                             notes: round.notes || null,
                         },
@@ -151,12 +268,15 @@ function negotiatePanel(caseId) {
         },
 
         async saveAdjusterInfo() {
+            const tab = this.getActiveTab();
+            if (!tab) return;
             clearTimeout(this._adjSaveTimer);
             this._adjSaveTimer = setTimeout(async () => {
                 try {
-                    const adj = this.adjusterInfo[this.activeCoverage];
+                    const adj = tab.adjuster_info;
                     await api.post(`negotiations/${caseId}`, {
-                        coverage_type: this.activeCoverage,
+                        coverage_type: tab.coverage_type,
+                        coverage_index: tab.coverage_index,
                         adjuster_info: {
                             insurance_company: adj.insurance_company || null,
                             party: adj.party || null,
@@ -174,10 +294,11 @@ function negotiatePanel(caseId) {
 
         async saveRound() {
             this.autoFillDate(this.roundForm);
-            // Only save if at least one field has data
             if (!this.roundForm.demand_amount && !this.roundForm.offer_amount && !this.roundForm.notes) return;
+            const tab = this.getActiveTab();
+            if (!tab) return;
             try {
-                const adj = this.adjusterInfo[this.activeCoverage];
+                const adj = tab.adjuster_info;
                 const roundData = {
                     id: null,
                     round_number: null,
@@ -196,7 +317,8 @@ function negotiatePanel(caseId) {
                 };
 
                 const res = await api.post(`negotiations/${caseId}`, {
-                    coverage_type: this.activeCoverage,
+                    coverage_type: tab.coverage_type,
+                    coverage_index: tab.coverage_index,
                     round: roundData,
                 });
 
@@ -288,11 +410,7 @@ function negotiatePanel(caseId) {
         },
 
         getNegotiateStatus() {
-            const allRounds = [];
-            for (const type of this.activeCoverages) {
-                const rounds = this.coverageNegotiations[type] || [];
-                allRounds.push(...rounds);
-            }
+            const allRounds = this.tabs.flatMap(t => t.rounds || []);
             if (allRounds.length === 0) return null;
             if (allRounds.some(r => r.status === 'accepted')) return 'accepted';
             if (allRounds.some(r => r.status === 'countered')) return 'countered';

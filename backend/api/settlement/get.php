@@ -22,28 +22,42 @@ if (!$case) {
     errorResponse('Case not found', 404);
 }
 
-// Best offers from negotiations
+// Best offers from negotiations — sum across coverage_index per type
 $bestOffers = ['3rd_party' => 0, 'um' => 0, 'uim' => 0, 'dv' => 0];
+$activeCoverages = [];
 $negotiations = dbFetchAll(
-    "SELECT coverage_type, offer_amount, status FROM case_negotiations WHERE case_id = ? ORDER BY coverage_type, round_number",
+    "SELECT coverage_type, coverage_index, offer_amount, status FROM case_negotiations WHERE case_id = ? ORDER BY coverage_type, coverage_index, round_number",
     [$caseId]
 );
+
+// Group by (type, index) to find best offer per tab, then sum by type
+$tabOffers = []; // "type_index" => best_offer
 foreach ($negotiations as $n) {
     $type = $n['coverage_type'];
+    $index = (int)$n['coverage_index'];
+    $key = "{$type}_{$index}";
     $offer = (float)$n['offer_amount'];
+
+    if (!isset($tabOffers[$key])) {
+        $tabOffers[$key] = ['type' => $type, 'best' => 0, 'has_accepted' => false];
+    }
+
     if ($n['status'] === 'accepted' && $offer > 0) {
-        $bestOffers[$type] = $offer;
-    } else {
-        $hasAccepted = false;
-        foreach ($negotiations as $check) {
-            if ($check['coverage_type'] === $type && $check['status'] === 'accepted') {
-                $hasAccepted = true;
-                break;
-            }
-        }
-        if (!$hasAccepted && $offer > $bestOffers[$type]) {
-            $bestOffers[$type] = $offer;
-        }
+        $tabOffers[$key]['best'] = $offer;
+        $tabOffers[$key]['has_accepted'] = true;
+    } elseif (!$tabOffers[$key]['has_accepted'] && $offer > $tabOffers[$key]['best']) {
+        $tabOffers[$key]['best'] = $offer;
+    }
+}
+foreach ($tabOffers as $tab) {
+    $bestOffers[$tab['type']] = ($bestOffers[$tab['type']] ?? 0) + $tab['best'];
+}
+
+// Active coverages (unique types with at least one negotiation round)
+$covTypes = array_unique(array_column($negotiations, 'coverage_type'));
+foreach (['3rd_party', 'um', 'uim', 'dv'] as $ct) {
+    if (in_array($ct, $covTypes)) {
+        $activeCoverages[] = $ct;
     }
 }
 
@@ -125,22 +139,37 @@ foreach ($medicalBills['providers'] as &$provider) {
 }
 unset($provider);
 
-// Expenses from cost ledger
+// Expenses from cost ledger (use billed_amount for settlement calculations)
 $expenses = dbFetchOne(
     "SELECT
-        COALESCE(SUM(CASE WHEN expense_category = 'mr_cost' THEN paid_amount ELSE 0 END), 0) AS reimbursable,
-        COALESCE(SUM(CASE WHEN expense_category = 'litigation' THEN paid_amount ELSE 0 END), 0) AS litigation,
-        COALESCE(SUM(paid_amount), 0) AS total
+        COALESCE(SUM(CASE WHEN expense_category = 'mr_cost' THEN billed_amount ELSE 0 END), 0) AS reimbursable,
+        COALESCE(SUM(CASE WHEN expense_category = 'litigation' THEN billed_amount ELSE 0 END), 0) AS litigation,
+        COALESCE(SUM(CASE WHEN expense_category = 'other' THEN billed_amount ELSE 0 END), 0) AS other_expenses,
+        COALESCE(SUM(billed_amount), 0) AS total
      FROM mr_fee_payments WHERE case_id = ?",
     [$caseId]
 );
 
-// PIP info from MBR report
+// PIP info from MBR report + Contacts
+$pipInsuranceCompany = null;
+$pipAdj = dbFetchOne(
+    "SELECT ic.name AS company_name
+     FROM case_adjusters ca
+     JOIN adjusters a ON a.id = ca.adjuster_id
+     LEFT JOIN insurance_companies ic ON ic.id = a.insurance_company_id
+     WHERE ca.case_id = ? AND ca.coverage_type = 'pip'",
+    [$caseId]
+);
+if ($pipAdj) {
+    $pipInsuranceCompany = $pipAdj['company_name'] ?? null;
+}
+
 $pipInfo = [
     'pip1_name' => $mbrReport['pip1_name'] ?? null,
     'pip2_name' => $mbrReport['pip2_name'] ?? null,
     'pip1_total' => round($pip1Total, 2),
     'pip2_total' => round($pip2Total, 2),
+    'contact_company' => $pipInsuranceCompany,
 ];
 
 jsonResponse([
@@ -157,6 +186,7 @@ jsonResponse([
         'pip_insurance_company' => $case['pip_insurance_company'],
         'settlement_method' => $case['settlement_method'],
     ],
+    'active_coverages' => $activeCoverages,
     'best_offers' => $bestOffers,
     'medical_bills' => $medicalBills,
     'medical_balance' => round($negotiatedMedicalBalance, 2),
@@ -165,6 +195,7 @@ jsonResponse([
     'expenses' => [
         'reimbursable' => round((float)$expenses['reimbursable'], 2),
         'litigation' => round((float)$expenses['litigation'], 2),
+        'other' => round((float)$expenses['other_expenses'], 2),
         'total' => round((float)$expenses['total'], 2),
     ],
     'pip_info' => $pipInfo,

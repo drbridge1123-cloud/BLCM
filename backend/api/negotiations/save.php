@@ -16,12 +16,13 @@ if (!$data) {
 }
 
 $coverageType = $data['coverage_type'] ?? '3rd_party';
-$allowedTypes = ['3rd_party', 'um', 'uim', 'dv'];
+$allowedTypes = ['3rd_party', 'um', 'uim', 'pip', 'pd', 'dv', 'bi'];
 if (!in_array($coverageType, $allowedTypes)) {
     errorResponse('Invalid coverage type');
 }
+$coverageIndex = (int)($data['coverage_index'] ?? 1);
 
-// If saving adjuster info for a coverage type (updates all rounds)
+// If saving adjuster info for a coverage group (updates all rounds in that group)
 if (isset($data['adjuster_info'])) {
     $adj = $data['adjuster_info'];
     $adjFields = [
@@ -32,10 +33,11 @@ if (isset($data['adjuster_info'])) {
         'adjuster_email' => $adj['adjuster_email'] ?? null,
         'claim_number' => $adj['claim_number'] ?? null,
     ];
-    dbUpdate('case_negotiations', $adjFields, 'case_id = ? AND coverage_type = ?', [$caseId, $coverageType]);
+    dbUpdate('case_negotiations', $adjFields, 'case_id = ? AND coverage_type = ? AND coverage_index = ?', [$caseId, $coverageType, $coverageIndex]);
 
     logActivity($userId, 'negotiation_adjuster_update', 'case', $caseId, [
         'coverage_type' => $coverageType,
+        'coverage_index' => $coverageIndex,
     ]);
 
     jsonResponse([
@@ -52,6 +54,7 @@ if (isset($data['round'])) {
     $fields = [
         'case_id' => $caseId,
         'coverage_type' => $coverageType,
+        'coverage_index' => $coverageIndex,
         'round_number' => (int)($round['round_number'] ?? 1),
         'demand_date' => $round['demand_date'] ?: null,
         'demand_amount' => (float)($round['demand_amount'] ?? 0),
@@ -72,10 +75,10 @@ if (isset($data['round'])) {
         dbUpdate('case_negotiations', $fields, 'id = ? AND case_id = ?', [$roundId, $caseId]);
         $id = $roundId;
     } else {
-        // Get next round number
+        // Get next round number within this coverage group
         $maxRound = dbFetchOne(
-            "SELECT MAX(round_number) AS max_round FROM case_negotiations WHERE case_id = ? AND coverage_type = ?",
-            [$caseId, $coverageType]
+            "SELECT MAX(round_number) AS max_round FROM case_negotiations WHERE case_id = ? AND coverage_type = ? AND coverage_index = ?",
+            [$caseId, $coverageType, $coverageIndex]
         );
         $fields['round_number'] = ($maxRound['max_round'] ?? 0) + 1;
         $fields['created_by'] = $userId;
@@ -85,6 +88,7 @@ if (isset($data['round'])) {
     logActivity($userId, 'negotiation_save', 'case_negotiation', $id, [
         'case_id' => $caseId,
         'coverage_type' => $coverageType,
+        'coverage_index' => $coverageIndex,
         'round_number' => $fields['round_number'],
     ]);
 

@@ -78,10 +78,10 @@ function getDefaultPermissions($role) {
     $defaults = [
         'admin' => getAllPermissions(),
         'manager' => [
-            'dashboard', 'cases', 'providers', 'mr_tracker',
-            'prelitigation_tracker', 'accounting_tracker',
-            'attorney_cases', 'commissions', 'referrals',
-            'reports', 'goals', 'messages', 'templates'
+            'dashboard', 'cases', 'providers', 'messages',
+            'attorney_cases', 'prelitigation_tracker',
+            'mr_tracker', 'health_tracker', 'accounting_tracker',
+            'mbr', 'templates', 'goals'
         ],
         'attorney' => [
             'dashboard', 'attorney_cases', 'traffic',

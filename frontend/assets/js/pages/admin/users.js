@@ -58,28 +58,37 @@ function usersPage() {
 
         // All permission definitions (matches backend auth.php)
         allPermissions: [
+            { group: 'Core' },
             { key: 'dashboard', label: 'Dashboard' },
             { key: 'cases', label: 'Cases (MR)' },
             { key: 'providers', label: 'Providers' },
-            { key: 'mr_tracker', label: 'MR Tracker' },
-            { key: 'prelitigation_tracker', label: 'Prelitigation Tracker' },
-            { key: 'accounting_tracker', label: 'Accounting Tracker' },
+            { key: 'messages', label: 'Messages' },
+
+            { group: 'Case Management' },
             { key: 'attorney_cases', label: 'Attorney Cases' },
             { key: 'traffic', label: 'Traffic' },
+            { key: 'prelitigation_tracker', label: 'Prelitigation Tracker' },
+
+            { group: 'Trackers' },
+            { key: 'mr_tracker', label: 'MR Tracker' },
+            { key: 'health_tracker', label: 'Health Tracker' },
+            { key: 'accounting_tracker', label: 'Accounting Tracker' },
+
+            { group: 'Finance' },
             { key: 'commissions', label: 'Commissions' },
             { key: 'commission_admin', label: 'Commission Admin' },
-            { key: 'referrals', label: 'Referrals' },
             { key: 'mbr', label: 'MBR' },
-            { key: 'health_tracker', label: 'Health Tracker' },
+            { key: 'referrals', label: 'Referrals' },
             { key: 'expense_report', label: 'Expense Report' },
             { key: 'bank_reconciliation', label: 'Bank Reconciliation' },
-            { key: 'reports', label: 'Reports' },
-            { key: 'goals', label: 'Goals' },
+
+            { group: 'Admin' },
             { key: 'users', label: 'Users' },
             { key: 'templates', label: 'Templates' },
+            { key: 'goals', label: 'Goals' },
+            { key: 'reports', label: 'Reports' },
             { key: 'activity_log', label: 'Activity Log' },
             { key: 'data_management', label: 'Data Management' },
-            { key: 'messages', label: 'Messages' }
         ],
 
         // Role → default permissions mapping (mirrors backend)
@@ -93,10 +102,10 @@ function usersPage() {
                 'users','templates','activity_log','data_management','messages'
             ],
             manager: [
-                'dashboard','cases','providers','mr_tracker',
-                'prelitigation_tracker','accounting_tracker',
-                'attorney_cases','commissions','referrals',
-                'reports','goals','messages','templates'
+                'dashboard','cases','providers','messages',
+                'attorney_cases','prelitigation_tracker',
+                'mr_tracker','health_tracker','accounting_tracker',
+                'mbr','templates','goals'
             ],
             attorney: [
                 'dashboard','attorney_cases','traffic',

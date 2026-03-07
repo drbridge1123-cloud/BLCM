@@ -6,7 +6,7 @@
 $userId = requireAuth();
 
 $user = dbFetchOne(
-    "SELECT id, username, full_name, display_name, role, permissions,
+    "SELECT id, username, full_name, display_name, role, team, permissions,
             commission_rate, uses_presuit_offer, is_active, created_at
      FROM users WHERE id = ?",
     [$userId]

@@ -10,3 +10,4 @@
 <?php include __DIR__ . '/modals/_modal-ini-staff.php'; ?>
 <?php include __DIR__ . '/modals/_modal-treatment-complete.php'; ?>
 <?php include __DIR__ . '/../../components/_modal-contacts.php'; ?>
+<?php include __DIR__ . '/modals/_modal-checklist.php'; ?>

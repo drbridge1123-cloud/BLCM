@@ -35,9 +35,8 @@ function accountingTrackerPage() {
 
         _resetPageFilters() {
             this.activeFilter = '';
-            // Preserve staffFilter for non-admin users (security)
             const user = Alpine.store('auth')?.user;
-            if (user && user.role !== 'admin' && user.role !== 'manager') {
+            if (user && user.team === 'accounting') {
                 this.staffFilter = user.id.toString();
             } else {
                 this.staffFilter = '';
@@ -52,9 +51,9 @@ function accountingTrackerPage() {
         fromCaseDetailUrl: '',
 
         async init() {
-            // Auto-filter non-admin to own user
+            // Default to own cases if user belongs to this team
             const user = Alpine.store('auth')?.user;
-            if (user && user.role !== 'admin' && user.role !== 'manager') {
+            if (user && user.team === 'accounting') {
                 this.staffFilter = user.id.toString();
             }
 

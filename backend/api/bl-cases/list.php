@@ -142,7 +142,7 @@ $summary = dbFetchOne("
         SUM(status = 'rfd') AS rfd,
         SUM(status = 'neg') AS neg,
         SUM(status = 'lit') AS lit,
-        SUM(status = 'final_verification') AS final_verification,
+        SUM(status = 'fbc') AS fbc,
         SUM(status = 'accounting') AS accounting,
         SUM(status = 'closed') AS closed,
         SUM(status NOT IN ('closed')) AS active
@@ -168,7 +168,7 @@ $summaryData = [
     'rfd' => (int) ($summary['rfd'] ?? 0),
     'neg' => (int) ($summary['neg'] ?? 0),
     'lit' => (int) ($summary['lit'] ?? 0),
-    'final_verification' => (int) ($summary['final_verification'] ?? 0),
+    'fbc' => (int) ($summary['fbc'] ?? 0),
     'accounting' => (int) ($summary['accounting'] ?? 0),
     'closed' => (int) $summary['closed'],
     'overdue_providers' => (int) ($providerCounts['overdue_providers'] ?? 0),

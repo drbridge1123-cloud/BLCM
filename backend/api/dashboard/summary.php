@@ -154,6 +154,78 @@ if (in_array('referrals', $permissions) || $isAdmin) {
     ];
 }
 
+// ── Prelitigation (if has prelitigation_tracker permission) ──
+if (in_array('prelitigation_tracker', $permissions) || $isAdmin) {
+    $plWhere = "status = 'ini'";
+    $plParams = [];
+    if (!$isAdmin) {
+        $plWhere .= ' AND assigned_to = ?';
+        $plParams[] = $userId;
+    }
+
+    $plStats = dbFetchOne("
+        SELECT
+            COUNT(*) AS active_count,
+            SUM(treatment_status = 'in_treatment') AS in_treatment,
+            SUM(treatment_status = 'treatment_done') AS treatment_done
+        FROM cases WHERE {$plWhere}
+    ", $plParams);
+
+    $data['prelitigation'] = [
+        'active_count'    => (int)($plStats['active_count'] ?? 0),
+        'in_treatment'    => (int)($plStats['in_treatment'] ?? 0),
+        'treatment_done'  => (int)($plStats['treatment_done'] ?? 0),
+    ];
+}
+
+// ── Billing / MR Tracker (if has mr_tracker permission) ──
+if (in_array('mr_tracker', $permissions) || $isAdmin) {
+    $blWhere = "cp.overall_status NOT IN ('verified','received_complete')";
+    $blParams = [];
+    if (!$isAdmin) {
+        $blWhere .= ' AND cp.assigned_to = ?';
+        $blParams[] = $userId;
+    }
+
+    $blStats = dbFetchOne("
+        SELECT
+            COUNT(*) AS active_count,
+            SUM(cp.overall_status = 'requesting') AS requesting,
+            SUM(cp.overall_status = 'follow_up') AS follow_up,
+            SUM(cp.deadline IS NOT NULL AND cp.deadline < CURDATE()) AS overdue
+        FROM case_providers cp WHERE {$blWhere}
+    ", $blParams);
+
+    $data['billing'] = [
+        'active_count' => (int)($blStats['active_count'] ?? 0),
+        'requesting'   => (int)($blStats['requesting'] ?? 0),
+        'follow_up'    => (int)($blStats['follow_up'] ?? 0),
+        'overdue'      => (int)($blStats['overdue'] ?? 0),
+    ];
+}
+
+// ── Accounting Tracker (if has accounting_tracker permission) ──
+if (in_array('accounting_tracker', $permissions) || $isAdmin) {
+    $atWhere = "status = 'accounting'";
+    $atParams = [];
+    if (!$isAdmin) {
+        $atWhere .= ' AND assigned_to = ?';
+        $atParams[] = $userId;
+    }
+
+    $atStats = dbFetchOne("
+        SELECT
+            COUNT(*) AS active_count,
+            COALESCE(SUM(settlement_amount), 0) AS total_settlement
+        FROM cases WHERE {$atWhere}
+    ", $atParams);
+
+    $data['accounting'] = [
+        'active_count'     => (int)($atStats['active_count'] ?? 0),
+        'total_settlement' => round((float)($atStats['total_settlement'] ?? 0), 2),
+    ];
+}
+
 // ── Pending Requests (admin only) ──
 if ($isAdmin) {
     $demandReq = dbFetchOne("SELECT COUNT(*) AS cnt FROM demand_requests WHERE status = 'pending'");

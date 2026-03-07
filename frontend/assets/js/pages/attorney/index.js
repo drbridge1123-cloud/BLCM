@@ -16,10 +16,10 @@ function attorneyCasesPage() {
         activeTab: 'demand',
 
         tabs: [
-            { key: 'demand',     label: 'Demand',     count: 0 },
-            { key: 'uim',       label: 'UIM',          count: 0 },
-            { key: 'litigation', label: 'Litigation',  count: 0 },
-            { key: 'settled',   label: 'Settled',      count: 0 }
+            { key: 'demand',     label: 'Demand',     count: 0, color: '#ea580c', bg: 'rgba(234,88,12,.1)' },
+            { key: 'uim',       label: 'UIM',          count: 0, color: '#8b5cf6', bg: 'rgba(139,92,246,.1)' },
+            { key: 'litigation', label: 'Litigation',  count: 0, color: '#e74c3c', bg: 'rgba(231,76,60,.1)' },
+            { key: 'settled',   label: 'Settled',      count: 0, color: '#059669', bg: 'rgba(16,185,129,.1)' }
         ],
 
         // -------------------------------------------------------
@@ -736,9 +736,9 @@ function attorneyCasesPage() {
         // -------------------------------------------------------
 
         async init() {
-            // Auto-filter to own user if they are in the staff list (attorney role)
+            // Default to own cases if user belongs to this team
             const user = Alpine.store('auth')?.user;
-            if (user && user.role === 'attorney') {
+            if (user && user.team === 'attorney') {
                 this.staffFilter = user.id.toString();
             }
 

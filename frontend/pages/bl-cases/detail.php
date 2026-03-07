@@ -11,6 +11,7 @@ $pageHeadScripts = [
 ];
 $pageScripts = [
     '/blcm/frontend/assets/js/components/contacts.js',
+    '/blcm/frontend/assets/js/components/checklist.js',
     '/blcm/frontend/assets/js/pages/bl-cases/detail.js'
 ];
 $pageContent = __DIR__ . '/_detail-content.php';

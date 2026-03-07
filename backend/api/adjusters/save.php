@@ -43,7 +43,7 @@ $data = [
 if (isset($input['insurance_company_id'])) $data['insurance_company_id'] = $input['insurance_company_id'] ? (int)$input['insurance_company_id'] : null;
 if (isset($input['adjuster_type'])) $data['adjuster_type'] = $input['adjuster_type'] ?: null;
 
-$stringFields = ['title', 'phone', 'fax', 'email', 'notes'];
+$stringFields = ['title', 'phone', 'fax', 'email', 'claim_number', 'notes'];
 foreach ($stringFields as $field) {
     if (isset($input[$field])) {
         $data[$field] = sanitizeString($input[$field]);

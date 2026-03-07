@@ -186,10 +186,13 @@
                                 <button @click="resetPermissions()" style="font-size:12px; color:#C9A84C; background:none; border:none; cursor:pointer; text-decoration:underline;">Reset to defaults</button>
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-                                <template x-for="perm in allPermissions" :key="perm.key">
-                                    <label style="display:flex; align-items:center; gap:6px; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px;" onmouseover="this.style.background='rgba(201,168,76,.05)'" onmouseout="this.style.background=''">
-                                        <input type="checkbox" :checked="form.permissions.includes(perm.key)" @change="togglePermission(perm.key)" style="accent-color:#C9A84C;"><span x-text="perm.label"></span>
-                                    </label>
+                                <template x-for="perm in allPermissions" :key="perm.key || perm.group">
+                                    <div :style="perm.group ? 'grid-column:1/-1' : ''">
+                                        <div x-show="perm.group" style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; padding:8px 8px 2px; border-top:1px solid #f1f0ec; margin-top:4px;" x-text="perm.group"></div>
+                                        <label x-show="perm.key" style="display:flex; align-items:center; gap:6px; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px;" onmouseover="this.style.background='rgba(201,168,76,.05)'" onmouseout="this.style.background=''">
+                                            <input type="checkbox" :checked="form.permissions.includes(perm.key)" @change="togglePermission(perm.key)" style="accent-color:#C9A84C;"><span x-text="perm.label"></span>
+                                        </label>
+                                    </div>
                                 </template>
                             </div>
                         </div>

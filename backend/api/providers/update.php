@@ -41,6 +41,7 @@ foreach ($stringFields as $field) {
 }
 
 if (isset($input['uses_third_party'])) $data['uses_third_party'] = (int)$input['uses_third_party'];
+if (isset($input['charges_record_fee'])) $data['charges_record_fee'] = (int)$input['charges_record_fee'];
 if (isset($input['avg_response_days'])) $data['avg_response_days'] = (int)$input['avg_response_days'];
 
 if (empty($data) && !isset($input['contacts'])) errorResponse('No fields to update');

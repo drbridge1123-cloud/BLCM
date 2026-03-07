@@ -92,13 +92,13 @@ function dashboardPage() {
         getStatusLabel(status) {
             const labels = {
                 'ini': 'Treatment',
-                'rec': 'Collection',
+                'rec': 'Records',
                 'verification': 'Verification',
                 'rfd': 'Demand',
                 'neg': 'Negotiate',
                 'lit': 'Litigation',
-                'final_verification': 'Settlement',
-                'accounting': 'Accounting',
+                'fbc': 'Final Review',
+                'accounting': 'Settlement',
                 'closed': 'Closed'
             };
             return labels[status] || status;

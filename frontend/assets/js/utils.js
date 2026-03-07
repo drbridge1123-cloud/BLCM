@@ -35,7 +35,7 @@ const DIFFICULTY_LEVELS = {
 const CASE_STATUSES = {
     prelitigation: 'Prelitigation',
     collecting: 'Collection', verification: 'Verification', completed: 'Completed',
-    rfd: 'Attorney', final_verification: 'Final Verification',
+    rfd: 'Attorney', fbc: 'Final Review',
     disbursement: 'Disbursement', accounting: 'Accounting', closed: 'Closed'
 };
 
@@ -46,7 +46,7 @@ const STATUS_COLORS = {
     verification: 'bg-yellow-100 text-yellow-700',
     completed: 'bg-green-100 text-green-700',
     rfd: 'bg-purple-100 text-purple-700',
-    final_verification: 'bg-orange-100 text-orange-700',
+    fbc: 'bg-orange-100 text-orange-700',
     disbursement: 'bg-indigo-100 text-indigo-700',
     accounting: 'bg-pink-100 text-pink-700',
     closed: 'bg-gray-100 text-gray-500'

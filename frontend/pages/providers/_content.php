@@ -834,7 +834,7 @@
                                                     <option value="police">Police</option>
                                                     <option value="other">Other</option>
                                                 </select></div>
-                                            <div style="flex:1;"><label class="sp-form-label">Difficulty</label><select
+                                            <div style="flex:1.5;"><label class="sp-form-label">Difficulty</label><select
                                                     x-model="editProvider.difficulty_level" class="sp-select">
                                                     <option value="easy">Easy</option>
                                                     <option value="medium">Medium</option>

@@ -71,7 +71,7 @@
                                             </template>
                                         </div>
                                         <!-- Autocomplete input (shown when field is active) -->
-                                        <div x-show="insAutoField === '<?= $f['field'] ?>'" style="position:relative" x-transition>
+                                        <div x-show="insAutoField === '<?= $f['field'] ?>'" style="position:relative">
                                             <input type="text" id="ins-auto-input-<?= $f['field'] ?>"
                                                 x-model="insAutoQuery"
                                                 @input="searchInsurance()"
@@ -79,6 +79,7 @@
                                                 @keydown.escape="insAutoField = null"
                                                 placeholder="Type to search..."
                                                 class="mbr-field-input"
+                                                autocomplete="one-time-code"
                                                 style="padding-right:28px">
                                             <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none;color:#b0afa8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -172,7 +173,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'charges')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.charges) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -184,7 +185,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'pip1_amount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.pip1_amount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
                                                 <!-- PIP #2 -->
@@ -195,7 +196,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'pip2_amount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.pip2_amount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
                                                 <!-- Health #1 -->
@@ -206,7 +207,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'health1_amount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.health1_amount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
                                                 <!-- Health #2 -->
@@ -217,7 +218,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'health2_amount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.health2_amount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
                                                 <!-- Health #3 -->
@@ -228,7 +229,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'health3_amount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.health3_amount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -240,7 +241,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'discount')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.discount) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -252,7 +253,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'office_paid')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.office_paid) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -264,7 +265,7 @@
                                                         @blur="endCellEdit($el, row._lineRef, 'client_paid')"
                                                         @keyup.enter="$el.blur()"
                                                         class="mbr-cell-input"
-                                                        :class="(Number(row.client_paid) || 0) === 0 ? 'mbr-zero-val' : ''"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -283,6 +284,7 @@
                                                         @change="saveLine(row._lineRef)"
                                                         placeholder="MM/DD/YY–MM/DD/YY"
                                                         class="mbr-date-input"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -291,6 +293,7 @@
                                                     <input type="text" x-model="row._lineRef.visits"
                                                         @change="saveLine(row._lineRef)"
                                                         class="mbr-visits-input"
+                                                        autocomplete="one-time-code"
                                                         :disabled="report?.status !== 'draft'">
                                                 </td>
 
@@ -359,6 +362,7 @@
                                                 @input="searchProviders()"
                                                 placeholder="Search provider name..."
                                                 class="mbr-ps-input"
+                                                autocomplete="one-time-code"
                                                 @keydown.escape="showProviderSearch = false">
                                         </div>
                                         <div class="mbr-ps-results">

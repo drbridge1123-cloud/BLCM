@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS cases (
     client_dob DATE NULL,
     doi DATE NULL,
     assigned_to INT NULL,
-    status ENUM('ini','rec','verification','rfd','neg','lit','final_verification','accounting','closed') NOT NULL DEFAULT 'ini',
+    status ENUM('ini','rec','verification','rfd','neg','lit','fbc','accounting','closed') NOT NULL DEFAULT 'ini',
     treatment_status ENUM('in_treatment','treatment_done','neg','rfd') NULL,
     treatment_end_date DATE NULL,
     settlement_amount DECIMAL(12,2) DEFAULT 0,
@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS providers (
     third_party_contact VARCHAR(200) NULL,
     avg_response_days INT NULL,
     difficulty_level ENUM('easy','medium','hard') NOT NULL DEFAULT 'medium',
+    charges_record_fee TINYINT(1) NOT NULL DEFAULT 1,
     notes TEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -171,6 +172,7 @@ CREATE TABLE IF NOT EXISTS adjusters (
     phone VARCHAR(50) NULL,
     fax VARCHAR(50) NULL,
     email VARCHAR(255) NULL,
+    claim_number VARCHAR(100) NULL,
     notes TEXT NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -179,6 +181,22 @@ CREATE TABLE IF NOT EXISTS adjusters (
     INDEX idx_adjusters_name (last_name, first_name),
     INDEX idx_adjusters_type (adjuster_type),
     INDEX idx_adjusters_ins_co (insurance_company_id)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 6b. CASE-ADJUSTER LINKS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS case_adjusters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    case_id INT NOT NULL,
+    adjuster_id INT NOT NULL,
+    coverage_type ENUM('3rd_party','um','uim','pip','pd','dv','bi') NOT NULL,
+    coverage_index INT NOT NULL DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (case_id) REFERENCES cases(id) ON DELETE CASCADE,
+    FOREIGN KEY (adjuster_id) REFERENCES adjusters(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_case_coverage_idx (case_id, coverage_type, coverage_index),
+    INDEX idx_ca_case (case_id)
 ) ENGINE=InnoDB;
 
 -- ============================================================
@@ -676,7 +694,8 @@ CREATE TABLE IF NOT EXISTS bank_statement_entries (
 CREATE TABLE IF NOT EXISTS case_negotiations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     case_id INT NOT NULL,
-    coverage_type ENUM('3rd_party','um','uim','dv') NOT NULL DEFAULT '3rd_party',
+    coverage_type ENUM('3rd_party','um','uim','pip','pd','dv','bi') NOT NULL DEFAULT '3rd_party',
+    coverage_index INT NOT NULL DEFAULT 1,
     insurance_company VARCHAR(255) NULL,
     round_number INT NOT NULL DEFAULT 1,
     demand_date DATE NULL,
@@ -1102,5 +1121,41 @@ VALUES (
 );
 
 -- ============================================================
--- DONE — 40 tables total (28 MRMS + 12 Commission)
+-- Case Tasks (Checklist system)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS case_tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    case_id INT NOT NULL,
+    parent_task_id INT NULL,
+    assigned_to INT NULL,
+    title VARCHAR(255) NOT NULL,
+    task_number VARCHAR(20) NULL,
+    phase VARCHAR(100) NOT NULL,
+    stage VARCHAR(100) NOT NULL,
+    phase_order INT DEFAULT 0,
+    stage_order INT DEFAULT 0,
+    sort_order INT DEFAULT 0,
+    status ENUM('not_started','in_progress','done','na') DEFAULT 'not_started',
+    priority ENUM('low','normal','high','urgent') DEFAULT 'normal',
+    is_conditional TINYINT(1) DEFAULT 0,
+    condition_value VARCHAR(10) NULL,
+    condition_answer VARCHAR(10) NULL,
+    has_subtasks TINYINT(1) DEFAULT 0,
+    due_date DATE NULL,
+    notes TEXT NULL,
+    completed_at DATETIME NULL,
+    completed_by INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (case_id) REFERENCES cases(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (parent_task_id) REFERENCES case_tasks(id) ON DELETE CASCADE,
+    INDEX idx_ct_case (case_id),
+    INDEX idx_ct_phase (case_id, phase_order),
+    INDEX idx_ct_parent (parent_task_id),
+    INDEX idx_ct_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- DONE — 41 tables total (28 MRMS + 12 Commission + 1 Checklist)
 -- ============================================================

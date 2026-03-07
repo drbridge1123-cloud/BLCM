@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLCM Database Diagram</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #334155;
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .header h1 span { color: #60a5fa; }
+        .header .badge {
+            background: #1e3a5f;
+            color: #93c5fd;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .legend {
+            display: flex;
+            gap: 16px;
+            padding: 12px 32px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        .container {
+            padding: 24px;
+            overflow: auto;
+        }
+        .diagram-wrapper {
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            padding: 20px;
+            overflow: auto;
+            min-height: 600px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+        }
+        /* Override mermaid styles for dark theme */
+        .mermaid .er.entityBox { fill: #1e293b !important; stroke: #475569 !important; }
+        .mermaid .er.entityLabel { fill: #f1f5f9 !important; }
+        .mermaid .er.attributeBoxEven { fill: #0f172a !important; }
+        .mermaid .er.attributeBoxOdd { fill: #1a2332 !important; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span>BLCM</span> Database Diagram — 40 Tables</h1>
+        <div class="badge">MySQL / InnoDB</div>
+    </div>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Core Case Tables</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Medical Records</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Commission System</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Workflow / Requests</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Support Tables</div>
+        <div class="legend-item">|| = one &nbsp; }o = zero-or-more &nbsp; |{ = one-or-more</div>
+    </div>
+    <div class="container">
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+erDiagram
+
+    %% =============================================
+    %% CORE CASE TABLES
+    %% =============================================
+
+    users {
+        int id PK
+        varchar username UK
+        varchar full_name
+        varchar display_name
+        varchar email
+        enum role "admin|manager|attorney|paralegal|billing|accounting"
+        decimal commission_rate
+        tinyint is_active
+    }
+
+    clients {
+        int id PK
+        varchar name
+        date dob
+        varchar phone
+        varchar email
+        varchar address_street
+        varchar address_city
+        varchar address_state
+        varchar address_zip
+    }
+
+    cases {
+        int id PK
+        int client_id FK
+        int adjuster_3rd_id FK
+        int adjuster_um_id FK
+        varchar case_number UK
+        varchar client_name
+        date doi
+        int assigned_to FK
+        enum status "ini|rec|verification|rfd|neg|lit|fbc|accounting|closed"
+        enum treatment_status "in_treatment|treatment_done|neg|rfd"
+        decimal settlement_amount
+        decimal attorney_fee_percent
+    }
+
+    insurance_companies {
+        int id PK
+        varchar name
+        enum type "auto|health|workers_comp|liability|um_uim|other"
+        varchar phone
+        varchar fax
+        varchar email
+    }
+
+    adjusters {
+        int id PK
+        int insurance_company_id FK
+        varchar first_name
+        varchar last_name
+        enum adjuster_type "pip|um|uim|3rd_party|liability|pd|bi"
+        varchar phone
+        varchar email
+    }
+
+    %% =============================================
+    %% PROVIDERS & MEDICAL RECORDS
+    %% =============================================
+
+    providers {
+        int id PK
+        varchar name
+        enum type "hospital|er|chiro|imaging|physician|surgery_center|pharmacy|..."
+        enum preferred_method "email|fax|portal|phone|mail|chartswap|online"
+        enum difficulty_level "easy|medium|hard"
+    }
+
+    provider_contacts {
+        int id PK
+        int provider_id FK
+        varchar department
+        enum contact_type "email|fax|portal|phone"
+        varchar contact_value
+        tinyint is_primary
+    }
+
+    case_providers {
+        int id PK
+        int case_id FK
+        int provider_id FK
+        int assigned_to FK
+        enum overall_status "not_started|requesting|follow_up|action_needed|received_partial|on_hold|received_complete|verified"
+        enum assignment_status "pending|accepted|declined"
+        date deadline
+        tinyint is_on_hold
+    }
+
+    record_requests {
+        int id PK
+        int case_provider_id FK
+        int template_id FK
+        date request_date
+        enum request_method "email|fax|portal|phone|mail|chartswap|online"
+        enum request_type "initial|follow_up|re_request|rfd"
+        enum send_status "draft|sending|sent|failed"
+        date next_followup_date
+    }
+
+    record_receipts {
+        int id PK
+        int case_provider_id FK
+        date received_date
+        enum received_method "email|fax|portal|mail|in_person"
+        tinyint is_complete
+    }
+
+    letter_templates {
+        int id PK
+        varchar name
+        enum template_type "medical_records|health_ledger|bulk_request|custom|balance_verification"
+        longtext body_template
+        tinyint is_default
+        tinyint is_active
+    }
+
+    letter_template_versions {
+        int id PK
+        int template_id FK
+        int version_number
+        longtext body_template
+    }
+
+    request_attachments {
+        int id PK
+        int record_request_id FK
+        int case_document_id FK
+    }
+
+    %% =============================================
+    %% DOCUMENTS & NOTES
+    %% =============================================
+
+    case_documents {
+        int id PK
+        int case_id FK
+        int case_provider_id FK
+        enum document_type "hipaa_authorization|signed_release|other"
+        varchar file_name
+        varchar file_path
+        int uploaded_by FK
+        tinyint is_provider_template
+    }
+
+    case_notes {
+        int id PK
+        int case_id FK
+        int case_provider_id FK
+        int user_id FK
+        enum note_type "general|follow_up|issue|handoff"
+        text content
+    }
+
+    %% =============================================
+    %% NOTIFICATIONS & LOGGING
+    %% =============================================
+
+    notifications {
+        int id PK
+        int user_id FK
+        int case_provider_id FK
+        varchar type
+        varchar message
+        tinyint is_read
+    }
+
+    activity_log {
+        int id PK
+        int user_id FK
+        varchar action
+        varchar entity_type
+        int entity_id
+        json details
+    }
+
+    messages {
+        int id PK
+        int from_user_id FK
+        int to_user_id FK
+        varchar subject
+        text message
+        tinyint is_read
+    }
+
+    send_log {
+        int id PK
+        int record_request_id FK
+        enum send_method "email|fax"
+        varchar recipient
+        enum status "success|failed"
+    }
+
+    deadline_changes {
+        int id PK
+        int case_provider_id FK
+        date old_deadline
+        date new_deadline
+        varchar reason
+        int changed_by FK
+    }
+
+    %% =============================================
+    %% HEALTH LEDGER
+    %% =============================================
+
+    health_ledger_items {
+        int id PK
+        int case_id FK
+        varchar client_name
+        varchar insurance_carrier
+        varchar claim_number
+        enum overall_status "not_started|requesting|follow_up|received|done"
+        int assigned_to FK
+    }
+
+    hl_requests {
+        int id PK
+        int item_id FK
+        int template_id FK
+        enum request_type "initial|follow_up|re_request"
+        enum send_status "draft|sending|sent|failed"
+        date next_followup_date
+    }
+
+    hl_request_attachments {
+        int id PK
+        int hl_request_id FK
+        int case_document_id FK
+    }
+
+    %% =============================================
+    %% MBR (Medical Billing Report)
+    %% =============================================
+
+    mbr_reports {
+        int id PK
+        int case_id FK "UNIQUE"
+        enum status "draft|completed|approved"
+        int completed_by FK
+        int approved_by FK
+    }
+
+    mbr_lines {
+        int id PK
+        int report_id FK
+        enum line_type "provider|bridge_law|wage_loss|essential_service|health_subrogation|rx"
+        int case_provider_id FK
+        decimal charges
+        decimal balance
+        int sort_order
+    }
+
+    %% =============================================
+    %% FINANCES
+    %% =============================================
+
+    mr_fee_payments {
+        int id PK
+        int case_id FK
+        int case_provider_id FK
+        enum expense_category "mr_cost|litigation|other"
+        decimal billed_amount
+        decimal paid_amount
+        date payment_date
+    }
+
+    bank_statement_entries {
+        int id PK
+        varchar batch_id
+        date transaction_date
+        decimal amount
+        enum reconciliation_status "unmatched|matched|ignored"
+        int matched_payment_id FK
+    }
+
+    case_negotiations {
+        int id PK
+        int case_id FK
+        enum coverage_type "3rd_party|um|uim|dv"
+        decimal demand_amount
+        decimal offer_amount
+        enum status "pending|countered|accepted|rejected"
+    }
+
+    provider_negotiations {
+        int id PK
+        int case_id FK
+        int case_provider_id FK
+        int mbr_line_id FK
+        decimal original_balance
+        decimal accepted_amount
+        enum status "pending|negotiating|accepted|rejected|waived"
+    }
+
+    %% =============================================
+    %% COMMISSION SYSTEM
+    %% =============================================
+
+    attorney_cases {
+        int id PK
+        int case_id FK
+        varchar case_number
+        varchar client_name
+        int attorney_user_id FK
+        enum phase "demand|litigation|uim|settled"
+        varchar status
+        decimal settled
+        decimal legal_fee
+        decimal commission
+    }
+
+    attorney_case_transfers {
+        int id PK
+        int attorney_case_id FK
+        int from_attorney_id FK
+        int to_attorney_id FK
+        int transferred_by FK
+    }
+
+    employee_commissions {
+        int id PK
+        varchar case_number
+        varchar client_name
+        int employee_user_id FK
+        decimal settled
+        decimal legal_fee
+        decimal commission
+        enum status "in_progress|unpaid|paid|rejected"
+    }
+
+    %% =============================================
+    %% REFERRALS & TRAFFIC
+    %% =============================================
+
+    referral_entries {
+        int id PK
+        date signed_date
+        varchar file_number
+        varchar client_name
+        varchar referred_by
+        varchar referral_type
+        varchar entry_month
+    }
+
+    traffic_cases {
+        int id PK
+        int user_id FK
+        varchar client_name
+        varchar court
+        datetime court_date
+        varchar charge
+        enum disposition "pending|dismissed|amended|other"
+        enum status "active|resolved"
+        decimal commission
+    }
+
+    traffic_case_files {
+        int id PK
+        int case_id FK
+        varchar filename
+        varchar original_name
+    }
+
+    %% =============================================
+    %% WORKFLOW REQUESTS
+    %% =============================================
+
+    demand_requests {
+        int id PK
+        int requested_by FK
+        int assigned_to FK
+        varchar case_number
+        varchar client_name
+        enum status "pending|accepted|denied"
+    }
+
+    traffic_requests {
+        int id PK
+        int requested_by FK
+        int assigned_to FK
+        varchar client_name
+        varchar court
+        enum status "pending|accepted|denied"
+    }
+
+    deadline_extension_requests {
+        int id PK
+        int case_id FK
+        int user_id FK
+        date current_deadline
+        date requested_deadline
+        enum status "pending|approved|rejected"
+    }
+
+    %% =============================================
+    %% PERFORMANCE / TEAM
+    %% =============================================
+
+    employee_goals {
+        int id PK
+        int user_id FK
+        int year
+        int target_cases
+        decimal target_legal_fee
+    }
+
+    performance_snapshots {
+        int id PK
+        int employee_id FK
+        varchar snapshot_month
+        int cases_settled
+        decimal total_commission
+    }
+
+    manager_team {
+        int id PK
+        int manager_id FK
+        int employee_id FK
+    }
+
+    litigation_cases {
+        int id PK
+        int user_id FK
+        varchar case_number
+        varchar client_name
+        enum litigation_stage "filed|post|after_dep|mediation|post_arb|arb|settle"
+        decimal settlement_amount
+    }
+
+    %% =============================================
+    %% RELATIONSHIPS
+    %% =============================================
+
+    %% Core
+    clients ||--o{ cases : "has"
+    users ||--o{ cases : "assigned_to"
+    adjusters ||--o{ cases : "adjuster_3rd"
+    adjusters ||--o{ cases : "adjuster_um"
+    insurance_companies ||--o{ adjusters : "employs"
+
+    %% Providers
+    providers ||--o{ provider_contacts : "has"
+    cases ||--o{ case_providers : "has"
+    providers ||--o{ case_providers : "linked"
+    users ||--o{ case_providers : "assigned"
+
+    %% Record Requests
+    case_providers ||--o{ record_requests : "has"
+    letter_templates ||--o{ record_requests : "uses"
+    case_providers ||--o{ record_receipts : "has"
+    letter_templates ||--o{ letter_template_versions : "has"
+    record_requests ||--o{ request_attachments : "has"
+    case_documents ||--o{ request_attachments : "attached"
+    record_requests ||--o{ send_log : "logged"
+
+    %% Documents & Notes
+    cases ||--o{ case_documents : "has"
+    cases ||--o{ case_notes : "has"
+    users ||--o{ case_notes : "wrote"
+    case_providers ||--o{ deadline_changes : "has"
+
+    %% Notifications
+    users ||--o{ notifications : "receives"
+    users ||--o{ activity_log : "logged"
+    users ||--o{ messages : "sends"
+    users ||--o{ messages : "receives"
+
+    %% Health Ledger
+    cases ||--o{ health_ledger_items : "has"
+    health_ledger_items ||--o{ hl_requests : "has"
+    hl_requests ||--o{ hl_request_attachments : "has"
+
+    %% MBR
+    cases ||--|| mbr_reports : "has"
+    mbr_reports ||--o{ mbr_lines : "has"
+    case_providers ||--o{ mbr_lines : "linked"
+
+    %% Finance
+    cases ||--o{ mr_fee_payments : "has"
+    mr_fee_payments ||--o{ bank_statement_entries : "matched"
+    cases ||--o{ case_negotiations : "has"
+    cases ||--o{ provider_negotiations : "has"
+    mbr_lines ||--o{ provider_negotiations : "linked"
+
+    %% Commission
+    users ||--o{ attorney_cases : "attorney"
+    attorney_cases ||--o{ attorney_case_transfers : "transferred"
+    users ||--o{ employee_commissions : "earns"
+
+    %% Traffic
+    users ||--o{ traffic_cases : "handles"
+    traffic_cases ||--o{ traffic_case_files : "has"
+
+    %% Workflow
+    cases ||--o{ deadline_extension_requests : "has"
+
+    %% Performance
+    users ||--o{ employee_goals : "has"
+    users ||--o{ performance_snapshots : "tracked"
+    users ||--o{ manager_team : "manages"
+    users ||--o{ litigation_cases : "handles"
+            </pre>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            er: {
+                diagramPadding: 30,
+                layoutDirection: 'TB',
+                minEntityWidth: 180,
+                minEntityHeight: 40,
+                entityPadding: 12,
+                useMaxWidth: false,
+                fontSize: 13
+            },
+            themeVariables: {
+                darkMode: true,
+                background: '#1e293b',
+                primaryColor: '#3b82f6',
+                primaryTextColor: '#f1f5f9',
+                primaryBorderColor: '#475569',
+                lineColor: '#64748b',
+                secondaryColor: '#1e3a5f',
+                tertiaryColor: '#0f172a',
+                edgeLabelBackground: '#1e293b',
+                attributeBackgroundColorEven: '#0f172a',
+                attributeBackgroundColorOdd: '#162032'
+            }
+        });
+    </script>
+</body>
+</html>

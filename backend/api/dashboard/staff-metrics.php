@@ -10,7 +10,7 @@ if ($method !== 'GET') {
 $userId = requireAuth();
 $user = getCurrentUser();
 
-$isStaff = in_array($user['role'], ['paralegal', 'billing']);
+$isStaff = !in_array($user['role'], ['admin', 'manager']);
 
 if ($isStaff) {
     // Staff view: personal metrics only
@@ -19,6 +19,10 @@ if ($isStaff) {
             u.id,
             COALESCE(u.display_name, u.full_name) AS full_name,
             COUNT(DISTINCT c.id) as my_cases,
+            COUNT(DISTINCT CASE
+                WHEN cp.overall_status NOT IN ('received_complete', 'verified')
+                THEN cp.id
+            END) as my_providers,
             COUNT(DISTINCT CASE
                 WHEN cp.deadline < CURDATE()
                 AND cp.overall_status NOT IN ('received_complete', 'verified')
@@ -36,7 +40,7 @@ if ($isStaff) {
             END) as my_followup
         FROM users u
         LEFT JOIN cases c ON c.assigned_to = u.id AND c.status NOT IN ('closed')
-        LEFT JOIN case_providers cp ON cp.assigned_to = u.id
+        LEFT JOIN case_providers cp ON cp.assigned_to = u.id AND cp.assignment_status = 'accepted'
         WHERE u.id = ?
         GROUP BY u.id, COALESCE(u.display_name, u.full_name)
     ", [$userId]);
@@ -69,7 +73,7 @@ if ($isStaff) {
             FROM users u
             LEFT JOIN cases c ON c.assigned_to = u.id AND c.status NOT IN ('closed')
             LEFT JOIN case_providers cp ON cp.assigned_to = u.id
-            WHERE u.is_active = 1 AND u.role IN ('paralegal', 'billing')
+            WHERE u.is_active = 1 AND u.role NOT IN ('admin', 'manager')
             GROUP BY u.id
         ) t
     ");
@@ -80,6 +84,7 @@ if ($isStaff) {
             'id' => (int)($myMetrics['id'] ?? 0),
             'full_name' => $myMetrics['full_name'] ?? '',
             'my_cases' => (int)($myMetrics['my_cases'] ?? 0),
+            'my_providers' => (int)($myMetrics['my_providers'] ?? 0),
             'my_overdue' => (int)($myMetrics['my_overdue'] ?? 0),
             'my_followup' => (int)($myMetrics['my_followup'] ?? 0)
         ],
@@ -99,6 +104,10 @@ if ($isStaff) {
             u.role,
             COUNT(DISTINCT c.id) as case_count,
             COUNT(DISTINCT CASE
+                WHEN cp.overall_status NOT IN ('received_complete', 'verified')
+                THEN cp.id
+            END) as provider_count,
+            COUNT(DISTINCT CASE
                 WHEN cp.deadline < CURDATE()
                 AND cp.overall_status NOT IN ('received_complete', 'verified')
                 THEN cp.id
@@ -115,7 +124,7 @@ if ($isStaff) {
             END) as followup_count
         FROM users u
         LEFT JOIN cases c ON c.assigned_to = u.id AND c.status NOT IN ('closed')
-        LEFT JOIN case_providers cp ON cp.assigned_to = u.id
+        LEFT JOIN case_providers cp ON cp.assigned_to = u.id AND cp.assignment_status = 'accepted'
         WHERE u.is_active = 1
         GROUP BY u.id, COALESCE(u.display_name, u.full_name), u.role
         ORDER BY u.role, COALESCE(u.display_name, u.full_name)
@@ -123,16 +132,19 @@ if ($isStaff) {
 
     $totals = [
         'total_cases' => 0,
+        'total_providers' => 0,
         'total_overdue' => 0,
         'total_followup' => 0
     ];
 
     foreach ($staffMetrics as &$staff) {
         $staff['case_count'] = (int)$staff['case_count'];
+        $staff['provider_count'] = (int)$staff['provider_count'];
         $staff['overdue_count'] = (int)$staff['overdue_count'];
         $staff['followup_count'] = (int)$staff['followup_count'];
 
         $totals['total_cases'] += $staff['case_count'];
+        $totals['total_providers'] += $staff['provider_count'];
         $totals['total_overdue'] += $staff['overdue_count'];
         $totals['total_followup'] += $staff['followup_count'];
     }

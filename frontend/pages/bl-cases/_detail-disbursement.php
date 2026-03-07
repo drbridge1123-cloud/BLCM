@@ -4,9 +4,9 @@
         <div class="disb-header-left">
             <span class="c1-num c1-num-gold">08</span>
             <span class="disb-header-title">Settlement & Disbursement</span>
-            <template x-if="calculated && calculated.clientNet !== 0">
+            <template x-if="calculated && (calculated.clientNet + (bestOffers['dv'] || 0)) !== 0">
                 <span style="color:var(--gold); font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:600;"
-                    x-text="'Client Net: $' + calculated.clientNet.toLocaleString('en-US', {minimumFractionDigits:2})"></span>
+                    x-text="'Client Net: $' + (calculated.clientNet + (bestOffers['dv'] || 0)).toLocaleString('en-US', {minimumFractionDigits:2})"></span>
             </template>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -45,7 +45,7 @@
                         </div>
                         <div class="disb-summary-card highlight">
                             <div class="disb-summary-label">Client Net</div>
-                            <div class="disb-summary-value" x-text="formatCurrency(calculated?.clientNet || 0)"></div>
+                            <div class="disb-summary-value" x-text="formatCurrency((calculated?.clientNet || 0) + (bestOffers['dv'] || 0))"></div>
                         </div>
                     </div>
 
@@ -86,13 +86,13 @@
                         </div>
                         <div class="disb-settings-group">
                             <span class="disb-settings-label">PIP:</span>
-                            <input type="number" step="0.01" class="disb-amount-input" style="width:110px;"
-                                x-model.number="settings.pip_subrogation_amount"
-                                @change="onSettingsChange()" placeholder="0.00">
+                            <input type="text" class="disb-amount-input" style="width:110px; background:#f4f3f0; cursor:default;"
+                                :value="formatCurrency(settings.pip_subrogation_amount)" disabled
+                                title="MBR PIP Paid Total">
                             <span style="font-size:12px; color:var(--mbr-muted);">via</span>
-                            <input type="text" class="disb-amount-input" style="width:140px;"
-                                x-model="settings.pip_insurance_company"
-                                @change="onSettingsChange()" :placeholder="pipInfo?.pip1_name || 'Insurance Co.'">
+                            <input type="text" class="disb-amount-input" style="width:140px; background:#f4f3f0; cursor:default;"
+                                :value="settings.pip_insurance_company || '-'" disabled
+                                title="From Contacts PIP adjuster">
                         </div>
                     </div>
 
@@ -127,32 +127,60 @@
                                 <template x-if="showMahler()">
                                     <div class="disb-method-card" :class="settings.settlement_method === 'mahler' ? 'selected' : ''"
                                         @click="selectMethod('mahler')">
-                                        <div class="disb-method-name">Mahler Method</div>
-                                        <div class="disb-method-desc">3rd Party + PIP Subrogation</div>
-                                        <div class="disb-method-detail">
-                                            <span>Gross (3rd Party)</span>
+                                        <div class="disb-method-name">Mahler Formula</div>
+
+                                        <!-- GROSS SETTLEMENT -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:6px;">
+                                            <span>Gross Settlement</span>
                                             <span x-text="formatCurrency(mahlerCalc.gross)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Attorney Fee</span>
-                                            <span x-text="'-' + formatCurrency(mahlerCalc.fee)"></span>
+
+                                        <!-- LEGAL FEE & EXPENSES -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:8px;">
+                                            <span>Legal Fee & Expenses</span>
+                                            <span x-text="formatCurrency(mahlerCalc.afe)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Costs</span>
-                                            <span x-text="'-' + formatCurrency(mahlerCalc.costs)"></span>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                            <span x-text="'Attorney\'s Fee (' + (settings.attorney_fee_percent >= 0.34 ? '40' : '33.33') + '% of Gross)'"></span>
+                                            <span x-text="formatCurrency(mahlerCalc.fee)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Carrier Share</span>
-                                            <span x-text="mahlerCalc.carrierShare > 0 ? '-' + formatCurrency(mahlerCalc.carrierShare) : 'Waived'"></span>
+                                        <template x-if="mahlerCalc.recordsFee > 0">
+                                            <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                                <span>Records Fee</span>
+                                                <span x-text="formatCurrency(mahlerCalc.recordsFee)"></span>
+                                            </div>
+                                        </template>
+                                        <template x-if="mahlerCalc.litigationFee > 0">
+                                            <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                                <span>Litigation Fee</span>
+                                                <span x-text="formatCurrency(mahlerCalc.litigationFee)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- TOTAL PIP PAYMENT -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:8px;">
+                                            <span x-text="'Total PIP Payment' + (settings.pip_insurance_company ? ' → ' + settings.pip_insurance_company : '')"></span>
+                                            <span x-text="formatCurrency(mahlerCalc.pip)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Medical Balance</span>
-                                            <span x-text="'-' + formatCurrency(mahlerCalc.medicalBalance)"></span>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                            <span>PIP Percentage of Gross</span>
+                                            <span x-text="(mahlerCalc.pipPercent * 100).toFixed(2) + '%'"></span>
                                         </div>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-green);">
+                                            <span>Client Credit for Attorney Fee & Cost</span>
+                                            <span x-text="formatCurrency(mahlerCalc.clientCredit)"></span>
+                                        </div>
+
+                                        <!-- SUBROGATION LIEN AMOUNT = PIP - Client Credit -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:8px;">
+                                            <span>Subrogation Lien Amount</span>
+                                            <span x-text="formatCurrency(mahlerCalc.subrogationLien)"></span>
+                                        </div>
+
+                                        <!-- Bottom: Subrogation Lien + Print -->
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:2px solid var(--border);">
-                                            <div class="disb-method-net" style="margin:0;padding:0;border:none;"
-                                                :style="mahlerCalc.clientNet >= 0 ? 'color:var(--mbr-green)' : 'color:var(--mbr-red)'"
-                                                x-text="'Client Net: ' + formatCurrency(mahlerCalc.clientNet)"></div>
+                                            <div class="disb-method-net" style="margin:0;padding:0;border:none; color:#C62828;"
+                                                x-text="'Subrogation Lien: ' + formatCurrency(mahlerCalc.subrogationLien)"></div>
                                             <button @click.stop="printMethod('mahler')" class="disb-method-print" title="Print Mahler">
                                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -167,35 +195,54 @@
                                 <template x-if="showHamm()">
                                     <div class="disb-method-card" :class="settings.settlement_method === 'hamm' ? 'selected' : ''"
                                         @click="selectMethod('hamm')">
-                                        <div class="disb-method-name">Hamm Method</div>
-                                        <div class="disb-method-desc">Hamm/Winters/Matsyuk Formula</div>
-                                        <div class="disb-method-detail">
-                                            <span>Gross Settlement</span>
+                                        <div class="disb-method-name">Hamm/Winters/Matsyuk Formula</div>
+
+                                        <!-- GROSS SETTLEMENT -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:6px;">
+                                            <span>Gross Settlement (All Sources)</span>
                                             <span x-text="formatCurrency(hammCalc.gross)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Attorney Fee + Costs</span>
-                                            <span x-text="'-' + formatCurrency(hammCalc.afe)"></span>
+
+                                        <!-- LEGAL FEE & EXPENSES -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:8px;">
+                                            <span>Legal Fee & Expenses</span>
+                                            <span x-text="formatCurrency(hammCalc.afe)"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Total PIP Payment</span>
-                                            <span x-text="'-' + formatCurrency(hammCalc.pip)"></span>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                            <span x-text="'Attorney\'s Fee (' + (settings.attorney_fee_percent >= 0.34 ? '40' : '33.33') + '% of Gross)'"></span>
+                                            <span x-text="formatCurrency(hammCalc.fee)"></span>
                                         </div>
-                                        <div class="disb-method-detail" style="font-size:11px; color:var(--mbr-muted);">
-                                            <span x-text="'PIP Ratio: ' + (hammCalc.pipRatio * 100).toFixed(2) + '%'"></span>
+                                        <template x-if="hammCalc.recordsFee > 0">
+                                            <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                                <span>Records Fee</span>
+                                                <span x-text="formatCurrency(hammCalc.recordsFee)"></span>
+                                            </div>
+                                        </template>
+                                        <template x-if="hammCalc.litigationFee > 0">
+                                            <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                                <span>Litigation Fee</span>
+                                                <span x-text="formatCurrency(hammCalc.litigationFee)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- TOTAL PIP PAYMENT -->
+                                        <div class="disb-method-detail" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.3px; margin-top:8px;">
+                                            <span x-text="'Total PIP Payment' + (settings.pip_insurance_company ? ' → ' + settings.pip_insurance_company : '')"></span>
+                                            <span x-text="formatCurrency(hammCalc.pip)"></span>
                                         </div>
-                                        <div class="disb-method-detail" style="color:var(--mbr-green);">
-                                            <span>Client Credit (Hamm Fee)</span>
-                                            <span x-text="'+' + formatCurrency(hammCalc.clientCredit)"></span>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-muted);">
+                                            <span>PIP / Gross Settlement Ratio</span>
+                                            <span x-text="(hammCalc.pipRatio * 100).toFixed(2) + '%'"></span>
                                         </div>
-                                        <div class="disb-method-detail">
-                                            <span>Medical Balance</span>
-                                            <span x-text="'-' + formatCurrency(hammCalc.medicalBalance)"></span>
+                                        <div class="disb-method-detail" style="padding-left:12px; font-size:11px; color:var(--mbr-green);">
+                                            <span>Client Credit for Attorney Fee & Cost</span>
+                                            <span x-text="formatCurrency(hammCalc.clientCredit)"></span>
                                         </div>
+
+                                        <!-- Client Credit -->
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:2px solid var(--border);">
-                                            <div class="disb-method-net" style="margin:0;padding:0;border:none;"
-                                                :style="hammCalc.clientNet >= 0 ? 'color:var(--mbr-green)' : 'color:var(--mbr-red)'"
-                                                x-text="'Client Net: ' + formatCurrency(hammCalc.clientNet)"></div>
+                                            <div class="disb-method-net" style="margin:0;padding:0;border:none; color:#C62828;"
+                                                x-text="'Client Credit: ' + formatCurrency(hammCalc.clientCredit)"></div>
                                             <button @click.stop="printMethod('hamm')" class="disb-method-print" title="Print Hamm">
                                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

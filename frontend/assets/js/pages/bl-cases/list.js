@@ -96,7 +96,7 @@ function casesListPage() {
                 rfd: 'sp-stage-demand-sent',
                 neg: 'sp-stage-demand-review',
                 lit: 'sp-stage-demand-sent',
-                final_verification: 'sp-stage-trial-set',
+                fbc: 'sp-stage-trial-set',
                 accounting: 'sp-stage-mediation',
                 closed: '',
             };
@@ -121,7 +121,7 @@ function casesListPage() {
                 rfd: 'Attorney',
                 neg: 'Attorney',
                 lit: 'Attorney',
-                final_verification: 'Acctg',
+                fbc: 'Acctg',
                 accounting: 'Acctg',
                 closed: 'Closed',
             };
@@ -137,7 +137,7 @@ function casesListPage() {
                 rfd:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
                 neg:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
                 lit:                '/blcm/frontend/pages/attorney/index.php?search=' + caseNum + '&from=case-detail&case_id=' + c.id,
-                final_verification: '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
+                fbc: '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
                 accounting:         '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
                 closed:             '/blcm/frontend/pages/accounting/index.php?search=' + caseNum + '&case_id=' + c.id,
             };

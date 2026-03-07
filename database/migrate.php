@@ -608,8 +608,8 @@ if (!$teamColExists) {
     try {
         // Update cases.status ENUM to new codes
         $blcm->exec("ALTER TABLE cases MODIFY COLUMN status ENUM(
-            'ini','rec','verification','rfd','neg',
-            'final_verification','accounting','closed'
+            'ini','rec','verification','rfd','neg','lit',
+            'fbc','accounting','closed'
         ) NOT NULL DEFAULT 'ini'");
         msg('  cases.status ENUM updated (new status codes)', 'ok');
     } catch (PDOException $e) {

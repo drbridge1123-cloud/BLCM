@@ -10,7 +10,7 @@ $id = (int)$_GET['id'];
 $provider = dbFetchOne(
     "SELECT id, name, type, address, phone, fax, email, portal_url,
             preferred_method, uses_third_party, third_party_name, third_party_contact,
-            avg_response_days, difficulty_level, notes, created_at, updated_at
+            avg_response_days, difficulty_level, charges_record_fee, notes, created_at, updated_at
      FROM providers WHERE id = ?",
     [$id]
 );
@@ -18,6 +18,7 @@ $provider = dbFetchOne(
 if (!$provider) errorResponse('Provider not found', 404);
 
 $provider['uses_third_party'] = (int)$provider['uses_third_party'];
+$provider['charges_record_fee'] = (int)$provider['charges_record_fee'];
 $provider['avg_response_days'] = $provider['avg_response_days'] !== null ? (int)$provider['avg_response_days'] : null;
 
 // Get contacts

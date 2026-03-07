@@ -158,33 +158,12 @@
         <div class="sp-gold-bar"></div>
 
         <!-- Header -->
-        <div class="sp-header" style="flex-wrap:wrap; gap:20px; padding:20px 24px 16px;">
-            <!-- Top row: Title + Buttons -->
-            <div style="display:flex; align-items:center; width:100%; margin-bottom:16px;">
-                <h1 class="sp-title" style="flex:1">Commissions</h1>
-                <div style="display:flex; gap:8px;">
-                    <button @click="openCreateModal()" class="sp-new-btn-navy" style="box-shadow:0 2px 8px rgba(15,27,45,.2)">+ Add Commission</button>
-                </div>
+        <div class="sp-header">
+            <div>
+                <div class="sp-eyebrow">Finance</div>
+                <h1 class="sp-title">Commissions</h1>
             </div>
-            <!-- KPI cards -->
-            <div class="ec-kpi-grid" style="width:100%;">
-                <div class="ec-kpi ec-kpi-plain">
-                    <div class="ec-kpi-label">Total Cases</div>
-                    <div class="ec-kpi-num" x-text="stats.total_cases"></div>
-                </div>
-                <div class="ec-kpi ec-kpi-green">
-                    <div class="ec-kpi-label">Total Commission</div>
-                    <div class="ec-kpi-num" x-text="formatCurrency(stats.total_commission)"></div>
-                </div>
-                <div class="ec-kpi ec-kpi-blue">
-                    <div class="ec-kpi-label">Paid</div>
-                    <div class="ec-kpi-num" x-text="formatCurrency(stats.paid_commission)"></div>
-                </div>
-                <div class="ec-kpi ec-kpi-amber">
-                    <div class="ec-kpi-label">Unpaid</div>
-                    <div class="ec-kpi-num" x-text="formatCurrency(stats.unpaid_commission)"></div>
-                </div>
-            </div>
+            <button @click="openCreateModal()" class="sp-new-btn">+ Add Commission</button>
         </div>
 
         <!-- Toolbar -->

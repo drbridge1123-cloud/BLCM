@@ -1,34 +1,24 @@
-<!-- Summary Cards -->
-<div style="display:grid; grid-template-columns:repeat(6,1fr); gap:10px; padding:0 24px 12px;">
-    <div @click="toggleStatusFilter('')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === '' ? 'border-color:#C9A84C; box-shadow:0 0 0 2px rgba(201,168,76,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Total</div>
-        <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total ?? '-'"></div>
-    </div>
-    <div @click="toggleStatusFilter('not_started')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === 'not_started' ? 'border-color:#9ca3af; box-shadow:0 0 0 2px rgba(156,163,175,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Not Started</div>
-        <div class="sp-stat-num" style="color:#6b7280;" x-text="summary.not_started ?? '-'"></div>
-    </div>
-    <div @click="toggleStatusFilter('requesting')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === 'requesting' ? 'border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Requesting</div>
-        <div class="sp-stat-num" style="color:#2563eb;" x-text="summary.requesting ?? '-'"></div>
-    </div>
-    <div @click="toggleStatusFilter('follow_up')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === 'follow_up' ? 'border-color:#f59e0b; box-shadow:0 0 0 2px rgba(245,158,11,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Follow Up</div>
-        <div class="sp-stat-num" style="color:#d97706;" x-text="summary.follow_up ?? '-'"></div>
-    </div>
-    <div @click="toggleStatusFilter('received')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === 'received' ? 'border-color:#22c55e; box-shadow:0 0 0 2px rgba(34,197,94,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Received</div>
-        <div class="sp-stat-num" style="color:#16a34a;" x-text="summary.received ?? '-'"></div>
-    </div>
-    <div @click="toggleStatusFilter('done')" class="sp-stat" style="cursor:pointer; border-radius:8px; padding:8px 12px; border:1.5px solid #e8e4dc;"
-         :style="statusFilter === 'done' ? 'border-color:#059669; box-shadow:0 0 0 2px rgba(5,150,105,.15);' : ''">
-        <div class="sp-stat-label" style="font-size:10px;">Done</div>
-        <div class="sp-stat-num" style="color:#059669;" x-text="summary.done ?? '-'"></div>
+<!-- Filter Tabs -->
+<div style="padding:0 24px 8px;">
+    <div class="sp-tabs" style="flex-wrap:wrap;">
+        <button class="sp-tab" :class="statusFilter === '' && 'on'" @click="toggleStatusFilter('')">All
+            <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.total ?? 0"></span>
+        </button>
+        <button class="sp-tab" :class="statusFilter === 'not_started' && 'on'" @click="toggleStatusFilter('not_started')">Not Started
+            <span class="sp-tab-count" x-text="summary.not_started ?? 0"></span>
+        </button>
+        <button class="sp-tab" :class="statusFilter === 'requesting' && 'on'" @click="toggleStatusFilter('requesting')">Requesting
+            <span class="sp-tab-count" style="background:rgba(234,88,12,.1); color:#ea580c;" x-text="summary.requesting ?? 0"></span>
+        </button>
+        <button class="sp-tab" :class="statusFilter === 'follow_up' && 'on'" @click="toggleStatusFilter('follow_up')">Follow Up
+            <span class="sp-tab-count" style="background:rgba(217,119,6,.1); color:#d97706;" x-text="summary.follow_up ?? 0"></span>
+        </button>
+        <button class="sp-tab" :class="statusFilter === 'received' && 'on'" @click="toggleStatusFilter('received')">Received
+            <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.received ?? 0"></span>
+        </button>
+        <button class="sp-tab" :class="statusFilter === 'done' && 'on'" @click="toggleStatusFilter('done')">Done
+            <span class="sp-tab-count" style="background:rgba(16,185,129,.1); color:#059669;" x-text="summary.done ?? 0"></span>
+        </button>
     </div>
 </div>
 

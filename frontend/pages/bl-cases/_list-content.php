@@ -7,60 +7,49 @@
         <div class="sp-gold-bar"></div>
 
         <!-- Header -->
-        <div class="sp-header" style="flex-wrap:wrap; gap:16px; padding:20px 24px 16px;">
-            <div style="display:flex; align-items:center; width:100%; margin-bottom:12px;">
+        <div class="sp-header" style="padding:20px 24px 16px;">
+            <div style="display:flex; align-items:center; width:100%;">
                 <div style="flex:1">
                     <a x-show="fromAttorneyCases" x-cloak href="/blcm/frontend/pages/attorney/index.php"
                        style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#8a8a82; text-decoration:none; margin-bottom:4px;">&larr; Attorney Cases</a>
                     <div class="sp-eyebrow">Case Management</div>
                     <h1 class="sp-title">Cases</h1>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button @click="showCreateModal = true" class="sp-new-btn">+ New Case</button>
-                </div>
+                <button @click="showCreateModal = true" class="sp-new-btn">+ New Case</button>
             </div>
-            <!-- KPI Cards -->
-            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; width:100%;">
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'ini,rec,verification,rfd,neg,lit,final_verification,accounting' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'ini,rec,verification,rfd,neg,lit,final_verification,accounting' ? '' : 'ini,rec,verification,rfd,neg,lit,final_verification,accounting'; loadData(1)">
-                    <div class="sp-kpi-label">Active</div>
-                    <div class="sp-kpi-value" style="color:#C9A84C" x-text="summary.active ?? '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'ini' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'ini' ? '' : 'ini'; loadData(1)">
-                    <div class="sp-kpi-label">Treatment</div>
-                    <div class="sp-kpi-value" style="color:#2563eb" x-text="summary.ini ?? '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'rec' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'rec' ? '' : 'rec'; loadData(1)">
-                    <div class="sp-kpi-label">Collection</div>
-                    <div class="sp-kpi-value" style="color:#D97706" x-text="summary.rec ?? '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'verification,rfd' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'verification,rfd' ? '' : 'verification,rfd'; loadData(1)">
-                    <div class="sp-kpi-label">Attorney</div>
-                    <div class="sp-kpi-value" style="color:#7C5CBF" x-text="(parseInt(summary.verification || 0) + parseInt(summary.rfd || 0)) || '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'neg,lit,final_verification,accounting' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'neg,lit,final_verification,accounting' ? '' : 'neg,lit,final_verification,accounting'; loadData(1)">
-                    <div class="sp-kpi-label">Closing</div>
-                    <div class="sp-kpi-value" style="color:#D97706" x-text="(parseInt(summary.neg || 0) + parseInt(summary.lit || 0) + parseInt(summary.final_verification || 0) + parseInt(summary.accounting || 0)) || '-'"></div>
-                </div>
-                <div class="sp-kpi-card" style="cursor:pointer"
-                     :class="statusFilter === 'closed' ? 'sp-kpi-active' : ''"
-                     @click="statusFilter = statusFilter === 'closed' ? '' : 'closed'; loadData(1)">
-                    <div class="sp-kpi-label">Closed</div>
-                    <div class="sp-kpi-value" style="color:#8a8a82" x-text="summary.closed ?? '-'"></div>
-                </div>
-                <div class="sp-kpi-card">
-                    <div class="sp-kpi-label">Overdue</div>
-                    <div class="sp-kpi-value" style="color:#e74c3c" x-text="summary.overdue_providers ?? '-'"></div>
-                </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="sp-toolbar" style="flex-wrap:wrap;">
+            <div class="sp-tabs" style="flex-wrap:wrap;">
+                <button class="sp-tab" :class="statusFilter === 'ini,rec,verification,rfd,neg,lit,fbc,accounting' && 'on'"
+                        @click="statusFilter = statusFilter === 'ini,rec,verification,rfd,neg,lit,fbc,accounting' ? '' : 'ini,rec,verification,rfd,neg,lit,fbc,accounting'; loadData(1)">Active
+                    <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.active ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'ini' && 'on'"
+                        @click="statusFilter = statusFilter === 'ini' ? '' : 'ini'; loadData(1)">Treatment
+                    <span class="sp-tab-count" style="background:rgba(139,92,246,.1); color:#8b5cf6;" x-text="summary.ini ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'rec,verification' && 'on'"
+                        @click="statusFilter = statusFilter === 'rec,verification' ? '' : 'rec,verification'; loadData(1)">Records
+                    <span class="sp-tab-count" style="background:rgba(234,88,12,.1); color:#ea580c;" x-text="(parseInt(summary.rec || 0) + parseInt(summary.verification || 0)) || 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'rfd,neg,lit' && 'on'"
+                        @click="statusFilter = statusFilter === 'rfd,neg,lit' ? '' : 'rfd,neg,lit'; loadData(1)">Attorney
+                    <span class="sp-tab-count" style="background:rgba(201,168,76,.12); color:#b8960c;" x-text="(parseInt(summary.rfd || 0) + parseInt(summary.neg || 0) + parseInt(summary.lit || 0)) || 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'fbc' && 'on'"
+                        @click="statusFilter = statusFilter === 'fbc' ? '' : 'fbc'; loadData(1)">Final Review
+                    <span class="sp-tab-count" style="background:rgba(6,182,212,.1); color:#0891b2;" x-text="summary.fbc ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'accounting' && 'on'"
+                        @click="statusFilter = statusFilter === 'accounting' ? '' : 'accounting'; loadData(1)">Settlement
+                    <span class="sp-tab-count" style="background:rgba(16,185,129,.1); color:#059669;" x-text="summary.accounting ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="statusFilter === 'closed' && 'on'"
+                        @click="statusFilter = statusFilter === 'closed' ? '' : 'closed'; loadData(1)">Closed
+                    <span class="sp-tab-count" x-text="summary.closed ?? 0"></span>
+                </button>
             </div>
         </div>
 
@@ -205,20 +194,6 @@
     .ncm-btn-submit:hover { filter: brightness(1.05); box-shadow: 0 4px 12px rgba(201,168,76,.45); }
     .ncm-btn-submit:disabled { opacity: .55; cursor: not-allowed; }
 
-    /* KPI cards for cases */
-    .sp-kpi-card {
-        background: #fafaf8; border: 1px solid #e8e4dc; border-radius: 10px; padding: 10px 14px;
-        transition: all .15s;
-    }
-    .sp-kpi-card:hover { border-color: #C9A84C; }
-    .sp-kpi-active { border-color: #C9A84C !important; box-shadow: 0 0 0 2px rgba(201,168,76,.2); background: rgba(201,168,76,.04); }
-    .sp-kpi-label {
-        font-size: 8px; font-weight: 700; color: #8a8a82; text-transform: uppercase;
-        letter-spacing: .1em; font-family: 'IBM Plex Sans', sans-serif; margin-bottom: 2px;
-    }
-    .sp-kpi-value {
-        font-size: 20px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; line-height: 1;
-    }
     </style>
 
     <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;" @keydown.escape.window="showCreateModal && (showCreateModal = false)">

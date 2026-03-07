@@ -9,28 +9,12 @@
         <div class="sp-gold-bar"></div>
 
         <!-- Header -->
-        <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-            <div style="flex:1;">
+        <div class="sp-header">
+            <div>
                 <div class="sp-eyebrow">Case Management</div>
                 <h1 class="sp-title">Referrals</h1>
             </div>
-            <div class="sp-stats">
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.month_count || 0"></div>
-                    <div class="sp-stat-label">This Month</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#2563eb;" x-text="summary.total_entries || 0"></div>
-                    <div class="sp-stat-label">YTD Total</div>
-                </div>
-                <div class="sp-stat">
-                    <div class="sp-stat-num" style="color:#1a9e6a; font-size:13px;" x-text="topSource || '—'"></div>
-                    <div class="sp-stat-label">Top Source</div>
-                </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button @click="openCreateModal()" class="sp-new-btn-navy">+ New Referral</button>
-            </div>
+            <button @click="openCreateModal()" class="sp-new-btn">+ New Referral</button>
         </div>
 
         <!-- Toolbar -->

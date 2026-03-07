@@ -25,30 +25,26 @@
         <!-- Gold bar -->
         <div class="sp-gold-bar"></div>
 
-        <!-- Header -->
-        <div class="sp-header" style="flex-wrap:wrap; gap:16px;">
-            <div class="sp-stats">
-                <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('')" :style="activeFilter === '' ? 'box-shadow:0 0 0 2px #C9A84C;' : ''">
-                    <div class="sp-stat-num" style="color:#1a2535;" x-text="summary.total ?? '-'"></div>
-                    <div class="sp-stat-label">Total</div>
-                </div>
-                <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('followup_due')" :style="activeFilter === 'followup_due' ? 'box-shadow:0 0 0 2px #D97706;' : ''">
-                    <div class="sp-stat-num" style="color:#D97706;" x-text="summary.followup_due ?? '-'"></div>
-                    <div class="sp-stat-label">Follow-up Due</div>
-                </div>
-                <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('no_contact')" :style="activeFilter === 'no_contact' ? 'box-shadow:0 0 0 2px #8a8a82;' : ''">
-                    <div class="sp-stat-num" style="color:#8a8a82;" x-text="summary.no_contact ?? '-'"></div>
-                    <div class="sp-stat-label">No Contact</div>
-                </div>
-                <div class="sp-stat" style="cursor:pointer;" @click="toggleFilter('treatment_complete')" :style="activeFilter === 'treatment_complete' ? 'box-shadow:0 0 0 2px #1a9e6a;' : ''">
-                    <div class="sp-stat-num" style="color:#1a9e6a;" x-text="summary.treatment_complete ?? '-'"></div>
-                    <div class="sp-stat-label">Treatment Complete</div>
-                </div>
+        <!-- Toolbar -->
+        <div class="sp-toolbar" style="gap:8px;">
+            <div class="sp-tabs">
+                <button class="sp-tab" :class="activeFilter === '' && 'on'" @click="toggleFilter('')">All
+                    <span class="sp-tab-count" style="background:rgba(37,99,235,.1); color:#2563eb;" x-text="summary.total ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="activeFilter === 'followup_due' && 'on'" @click="toggleFilter('followup_due')">Follow-up Due
+                    <span class="sp-tab-count" style="background:rgba(234,88,12,.1); color:#ea580c;" x-text="summary.followup_due ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="activeFilter === 'no_contact' && 'on'" @click="toggleFilter('no_contact')">No Contact
+                    <span class="sp-tab-count" style="background:rgba(231,76,60,.1); color:#e74c3c;" x-text="summary.no_contact ?? 0"></span>
+                </button>
+                <button class="sp-tab" :class="activeFilter === 'treatment_complete' && 'on'" @click="toggleFilter('treatment_complete')">Treatment Complete
+                    <span class="sp-tab-count" style="background:rgba(16,185,129,.1); color:#059669;" x-text="summary.treatment_complete ?? 0"></span>
+                </button>
             </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="sp-toolbar" style="gap:8px;">
+        <!-- Filters -->
+        <div class="sp-toolbar" style="gap:8px; padding:8px 24px;">
             <input type="text" x-model="search" @input.debounce.300ms="loadData(1)" placeholder="Search case #, client name, or phone..."
                    class="sp-search" style="width:280px;">
             <select x-model="treatmentStatusFilter" @change="loadData(1)" class="sp-select">
